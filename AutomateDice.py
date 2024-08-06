@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import time
 
+
 def login(page, email, password):
     page.goto("https://www.dice.com/dashboard/login")
     page.wait_for_load_state("load")
@@ -14,6 +15,7 @@ def login(page, email, password):
     page.press("#password", "Enter")
     page.wait_for_load_state("load")
     time.sleep(3)
+
 
 def perform_job_search(page, search_keywords):
     page.wait_for_url("home-feed")
@@ -29,25 +31,31 @@ def perform_job_search(page, search_keywords):
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.wait_for_selector('//button[@aria-label="Filter Search Results by Third Party"]')
+    page.wait_for_selector(
+        '//button[@aria-label="Filter Search Results by Third Party"]')
     page.click('//button[@aria-label="Filter Search Results by Third Party"]')
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.wait_for_selector('//button[@aria-label="Filter Search Results by Easy Apply"]')
+    page.wait_for_selector(
+        '//button[@aria-label="Filter Search Results by Easy Apply"]')
     page.click('//button[@aria-label="Filter Search Results by Easy Apply"]')
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.wait_for_selector('button[aria-label="Filter Search Results by Remote Only"]')
-    remote_only_button = page.locator('button[aria-label="Filter Search Results by Remote Only"]')
+    page.wait_for_selector(
+        'button[aria-label="Filter Search Results by Remote Only"]')
+    remote_only_button = page.locator(
+        'button[aria-label="Filter Search Results by Remote Only"]')
     remote_only_button.click()
     page.wait_for_load_state("load")
     time.sleep(3)
-      
-    page.select_option('#pageSize_2', '100')  # Select the option with value "100"
+
+    # Select the option with value "100"
+    page.select_option('#pageSize_2', '100')
     page.wait_for_load_state("load")
     time.sleep(3)
+
 
 def extract_job_ids(page, job_ids):
     while True:
@@ -66,17 +74,20 @@ def extract_job_ids(page, job_ids):
         page.wait_for_load_state("load")
 
         page.wait_for_selector('li.pagination-next.page-item.ng-star-inserted')
-        next_button = page.query_selector('li.pagination-next.page-item.ng-star-inserted')
+        next_button = page.query_selector(
+            'li.pagination-next.page-item.ng-star-inserted')
 
         if next_button:
             page.wait_for_load_state("load")
-            is_disabled = next_button.evaluate('(element) => element.classList.contains("disabled")')
+            is_disabled = next_button.evaluate(
+                '(element) => element.classList.contains("disabled")')
             if not is_disabled:
                 next_button.click()
             else:
                 break
         else:
             break
+
 
 def write_job_titles_to_file(page, job_ids, url):
     print("number of All job IDs:" + str(len(job_ids)))
@@ -87,7 +98,8 @@ def write_job_titles_to_file(page, job_ids, url):
         parts = url.split('?')
 
         for job_id in job_ids:
-            job_id = "https://www.dice.com/job-detail/" + job_id + "?" + parts[1]
+            job_id = "https://www.dice.com/job-detail/" + \
+                job_id + "?" + parts[1]
             try:
                 new_page = page.context.new_page()
                 new_page.goto(job_id)
@@ -106,6 +118,7 @@ def write_job_titles_to_file(page, job_ids, url):
                 print("Error processing job id:", job_id)
                 print("Error details:", str(e))
                 continue
+
 
 def evaluate_and_apply(page, val):
     js_script = """
@@ -139,6 +152,7 @@ def evaluate_and_apply(page, val):
 
     if returned_value == 1:
         apply_and_upload_resume(page, val)
+
 
 def apply_and_upload_resume(page, val):
     page.wait_for_load_state("load")
@@ -176,21 +190,26 @@ def apply_and_upload_resume(page, val):
                     page.wait_for_load_state("load")
                     time.sleep(3)
                     page.wait_for_selector('span[data-e2e="upload"]')
-                    upload_button = page.query_selector('span[data-e2e="upload"]')
+                    upload_button = page.query_selector(
+                        'span[data-e2e="upload"]')
 
                     if upload_button:
                         upload_button.click()
                         page.wait_for_load_state("load")
                         time.sleep(3)
-                        page.wait_for_selector('button.btn-primary.btn-next.btn-block')
-                        next_button = page.query_selector('button.btn-primary.btn-next.btn-block')
+                        page.wait_for_selector(
+                            'button.btn-primary.btn-next.btn-block')
+                        next_button = page.query_selector(
+                            'button.btn-primary.btn-next.btn-block')
 
                         if next_button:
                             next_button.click()
                             page.wait_for_load_state("load")
                             time.sleep(3)
-                            page.wait_for_selector('button.btn-primary.btn-next.btn-split')
-                            apply_button = page.query_selector('button.btn-primary.btn-next.btn-split')
+                            page.wait_for_selector(
+                                'button.btn-primary.btn-next.btn-split')
+                            apply_button = page.query_selector(
+                                'button.btn-primary.btn-next.btn-split')
 
                             if apply_button:
                                 apply_button.click()
@@ -208,7 +227,8 @@ def apply_and_upload_resume(page, val):
             page.wait_for_load_state("load")
             time.sleep(3)
             page.wait_for_selector('button.btn-primary.btn-next.btn-split')
-            button = page.query_selector('button.btn-primary.btn-next.btn-split')
+            button = page.query_selector(
+                'button.btn-primary.btn-next.btn-split')
 
             if button.text_content() == "Apply":
                 button.click()
@@ -216,6 +236,7 @@ def apply_and_upload_resume(page, val):
                 page.close()
     else:
         print("Next button not found.")
+
 
 def logout_and_close(page, browser):
     page.wait_for_load_state("load")
@@ -260,6 +281,7 @@ def logout_and_close(page, browser):
         else:
             print("once done, log out & close manually")
 
+
 def main():
     print("started")
     email = "xyz@gmail.com"
@@ -282,6 +304,7 @@ def main():
         extract_job_ids(page, job_ids)
         write_job_titles_to_file(page, job_ids, url)
         logout_and_close(page, browser)
+
 
 if __name__ == "__main__":
     main()
