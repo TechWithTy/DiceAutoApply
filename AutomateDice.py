@@ -170,7 +170,7 @@ def write_job_titles_to_file(page, job_ids, url):
         "apply_button": 'apply-button-wc',
     }
 
-    with open('job_titles.txt', 'w') as file:
+    with open('output/job_titles.txt', 'w') as file:
         val = 0
 
         parts = url.split('?')
