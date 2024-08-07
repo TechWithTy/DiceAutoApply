@@ -152,6 +152,8 @@ def evaluate_and_apply(page, val):
         "submit_button": '//button/span[text()="Submit"]/..',
     }
 
+   
+
     js_script = """
         (function() {
             const applyButtonWc = document.querySelector('apply-button-wc');
