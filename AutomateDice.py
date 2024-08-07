@@ -1,3 +1,5 @@
+from _data_.filterSettings import job_filter ,JobFilter # Import the JobFilter class
+
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
@@ -9,6 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
+
 
 
 def login(page, email, password):
@@ -54,35 +57,73 @@ def perform_job_search(page, search_keywords):
         "employer_type_recruiter": '//button[@aria-label="Filter Search Results by Recruiter"]',
         "easy_apply_clicked": '//button[@aria-label="Filter Search Results by Easy Apply" and @aria-checked="true"]'
     }
+    
+    # Helper function to click a filter based on a selector
+    def click_filter(selector):
+        try:
+            page.wait_for_selector(selector, timeout=5000)
+            page.click(selector)
+            page.wait_for_load_state("load")
+            time.sleep(2)  # Allow time for the filter to apply
+        except Exception as e:
+            print(f"Failed to apply filter with selector {selector}: {e}")
 
-    page.wait_for_url("https://www.dice.com/home/home-feed")
+    # Start by navigating to the job search page
     page.goto("https://www.dice.com/jobs")
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.fill("#typeaheadInput", search_keywords)
-    page.wait_for_load_state("load")
-    time.sleep(5)
-
-    page.click("#submitSearch-button")
+    # Fill in the search keywords and perform search
+    page.fill(selectors["search_input"], search_keywords)
+    page.click(selectors["submit_search_button"])
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    # page.wait_for_selector(
-    #     '//button[@aria-label="Filter Search Results by Third Party"]')
-    # page.click('//button[@aria-label="Filter Search Results by Third Party"]')
-    # page.wait_for_load_state("load")
-    # time.sleep(3)
-    page.wait_for_selector(selectors["easy_apply_filter"])
-    page.click(selectors["easy_apply_filter"])
-    page.wait_for_load_state("load")
-    time.sleep(3)
+    # Apply filters based on JobFilter settings
 
-    page.wait_for_selector(selectors["remote_filter_group"])
-    remote_only_button = page.locator(selectors["remote_filter_group"])
-    remote_only_button.click()
-    page.wait_for_load_state("load")
-    time.sleep(3)
+    # Work setting filter
+    if job_filter.work_setting == JobFilter.WorkSetting.REMOTE:
+        click_filter(selectors["remote_filter_group"])
+    elif job_filter.work_setting == JobFilter.WorkSetting.ONSITE:
+        click_filter(selectors["work_settings_on_site"])
+    elif job_filter.work_setting == JobFilter.WorkSetting.HYBRID:
+        click_filter(selectors["work_settings_hybrid"])
+
+    # Posted date filter
+    if job_filter.posted_date == "Any Date":
+        click_filter(selectors["posted_date_any_date"])
+    elif job_filter.posted_date == "Today":
+        click_filter(selectors["posted_date_today"])
+    elif job_filter.posted_date == "Last 3 Days":
+        click_filter(selectors["posted_date_last_3_days"])
+    elif job_filter.posted_date == "Last 7 Days":
+        click_filter(selectors["posted_date_last_7_days"])
+
+    # Employment types filter
+    for employment_type in job_filter.employment_types:  # Access the instance attribute
+        if employment_type == JobFilter.EmploymentType.FULL_TIME:
+            click_filter(selectors["employment_type_full_time"])
+        elif employment_type == JobFilter.EmploymentType.CONTRACT:
+            click_filter(selectors["employment_type_contract"])
+        elif employment_type == JobFilter.EmploymentType.THIRD_PARTY:
+            click_filter(selectors["third_party_button"])
+
+    # Employer types filter
+    for employer_type in job_filter.employer_types:  # Access the instance attribute
+        if employer_type == JobFilter.EmployerType.DIRECT_HIRE:
+            click_filter(selectors["employer_type_direct_hire"])
+        elif employer_type == JobFilter.EmployerType.RECRUITER:
+            click_filter(selectors["employer_type_recruiter"])
+
+    # Work authorization filter
+    if job_filter.willing_to_sponsor:
+        click_filter(selectors["work_authorization_willing_to_sponsor"])
+
+    # Easy apply filter
+    if job_filter.easy_apply:
+        click_filter(selectors["easy_apply_filter"])
+
+    print("Filters applied successfully based on JobFilter settings.")
 
 
 def extract_job_ids(page, job_ids):
