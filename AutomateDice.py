@@ -41,6 +41,18 @@ def perform_job_search(page, search_keywords):
         "third_party_button": '//button[@aria-label="Filter Search Results by Third Party"]',
         "easy_apply_filter": '//button[@aria-label="Filter Search Results by Easy Apply"]',
         "remote_filter_group": '//button[@aria-label="Filter Search Results by Remote"]',
+        "work_settings_on_site": '//button[@aria-label="Filter Search Results by On-Site"]',
+        "work_settings_hybrid": '//button[@aria-label="Filter Search Results by Hybrid"]',
+        "posted_date_any_date": '//button[@role="radio" and text()=" Any Date "]',
+        "posted_date_today": '//button[@role="radio" and text()=" Today "]',
+        "posted_date_last_3_days": '//button[@role="radio" and text()=" Last 3 Days "]',
+        "posted_date_last_7_days": '//button[@role="radio" and text()=" Last 7 Days "]',
+        "employment_type_full_time": '//button[@aria-label="Filter Search Results by Full-time"]',
+        "employment_type_contract": '//button[@aria-label="Filter Search Results by Contract"]',
+        "work_authorization_willing_to_sponsor": '//button[@aria-label="Filter Search Results by Work Authorization"]',
+        "employer_type_direct_hire": '//button[@aria-label="Filter Search Results by Direct Hire"]',
+        "employer_type_recruiter": '//button[@aria-label="Filter Search Results by Recruiter"]',
+        "easy_apply_clicked": '//button[@aria-label="Filter Search Results by Easy Apply" and @aria-checked="true"]'
     }
 
     page.wait_for_url("https://www.dice.com/home/home-feed")
