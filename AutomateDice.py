@@ -291,13 +291,16 @@ def evaluate_and_apply(page, val):
             # Wait for the "Application Submitted" confirmation by text content
             if page.is_visible(selectors["application_submitted"]):
                 header_text = page.locator(selectors["application_submitted"]).text_content()
+                # Close the current tab
+                page.close()
             elif page.is_visible(selectors["profile_visible_application_submitted"]):
                 header_text = page.locator(selectors["profile_visible_application_submitted"]).text_content()
-
-            if header_text:
-                val = 0  # Successful application submission
-            else:
-                val = 1  # Unsuccessful application submission
+                # Close the current tab
+                page.close()
+            #! if header_text:
+            #!     returned_value = 0  # Successful application submission
+            #! else:
+            #!     returned_value  = 1  # Unsuccessful application submission
         except PlaywrightTimeoutError as e:
             print(f"Timeout during the application process: {e}")
             val = 1
