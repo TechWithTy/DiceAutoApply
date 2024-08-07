@@ -38,7 +38,7 @@ Here are some of the current and planned features for the project:
 ### Stretch Goals
 
 - [ ] **Advanced LLM Integration**: Enable complex decision-making processes during job applications with AI assistance.
-- [ ] **Cross-platform Support**: Expand automation support to additional job application platforms beyond Dice.
+- [ ] **Cross-platform Support**: Expand automation support to additional job application platforms beyond Dice (LI).
 
 ## Setup
 
@@ -52,7 +52,7 @@ Here are some of the current and planned features for the project:
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/yourusername/automate-job-application.git
+   git clone {repo}
    cd automate-job-application
    ```
 
@@ -72,7 +72,7 @@ Here are some of the current and planned features for the project:
    SEARCH_KEYWORDS=your-search-keywords
    WEBSITE=https://yourwebsite.com
    PORTFOLIO=https://yourportfolio.com
-   BOOKME=https://yourbookinglink.com
+   BOOKME=https://yourbookinglink.com (Scheduling link)
    LINKEDIN_PROFILE=https://linkedin.com/in/yourprofile
    NAME=Your Full Name
    PHONE_NUMBER=123-456-7890
