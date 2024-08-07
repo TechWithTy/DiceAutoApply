@@ -116,7 +116,7 @@ def write_job_titles_to_file(page, job_ids, url):
     selectors = {
         "apply_button": 'apply-button-wc',
     }
-    
+
     with open('job_titles.txt', 'w') as file:
         val = 0
 
@@ -174,6 +174,8 @@ def evaluate_and_apply(page, val):
     returned_value = page.evaluate(js_script)
 
     if returned_value == 1:
+        page.wait_for_load_state("load")
+
         try:
             # Wait for the URL to contain the expected path
             # Timeout after 30 seconds
@@ -183,20 +185,40 @@ def evaluate_and_apply(page, val):
             max_attempts = 3
             attempt = 0
 
+                # Define the expected URL pattern
+            expected_url_pattern = "https://www.dice.com/**/{apply,job-detail}**"
+
+                # Get the current page URL
+            current_url = page.url
+
+                # Check if we are already on the correct URL
+            if "apply" in current_url or "job-detail" in current_url:
+                    print(f"Already on the correct URL: {current_url}")
+                    # Wait for the "Next" button and click it
+                    next_button = page.wait_for_selector(
+                        next_in_application_button, timeout=10000)
+                    next_button.click()
+
+                    # Wait for the "Submit" button and click it
+                    submit_button = page.wait_for_selector(
+                        selectors["submit_button"], timeout=10000)
+                    submit_button.click()
+                    return
+
             while attempt < max_attempts:
-                try:
-                    # Wait for the URL to contain the expected path
-                    page.wait_for_url(
-                        "https://www.dice.com/**/{apply,job-detail}**", timeout=10000)
-                    break  # Break out of the loop if successful
-                except PlaywrightTimeoutError:
-                    attempt += 1
-                    print(f"Attempt {attempt} failed. Retrying...")
-                    time.sleep(3)  # Sleep before retrying
+                    try:
+                        # Wait for the URL to contain the expected path
+                        page.wait_for_url(expected_url_pattern, timeout=10000)
+                        print(f"Successfully navigated to URL: {page.url}")
+                        break  # Break out of the loop if successful
+                    except PlaywrightTimeoutError:
+                        attempt += 1
+                        current_url = page.url
+                        print(f"Attempt {attempt} failed. Expected: {expected_url_pattern}, but got: {current_url}")
+                        time.sleep(3)  # Sleep before retrying
 
             if attempt == max_attempts:
-                raise Exception(
-                    "Failed to navigate to the apply page after 3 attempts.")
+                    raise Exception(f"Failed to navigate to the expected URL after {max_attempts} attempts. Last URL: {current_url}")
 
             # Wait for the "Next" button and click it
             next_button = page.wait_for_selector(
@@ -228,8 +250,8 @@ def evaluate_and_apply(page, val):
             val = 1
 
     # Call the apply_and_upload_resume function if the application wasn't submitted
-    if returned_value == 1 and val == 1:
-        apply_and_upload_resume(page, val)
+    # if returned_value == 1 and val == 1:
+    #     apply_and_upload_resume(page, val)
 
 
 def apply_and_upload_resume(page, val):
