@@ -64,12 +64,12 @@ class JobFilter:
         self.easy_apply = easy
 
 # Example usage
-job_filter = JobFilter()
-job_filter.set_work_setting(JobFilter.WorkSetting.REMOTE)
-job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
-job_filter.add_employment_type(JobFilter.EmploymentType.CONTRACT)
-job_filter.set_willing_to_sponsor(True)
-job_filter.add_employer_type(JobFilter.EmployerType.DIRECT_HIRE)
-job_filter.set_easy_apply(True)
+dice_job_filter = JobFilter()
+dice_job_filter.set_work_setting(JobFilter.WorkSetting.REMOTE)
+dice_job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
+dice_job_filter.add_employment_type(JobFilter.EmploymentType.CONTRACT)
+dice_job_filter.set_willing_to_sponsor(True)
+dice_job_filter.add_employer_type(JobFilter.EmployerType.DIRECT_HIRE)
+dice_job_filter.set_easy_apply(True)
 
-print(job_filter)
+print(dice_job_filter)

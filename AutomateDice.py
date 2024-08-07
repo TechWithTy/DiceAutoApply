@@ -1,4 +1,4 @@
-from _data_.filterSettings import job_filter ,JobFilter # Import the JobFilter class
+from _data_.Filters.diceFilterSettings import dice_job_filter ,JobFilter # Import the JobFilter class
 
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -82,25 +82,25 @@ def perform_job_search(page, search_keywords):
     # Apply filters based on JobFilter settings
 
     # Work setting filter
-    if job_filter.work_setting == JobFilter.WorkSetting.REMOTE:
+    if dice_job_filter.work_setting == JobFilter.WorkSetting.REMOTE:
         click_filter(selectors["remote_filter_group"])
-    elif job_filter.work_setting == JobFilter.WorkSetting.ONSITE:
+    elif dice_job_filter.work_setting == JobFilter.WorkSetting.ONSITE:
         click_filter(selectors["work_settings_on_site"])
-    elif job_filter.work_setting == JobFilter.WorkSetting.HYBRID:
+    elif dice_job_filter.work_setting == JobFilter.WorkSetting.HYBRID:
         click_filter(selectors["work_settings_hybrid"])
 
     # Posted date filter
-    if job_filter.posted_date == "Any Date":
+    if dice_job_filter.posted_date == "Any Date":
         click_filter(selectors["posted_date_any_date"])
-    elif job_filter.posted_date == "Today":
+    elif dice_job_filter.posted_date == "Today":
         click_filter(selectors["posted_date_today"])
-    elif job_filter.posted_date == "Last 3 Days":
+    elif dice_job_filter.posted_date == "Last 3 Days":
         click_filter(selectors["posted_date_last_3_days"])
-    elif job_filter.posted_date == "Last 7 Days":
+    elif dice_job_filter.posted_date == "Last 7 Days":
         click_filter(selectors["posted_date_last_7_days"])
 
     # Employment types filter
-    for employment_type in job_filter.employment_types:  # Access the instance attribute
+    for employment_type in dice_job_filter.employment_types:  # Access the instance attribute
         if employment_type == JobFilter.EmploymentType.FULL_TIME:
             click_filter(selectors["employment_type_full_time"])
         elif employment_type == JobFilter.EmploymentType.CONTRACT:
@@ -109,18 +109,18 @@ def perform_job_search(page, search_keywords):
             click_filter(selectors["third_party_button"])
 
     # Employer types filter
-    for employer_type in job_filter.employer_types:  # Access the instance attribute
+    for employer_type in dice_job_filter.employer_types:  # Access the instance attribute
         if employer_type == JobFilter.EmployerType.DIRECT_HIRE:
             click_filter(selectors["employer_type_direct_hire"])
         elif employer_type == JobFilter.EmployerType.RECRUITER:
             click_filter(selectors["employer_type_recruiter"])
 
     # Work authorization filter
-    if job_filter.willing_to_sponsor:
+    if dice_job_filter.willing_to_sponsor:
         click_filter(selectors["work_authorization_willing_to_sponsor"])
 
     # Easy apply filter
-    if job_filter.easy_apply:
+    if dice_job_filter.easy_apply:
         click_filter(selectors["easy_apply_filter"])
 
     print("Filters applied successfully based on JobFilter settings.")
