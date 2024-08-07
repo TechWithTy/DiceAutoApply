@@ -142,18 +142,7 @@ def evaluate_and_apply(page, val):
 
             if (easyApplyButton) {
                 easyApplyButton.click();
-                      // Find and click the "Next" button
-                const nextButton = querySelector('button.seds-button-primary.btn-next');
-                if (nextButton) {
-                    nextButton.click();
-                }
-
-                // Find and click the "Submit" button
-                const submitButton = querySelector('button.seds-button-primary.btn-next');
-                if (submitButton) {
-                    submitButton.click();
-                }
-
+                
                 const applicationSubmitted = shadowRoot.querySelector('application-submitted');
                 if (applicationSubmitted) {
                     const appTextElement = applicationSubmitted.shadowRoot.querySelector('p.app-text');
