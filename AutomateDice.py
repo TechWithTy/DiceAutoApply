@@ -1,5 +1,10 @@
 from playwright.sync_api import sync_playwright
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def login(page, email, password):
@@ -7,18 +12,34 @@ def login(page, email, password):
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.fill("#email", email)
+    # Fill the email input field
+    page.fill('input[name="email"]', email)
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.fill("#password", password)
-    page.press("#password", "Enter")
+    # Click the "Sign In" button
+    page.click('button[data-testid="sign-in-button"]')
+    page.wait_for_load_state("load")
+    time.sleep(3)
+
+    # Fill the password input field using the name attribute
+    page.fill('input[name="password"]', password)
+    page.press('input[name="password"]', "Enter")
     page.wait_for_load_state("load")
     time.sleep(3)
 
 
 def perform_job_search(page, search_keywords):
-    page.wait_for_url("home-feed")
+
+    selectors = {
+        "search_input": "#typeaheadInput",
+        "submit_search_button": "#submitSearch-button",
+        "third_party_button": '//button[@aria-label="Filter Search Results by Third Party"]',
+        "easy_apply_filter": '//button[@aria-label="Filter Search Results by Easy Apply"]',
+        "remote_filter_group": '//button[@aria-label="Filter Search Results by Remote"]',
+    }
+
+    page.wait_for_url("https://www.dice.com/home/home-feed")
     page.goto("https://www.dice.com/jobs")
     page.wait_for_load_state("load")
     time.sleep(3)
@@ -31,28 +52,19 @@ def perform_job_search(page, search_keywords):
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.wait_for_selector(
-        '//button[@aria-label="Filter Search Results by Third Party"]')
-    page.click('//button[@aria-label="Filter Search Results by Third Party"]')
+    # page.wait_for_selector(
+    #     '//button[@aria-label="Filter Search Results by Third Party"]')
+    # page.click('//button[@aria-label="Filter Search Results by Third Party"]')
+    # page.wait_for_load_state("load")
+    # time.sleep(3)
+    page.wait_for_selector(selectors["easy_apply_filter"])
+    page.click(selectors["easy_apply_filter"])
     page.wait_for_load_state("load")
     time.sleep(3)
 
-    page.wait_for_selector(
-        '//button[@aria-label="Filter Search Results by Easy Apply"]')
-    page.click('//button[@aria-label="Filter Search Results by Easy Apply"]')
-    page.wait_for_load_state("load")
-    time.sleep(3)
-
-    page.wait_for_selector(
-        'button[aria-label="Filter Search Results by Remote Only"]')
-    remote_only_button = page.locator(
-        'button[aria-label="Filter Search Results by Remote Only"]')
+    page.wait_for_selector(selectors["remote_filter_group"])
+    remote_only_button = page.locator(selectors["remote_filter_group"])
     remote_only_button.click()
-    page.wait_for_load_state("load")
-    time.sleep(3)
-
-    # Select the option with value "100"
-    page.select_option('#pageSize_2', '100')
     page.wait_for_load_state("load")
     time.sleep(3)
 
@@ -130,6 +142,18 @@ def evaluate_and_apply(page, val):
 
             if (easyApplyButton) {
                 easyApplyButton.click();
+                      // Find and click the "Next" button
+                const nextButton = querySelector('button.seds-button-primary.btn-next');
+                if (nextButton) {
+                    nextButton.click();
+                }
+
+                // Find and click the "Submit" button
+                const submitButton = querySelector('button.seds-button-primary.btn-next');
+                if (submitButton) {
+                    submitButton.click();
+                }
+
                 const applicationSubmitted = shadowRoot.querySelector('application-submitted');
                 if (applicationSubmitted) {
                     const appTextElement = applicationSubmitted.shadowRoot.querySelector('p.app-text');
@@ -284,9 +308,12 @@ def logout_and_close(page, browser):
 
 def main():
     print("started")
-    email = "xyz@gmail.com"
-    password = "abc"
-    search_keywords = '("kw1" OR "KW2") AND "Kw3"'  # Keywords for the search
+
+    # Load environment variables
+    email = os.getenv('EMAIL')
+    password = os.getenv('PASSWORD')
+    search_keywords = os.getenv('SEARCH_KEYWORDS')
+
     custom_user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.288 Mobile Safari/537.36"
 
     with sync_playwright() as p:
