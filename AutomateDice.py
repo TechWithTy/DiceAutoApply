@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+next_in_application_button = 'button.seds-button-primary.btn-next'
+
 
 def login(page, email, password):
     page.goto("https://www.dice.com/dashboard/login")
@@ -72,12 +74,18 @@ def perform_job_search(page, search_keywords):
 
 
 def extract_job_ids(page, job_ids):
+
+    selectors = {
+        "card_title": 'a.card-title-link',
+        "list_pagination_next": 'li.pagination-next.page-item.ng-star-inserted',
+
+    }
     while True:
         page.wait_for_load_state("load")
         time.sleep(5)
 
-        page.wait_for_selector('a.card-title-link')
-        job_links = page.query_selector_all('a.card-title-link')
+        page.wait_for_selector(selectors["card_title"])
+        job_links = page.query_selector_all(selectors["card_title"])
 
         if not job_links:
             break
@@ -87,9 +95,8 @@ def extract_job_ids(page, job_ids):
 
         page.wait_for_load_state("load")
 
-        page.wait_for_selector('li.pagination-next.page-item.ng-star-inserted')
-        next_button = page.query_selector(
-            'li.pagination-next.page-item.ng-star-inserted')
+        page.wait_for_selector(selectors["list_pagination_next"])
+        next_button = page.query_selector(selectors["list_pagination_next"])
 
         if next_button:
             page.wait_for_load_state("load")
@@ -106,6 +113,10 @@ def extract_job_ids(page, job_ids):
 def write_job_titles_to_file(page, job_ids, url):
     print("number of All job IDs:" + str(len(job_ids)))
 
+    selectors = {
+        "apply_button": 'apply-button-wc',
+    }
+    
     with open('job_titles.txt', 'w') as file:
         val = 0
 
@@ -123,7 +134,7 @@ def write_job_titles_to_file(page, job_ids, url):
                 job_title = new_page.evaluate("document.title")
                 file.write(job_title + '\n')
 
-                new_page.wait_for_selector('apply-button-wc')
+                new_page.wait_for_selector(selectors["apply_button"])
 
                 val += 1
                 evaluate_and_apply(new_page, val)
@@ -136,6 +147,11 @@ def write_job_titles_to_file(page, job_ids, url):
 
 def evaluate_and_apply(page, val):
     # JavaScript code to interact with the DOM
+
+    selectors = {
+        "submit_button": '//button/span[text()="Submit"]/..',
+    }
+
     js_script = """
         (function() {
             const applyButtonWc = document.querySelector('apply-button-wc');
@@ -170,7 +186,8 @@ def evaluate_and_apply(page, val):
             while attempt < max_attempts:
                 try:
                     # Wait for the URL to contain the expected path
-                    page.wait_for_url("https://www.dice.com/**/{apply,job-detail}**", timeout=10000)
+                    page.wait_for_url(
+                        "https://www.dice.com/**/{apply,job-detail}**", timeout=10000)
                     break  # Break out of the loop if successful
                 except PlaywrightTimeoutError:
                     attempt += 1
@@ -178,17 +195,17 @@ def evaluate_and_apply(page, val):
                     time.sleep(3)  # Sleep before retrying
 
             if attempt == max_attempts:
-                raise Exception("Failed to navigate to the apply page after 3 attempts.")
-
+                raise Exception(
+                    "Failed to navigate to the apply page after 3 attempts.")
 
             # Wait for the "Next" button and click it
             next_button = page.wait_for_selector(
-                'button.seds-button-primary.btn-next', timeout=10000)
+                next_in_application_button, timeout=10000)
             next_button.click()
 
             # Wait for the "Submit" button and click it
             submit_button = page.wait_for_selector(
-                '//button/span[text()="Submit"]/..', timeout=10000)
+                selectors["submit_button"], timeout=10000)
             submit_button.click()
 
             # Wait for the "Application Submitted" confirmation by text content
@@ -216,10 +233,18 @@ def evaluate_and_apply(page, val):
 
 
 def apply_and_upload_resume(page, val):
+    selectors = {
+        "upload_button": 'button[data-v-746be088]',
+        "input_file": 'input[type="file"]',
+        "span_upload_button": 'span[data-e2e="upload"]',
+        "unk_primary_button": next_in_application_button,
+        "submit_button": '//button/span[text()="Submit"]/..',
+
+    }
     page.wait_for_load_state("load")
     time.sleep(3)
-    page.wait_for_selector('button.seds-button-primary.btn-next')
-    next_button = page.query_selector('button.seds-button-primary.btn-next')
+    page.wait_for_selector(next_in_application_button)
+    next_button = page.query_selector(next_in_application_button)
 
     if next_button:
         next_button.click()
@@ -234,8 +259,8 @@ def apply_and_upload_resume(page, val):
 
             page.wait_for_load_state("load")
             time.sleep(3)
-            page.wait_for_selector('button[data-v-746be088]')
-            upload_button = page.query_selector('button[data-v-746be088]')
+            page.wait_for_selector(selectors["upload_button"])
+            upload_button = page.query_selector(selectors["upload_button"])
 
             if upload_button:
                 upload_button.click()
@@ -243,34 +268,34 @@ def apply_and_upload_resume(page, val):
 
                 page.wait_for_load_state("load")
                 time.sleep(3)
-                page.wait_for_selector('input[type="file"]')
-                input_file = page.query_selector('input[type="file"]')
+                page.wait_for_selector(selectors["input_file"])
+                input_file = page.query_selector(selectors["input_file"])
 
                 if input_file:
                     input_file.set_input_files(file_path)
                     page.wait_for_load_state("load")
                     time.sleep(3)
-                    page.wait_for_selector('span[data-e2e="upload"]')
+                    page.wait_for_selector(selectors["span_upload_button"])
                     upload_button = page.query_selector(
-                        'span[data-e2e="upload"]')
+                        selectors["span_upload_button"])
 
                     if upload_button:
                         upload_button.click()
                         page.wait_for_load_state("load")
                         time.sleep(3)
                         page.wait_for_selector(
-                            'button.seds-button-primary.btn-next')
+                            next_in_application_button)
                         next_button = page.query_selector(
-                            'button.seds-button-primary.btn-next')
+                            next_in_application_button)
 
                         if next_button:
                             next_button.click()
                             page.wait_for_load_state("load")
                             time.sleep(3)
                             page.wait_for_selector(
-                                'button.btn-primary.btn-next.btn-split')
+                                selectors["span_upload_button"])
                             apply_button = page.query_selector(
-                                'button.btn-primary.btn-next.btn-split')
+                                selectors["span_upload_button"])
 
                             if apply_button:
                                 apply_button.click()
@@ -287,10 +312,13 @@ def apply_and_upload_resume(page, val):
         else:
             page.wait_for_load_state("load")
             time.sleep(3)
-            page.wait_for_selector('button.btn-primary.btn-next.btn-split')
+            page.wait_for_selector(selectors["unk_primary_button"])
             button = page.query_selector(
-                'button.btn-primary.btn-next.btn-split')
+                selectors["unk_primary_button"])
+            page.wait_for_selector(selectors["submit_button"])
+            submit_button = page.query_selector(selectors["submit_button"])
 
+            submit_button.click()
             if button.text_content() == "Apply":
                 button.click()
                 print(val)
@@ -300,9 +328,15 @@ def apply_and_upload_resume(page, val):
 
 
 def logout_and_close(page, browser):
+
+    selectors = {
+        "nav_header": 'dhi-seds-nav-header-display',
+
+
+    }
     page.wait_for_load_state("load")
     time.sleep(3)
-    page.wait_for_selector('dhi-seds-nav-header-display')
+    page.wait_for_selector(selectors["nav_header"])
 
     js_code = """
         const headerDisplay = document.querySelector('dhi-seds-nav-header-display');
