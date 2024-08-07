@@ -4,7 +4,7 @@ import os
 
 from _data_.Filters.diceFilterSettings import JobFilter, dice_job_filter  # Import the JobFilter class
 # Import the InterviewAnswerDataset class
-from _data_.interviewQuestions import InterviewAnswerDataset
+from _data_.Profiles.interviewQuestions import InterviewAnswerDataset
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file (if applicable)
