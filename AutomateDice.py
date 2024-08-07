@@ -1,4 +1,6 @@
-from _data_.Filters.diceFilterSettings import dice_job_filter ,JobFilter # Import the JobFilter class
+# Import the JobFilter class
+from _data_.Filters.diceFilterSettings import dice_job_filter, JobFilter
+import time
 
 from playwright.sync_api import sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -11,7 +13,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
-
 
 
 def login(page, email, password):
@@ -57,7 +58,7 @@ def perform_job_search(page, search_keywords):
         "employer_type_recruiter": '//button[@aria-label="Filter Search Results by Recruiter"]',
         "easy_apply_clicked": '//button[@aria-label="Filter Search Results by Easy Apply" and @aria-checked="true"]'
     }
-    
+
     # Helper function to click a filter based on a selector
     def click_filter(selector):
         try:
@@ -203,9 +204,9 @@ def evaluate_and_apply(page, val):
 
     selectors = {
         "submit_button": '//button/span[text()="Submit"]/..',
+        "application_submitted": 'h1:has-text("Application submitted. We\'re rooting for you.")',
+        "profile_visible_application_submitted":   'div.banner-message.sc-dhi-candidates-modal-2:has-text("Your Application is on its way.")'
     }
-
-   
 
     js_script = """
         (function() {
@@ -240,40 +241,42 @@ def evaluate_and_apply(page, val):
             max_attempts = 3
             attempt = 0
 
-                # Define the expected URL pattern
+            # Define the expected URL pattern
             expected_url_pattern = "https://www.dice.com/**/{apply,job-detail}**"
 
-                # Get the current page URL
+            # Get the current page URL
             current_url = page.url
 
-                # Check if we are already on the correct URL
+            # Check if we are already on the correct URL
             if "apply" in current_url or "job-detail" in current_url:
-                    print(f"Already on the correct URL: {current_url}")
-                    # Wait for the "Next" button and click it
-                    next_button = page.wait_for_selector(
-                        next_in_application_button, timeout=10000)
-                    next_button.click()
+                print(f"Already on the correct URL: {current_url}")
+                # Wait for the "Next" button and click it
+                next_button = page.wait_for_selector(
+                    next_in_application_button, timeout=10000)
+                next_button.click()
 
-                    # Wait for the "Submit" button and click it
-                    submit_button = page.wait_for_selector(
-                        selectors["submit_button"], timeout=10000)
-                    submit_button.click()
-                    return
+                # Wait for the "Submit" button and click it
+                submit_button = page.wait_for_selector(
+                    selectors["submit_button"], timeout=10000)
+                submit_button.click()
+                return
 
             while attempt < max_attempts:
-                    try:
-                        # Wait for the URL to contain the expected path
-                        page.wait_for_url(expected_url_pattern, timeout=10000)
-                        print(f"Successfully navigated to URL: {page.url}")
-                        break  # Break out of the loop if successful
-                    except PlaywrightTimeoutError:
-                        attempt += 1
-                        current_url = page.url
-                        print(f"Attempt {attempt} failed. Expected: {expected_url_pattern}, but got: {current_url}")
-                        time.sleep(3)  # Sleep before retrying
+                try:
+                    # Wait for the URL to contain the expected path
+                    page.wait_for_url(expected_url_pattern, timeout=10000)
+                    print(f"Successfully navigated to URL: {page.url}")
+                    break  # Break out of the loop if successful
+                except PlaywrightTimeoutError:
+                    attempt += 1
+                    current_url = page.url
+                    print(f"Attempt {attempt} failed. Expected: {
+                          expected_url_pattern}, but got: {current_url}")
+                    time.sleep(3)  # Sleep before retrying
 
             if attempt == max_attempts:
-                    raise Exception(f"Failed to navigate to the expected URL after {max_attempts} attempts. Last URL: {current_url}")
+                raise Exception(f"Failed to navigate to the expected URL after {
+                                max_attempts} attempts. Last URL: {current_url}")
 
             # Wait for the "Next" button and click it
             next_button = page.wait_for_selector(
@@ -286,12 +289,10 @@ def evaluate_and_apply(page, val):
             submit_button.click()
 
             # Wait for the "Application Submitted" confirmation by text content
-            page.wait_for_selector(
-                'h1:has-text("Application submitted. We\'re rooting for you.")', timeout=10000)
-
-            # Check if the application submission was successful
-            header_text = page.locator(
-                'h1:has-text("Application submitted. We\'re rooting for you.")').text_content()
+            if page.is_visible(selectors["application_submitted"]):
+                header_text = page.locator(selectors["application_submitted"]).text_content()
+            elif page.is_visible(selectors["profile_visible_application_submitted"]):
+                header_text = page.locator(selectors["profile_visible_application_submitted"]).text_content()
 
             if header_text:
                 val = 0  # Successful application submission
@@ -303,7 +304,10 @@ def evaluate_and_apply(page, val):
         except Exception as e:
             print(f"Error during the application process: {e}")
             val = 1
-
+    else:
+        # Close the last opened tab if the easy apply button was not found
+        last_page = page.context.pages[-1]
+        last_page.close()
     # Call the apply_and_upload_resume function if the application wasn't submitted
     # if returned_value == 1 and val == 1:
     #     apply_and_upload_resume(page, val)
@@ -387,6 +391,8 @@ def apply_and_upload_resume(page, val):
             else:
                 print("Upload button not found.")
         else:
+            submit_clicked = False
+
             page.wait_for_load_state("load")
             time.sleep(3)
             page.wait_for_selector(selectors["unk_primary_button"])
@@ -396,10 +402,14 @@ def apply_and_upload_resume(page, val):
             submit_button = page.query_selector(selectors["submit_button"])
 
             submit_button.click()
-            if button.text_content() == "Apply":
-                button.click()
-                print(val)
-                page.close()
+            submit_clicked = True
+
+            if submit_clicked:
+                # Wait 1 second after clicking the submit button
+                time.sleep(1)
+                # Close the last tab opened
+                last_page = page.context.pages[-1]
+                last_page.close()
     else:
         print("Next button not found.")
 

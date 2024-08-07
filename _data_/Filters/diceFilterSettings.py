@@ -63,13 +63,19 @@ class JobFilter:
             raise ValueError("easy_apply can only be set to True.")
         self.easy_apply = easy
 
+
 # Example usage
 dice_job_filter = JobFilter()
+dice_job_filter.set_posted_date("Today")  # Added posted date of today
 dice_job_filter.set_work_setting(JobFilter.WorkSetting.REMOTE)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.CONTRACT)
-dice_job_filter.set_willing_to_sponsor(True)
+dice_job_filter.add_employment_type(JobFilter.EmploymentType.THIRD_PARTY)
+
+dice_job_filter.set_willing_to_sponsor(False)
 dice_job_filter.add_employer_type(JobFilter.EmployerType.DIRECT_HIRE)
+dice_job_filter.add_employer_type(JobFilter.EmployerType.RECRUITER)
+
 dice_job_filter.set_easy_apply(True)
 
 print(dice_job_filter)
