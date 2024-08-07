@@ -218,8 +218,8 @@ def evaluate_and_apply(page, val):
 def apply_and_upload_resume(page, val):
     page.wait_for_load_state("load")
     time.sleep(3)
-    page.wait_for_selector('button.btn-primary.btn-next.btn-block')
-    next_button = page.query_selector('button.btn-primary.btn-next.btn-block')
+    page.wait_for_selector('button.seds-button-primary.btn-next')
+    next_button = page.query_selector('button.seds-button-primary.btn-next')
 
     if next_button:
         next_button.click()
@@ -259,9 +259,9 @@ def apply_and_upload_resume(page, val):
                         page.wait_for_load_state("load")
                         time.sleep(3)
                         page.wait_for_selector(
-                            'button.btn-primary.btn-next.btn-block')
+                            'button.seds-button-primary.btn-next')
                         next_button = page.query_selector(
-                            'button.btn-primary.btn-next.btn-block')
+                            'button.seds-button-primary.btn-next')
 
                         if next_button:
                             next_button.click()
