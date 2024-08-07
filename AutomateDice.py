@@ -160,8 +160,26 @@ def evaluate_and_apply(page, val):
     if returned_value == 1:
         try:
             # Wait for the URL to contain the expected path
-            # Timeout after 10 seconds
-            page.wait_for_url("**/www.dice.com/apply**", timeout=10000)
+            # Timeout after 30 seconds
+            time.sleep(3)
+
+            # Retry logic for waiting for the URL
+            max_attempts = 3
+            attempt = 0
+
+            while attempt < max_attempts:
+                try:
+                    # Wait for the URL to contain the expected path
+                    page.wait_for_url("https://www.dice.com/apply**", timeout=10000)
+                    break  # Break out of the loop if successful
+                except PlaywrightTimeoutError:
+                    attempt += 1
+                    print(f"Attempt {attempt} failed. Retrying...")
+                    time.sleep(3)  # Sleep before retrying
+
+            if attempt == max_attempts:
+                raise Exception("Failed to navigate to the apply page after 3 attempts.")
+
 
             # Wait for the "Next" button and click it
             next_button = page.wait_for_selector(
@@ -173,20 +191,15 @@ def evaluate_and_apply(page, val):
                 '//button/span[text()="Submit"]/..', timeout=10000)
             submit_button.click()
 
-            # Wait to confirm that the application was submitted
-            page.wait_for_selector('application-submitted', timeout=10000)
+            # Wait for the "Application Submitted" confirmation by text content
+            page.wait_for_selector(
+                'h1:has-text("Application submitted. We\'re rooting for you.")', timeout=10000)
 
             # Check if the application submission was successful
-            app_text_element = page.evaluate("""
-                const appSubmitted = document.querySelector('application-submitted');
-                if (appSubmitted) {
-                    const appTextElement = appSubmitted.shadowRoot.querySelector('p.app-text');
-                    return appTextElement ? appTextElement.textContent : null;
-                }
-                return null;
-            """)
+            header_text = page.locator(
+                'h1:has-text("Application submitted. We\'re rooting for you.")').text_content()
 
-            if app_text_element and 'Application Submitted' in app_text_element:
+            if header_text:
                 val = 0  # Successful application submission
             else:
                 val = 1  # Unsuccessful application submission
