@@ -1,4 +1,6 @@
 from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
 import time
 import os
 from dotenv import load_dotenv
@@ -133,37 +135,70 @@ def write_job_titles_to_file(page, job_ids, url):
 
 
 def evaluate_and_apply(page, val):
+    # JavaScript code to interact with the DOM
     js_script = """
-        const applyButtonWc = document.querySelector('apply-button-wc');
+        (function() {
+            const applyButtonWc = document.querySelector('apply-button-wc');
+            let value = 0;  // Default value
 
-        if (applyButtonWc) {
-            const shadowRoot = applyButtonWc.shadowRoot;
-            const easyApplyButton = shadowRoot.querySelector('button.btn.btn-primary');
+            if (applyButtonWc) {
+                const shadowRoot = applyButtonWc.shadowRoot;
+                const easyApplyButton = shadowRoot.querySelector('button.btn.btn-primary');
 
-            if (easyApplyButton) {
-                easyApplyButton.click();
-                
-                const applicationSubmitted = shadowRoot.querySelector('application-submitted');
-                if (applicationSubmitted) {
-                    const appTextElement = applicationSubmitted.shadowRoot.querySelector('p.app-text');
-                    if (appTextElement && appTextElement.textContent.includes('Application Submitted')) {
-                        value = 0;
-                    } else {
-                        value = 1;
-                    }
-                } else {
-                    value = 1;
+                if (easyApplyButton) {
+                    easyApplyButton.click();
+                    return 1;  // Proceed to next steps
                 }
             }
-        } else {
-            value = 0;
-        }
+            return 0;  // Easy Apply button not found
+        })();
     """
-    page.evaluate(js_script)
 
-    returned_value = page.evaluate("value")
+    # Execute the JavaScript and get the returned value
+    returned_value = page.evaluate(js_script)
 
     if returned_value == 1:
+        try:
+            # Wait for the URL to contain the expected path
+            # Timeout after 10 seconds
+            page.wait_for_url("**/www.dice.com/apply**", timeout=10000)
+
+            # Wait for the "Next" button and click it
+            next_button = page.wait_for_selector(
+                'button.seds-button-primary.btn-next', timeout=10000)
+            next_button.click()
+
+            # Wait for the "Submit" button and click it
+            submit_button = page.wait_for_selector(
+                '//button/span[text()="Submit"]/..', timeout=10000)
+            submit_button.click()
+
+            # Wait to confirm that the application was submitted
+            page.wait_for_selector('application-submitted', timeout=10000)
+
+            # Check if the application submission was successful
+            app_text_element = page.evaluate("""
+                const appSubmitted = document.querySelector('application-submitted');
+                if (appSubmitted) {
+                    const appTextElement = appSubmitted.shadowRoot.querySelector('p.app-text');
+                    return appTextElement ? appTextElement.textContent : null;
+                }
+                return null;
+            """)
+
+            if app_text_element and 'Application Submitted' in app_text_element:
+                val = 0  # Successful application submission
+            else:
+                val = 1  # Unsuccessful application submission
+        except PlaywrightTimeoutError as e:
+            print(f"Timeout during the application process: {e}")
+            val = 1
+        except Exception as e:
+            print(f"Error during the application process: {e}")
+            val = 1
+
+    # Call the apply_and_upload_resume function if the application wasn't submitted
+    if returned_value == 1 and val == 1:
         apply_and_upload_resume(page, val)
 
 
