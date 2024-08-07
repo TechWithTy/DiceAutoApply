@@ -1,5 +1,76 @@
-# Ignore all .env files
-*.env
-*.pdf
-job_titles.txt
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore virtual environment
 venv/
+
+# Ignore environment variables file
+*.env
+
+# Ignore log files and unwanted output files
+*.log
+*.csv
+*.sqlite3
+*.db
+*.xlsx
+
+# Ignore MacOS files
+.DS_Store
+
+# Ignore specific file types
+*.pdf
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore Python-specific files
+*.egg-info/
+*.egg
+*.pyo
+*.whl
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore your specific project files
+job_titles.txt
+
+# Ignore coverage and test files
+.coverage
+*.coverage
+.cache
+pytest_cache/
+nose2-*.xml
+htmlcov/
+.tox/
+
+# Ignore temporary files and backup files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.~*
+*.lock
+
+# Ignore compiled files
+*.o
+*.a
+*.out
+*.so
+*.class
+
+# Ignore build directories
+build/
+dist/
+bin/
+obj/
+output/
