@@ -59,8 +59,9 @@ class JobFilter:
         self.willing_to_sponsor = willing
 
     def set_easy_apply(self, easy: bool):
+        if easy is not True:
+            raise ValueError("easy_apply can only be set to True.")
         self.easy_apply = easy
-
 
 # Example usage
 job_filter = JobFilter()

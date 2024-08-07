@@ -458,9 +458,9 @@ def main():
     print("started")
 
     # Load environment variables
-    email = os.getenv('EMAIL')
-    password = os.getenv('PASSWORD')
-    search_keywords = os.getenv('SEARCH_KEYWORDS')
+    secret_email = os.getenv('EMAIL')
+    secret_password = os.getenv('PASSWORD')
+    secret_search_keywords = os.getenv('SEARCH_KEYWORDS')
 
     custom_user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.288 Mobile Safari/537.36"
 
@@ -470,8 +470,8 @@ def main():
         context.clear_cookies()
 
         page = context.new_page()
-        login(page, email, password)
-        perform_job_search(page, search_keywords)
+        login(page, secret_email, secret_password)
+        perform_job_search(page, secret_search_keywords)
 
         job_ids = []
         url = page.url
