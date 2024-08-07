@@ -170,7 +170,7 @@ def evaluate_and_apply(page, val):
             while attempt < max_attempts:
                 try:
                     # Wait for the URL to contain the expected path
-                    page.wait_for_url("https://www.dice.com/apply**", timeout=10000)
+                    page.wait_for_url("https://www.dice.com/**/{apply,job-detail}**", timeout=10000)
                     break  # Break out of the loop if successful
                 except PlaywrightTimeoutError:
                     attempt += 1
