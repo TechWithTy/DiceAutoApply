@@ -1,0 +1,6 @@
+[submodule "LinkedIn-Easy-Apply-Bot"]
+	path = LinkedIn-Easy-Apply-Bot
+	url = https://github.com/nicolomantini/LinkedIn-Easy-Apply-Bot.git
+[submodule "LI-Easy-Apply-Bot"]
+	path = LI-Easy-Apply-Bot
+	url = https://github.com/TechWithTy/LI-Easy-Apply-Bot.git

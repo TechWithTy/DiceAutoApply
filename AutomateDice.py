@@ -292,11 +292,13 @@ def evaluate_and_apply(page, val):
             if page.is_visible(selectors["application_submitted"]):
                 header_text = page.locator(selectors["application_submitted"]).text_content()
                 # Close the current tab
-                page.close()
+                last_page = page.context.pages[-1]
+                last_page.close()
             elif page.is_visible(selectors["profile_visible_application_submitted"]):
                 header_text = page.locator(selectors["profile_visible_application_submitted"]).text_content()
                 # Close the current tab
-                page.close()
+                last_page = page.context.pages[-1]
+                last_page.close()
             #! if header_text:
             #!     returned_value = 0  # Successful application submission
             #! else:

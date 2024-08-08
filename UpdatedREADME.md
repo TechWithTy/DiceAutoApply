@@ -85,6 +85,7 @@ Here are some of the current and planned features for the project:
 - **EMAIL**: Your email address used for applications.
 - **PASSWORD**: Your password for logging into job platforms.
 - **SEARCH_KEYWORDS**: Keywords for searching job listings.
+--------------------------------------------------------------
 - **WEBSITE**: Personal or professional website URL.
 - **PORTFOLIO**: Link to your portfolio.
 - **BOOKME**: Booking link for scheduling interviews.
