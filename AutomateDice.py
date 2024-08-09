@@ -1,5 +1,6 @@
 # Import the JobFilter class
 from _data_.Filters.diceFilterSettings import dice_job_filter, JobFilter
+from _data_.Profiles.main_profile import UserProfile ,user_profile,display_profile
 import time
 
 from playwright.sync_api import sync_playwright
@@ -13,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
-search_keyword = "Javascript Developer"
+search_keyword = "Machine learning engineer"
 
 def login(page, email, password):
     page.goto("https://www.dice.com/dashboard/login")
@@ -471,7 +472,7 @@ def logout_and_close(page, browser):
 
 def main():
     print("started")
-
+    display_profile(user_profile)
     # Load environment variables
     secret_email = os.getenv('EMAIL')
     secret_password = os.getenv('PASSWORD')
