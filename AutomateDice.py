@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
-
+search_keyword = "Javascript Developer"
 
 def login(page, email, password):
     page.goto("https://www.dice.com/dashboard/login")
@@ -476,7 +476,7 @@ def main():
     secret_email = os.getenv('EMAIL')
     secret_password = os.getenv('PASSWORD')
     secret_search_keywords = os.getenv('SEARCH_KEYWORDS')
-
+    print('Search keyword Env ', secret_search_keywords,"Static" ,search_keyword)
     custom_user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.288 Mobile Safari/537.36"
 
     with sync_playwright() as p:
@@ -486,7 +486,7 @@ def main():
 
         page = context.new_page()
         login(page, secret_email, secret_password)
-        perform_job_search(page, secret_search_keywords)
+        perform_job_search(page, search_keyword)
 
         job_ids = []
         url = page.url
