@@ -32,6 +32,14 @@ class JobTitle:
     skills: List[str] = field(default_factory=list)
 
 
+class ApplyEvery(Enum):
+    ONE_HOUR = "1Hour"
+    FOUR_HOURS = "4Hours"
+    EIGHT_HOURS = "8Hours"
+    SIXTEEN_HOURS = "16Hours"
+    TWENTY_FOUR_HOURS = "24Hours"
+
+
 @dataclass
 class UserProfile:
     name: str
@@ -43,6 +51,10 @@ class UserProfile:
     job_titles: List[JobTitle]  # List of JobTitle instances
     dice_job_filter: JobFilter  # User's job filter preferences
     main_interview_questions: InterviewAnswerDataset  # General interview questions
+    city: str
+    country: str
+    timezone: str
+    apply_every: ApplyEvery
 
 
 # Instantiate the user_profile at the module level for importing
@@ -108,7 +120,11 @@ user_profile = UserProfile(
     about_me=about_me,
     job_titles=job_titles,
     dice_job_filter=dice_job_filter,
-    main_interview_questions=interview_data
+    main_interview_questions=interview_data,
+    city="Denver",
+    country="USA",
+    timezone="MST",  # Mountain Standard Time
+    apply_every=ApplyEvery.EIGHT_HOURS  # Apply every 8 hours
 )
 
 
