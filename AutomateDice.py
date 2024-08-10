@@ -1,6 +1,6 @@
 # Import the JobFilter class
 from _data_.Filters.diceFilterSettings import dice_job_filter, JobFilter
-from _data_.Profiles.main_profile import UserProfile ,user_profile,display_profile
+from _data_.Profiles.main_profile import UserProfile, user_profile, display_profile
 import time
 
 from playwright.sync_api import sync_playwright
@@ -13,8 +13,12 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
+first_run = True
+
 next_in_application_button = 'button.seds-button-primary.btn-next'
 search_keyword = "Machine learning engineer"
+
 
 def login(page, email, password):
     page.goto("https://www.dice.com/dashboard/login")
@@ -39,6 +43,7 @@ def login(page, email, password):
 
 
 def perform_job_search(page, search_keywords):
+    global first_run  # Ensure we're referencing the global variable
 
     selectors = {
         "search_input": "#typeaheadInput",
@@ -82,50 +87,52 @@ def perform_job_search(page, search_keywords):
     time.sleep(3)
 
     # Apply filters based on JobFilter settings
+    if first_run:
+        # Work setting filter
+        if dice_job_filter.work_setting == JobFilter.WorkSetting.REMOTE:
+            click_filter(selectors["remote_filter_group"])
+        elif dice_job_filter.work_setting == JobFilter.WorkSetting.ONSITE:
+            click_filter(selectors["work_settings_on_site"])
+        elif dice_job_filter.work_setting == JobFilter.WorkSetting.HYBRID:
+            click_filter(selectors["work_settings_hybrid"])
 
-    # Work setting filter
-    if dice_job_filter.work_setting == JobFilter.WorkSetting.REMOTE:
-        click_filter(selectors["remote_filter_group"])
-    elif dice_job_filter.work_setting == JobFilter.WorkSetting.ONSITE:
-        click_filter(selectors["work_settings_on_site"])
-    elif dice_job_filter.work_setting == JobFilter.WorkSetting.HYBRID:
-        click_filter(selectors["work_settings_hybrid"])
+        # Posted date filter
+        if dice_job_filter.posted_date == "Any Date":
+            click_filter(selectors["posted_date_any_date"])
+        elif dice_job_filter.posted_date == "Today":
+            click_filter(selectors["posted_date_today"])
+        elif dice_job_filter.posted_date == "Last 3 Days":
+            click_filter(selectors["posted_date_last_3_days"])
+        elif dice_job_filter.posted_date == "Last 7 Days":
+            click_filter(selectors["posted_date_last_7_days"])
 
-    # Posted date filter
-    if dice_job_filter.posted_date == "Any Date":
-        click_filter(selectors["posted_date_any_date"])
-    elif dice_job_filter.posted_date == "Today":
-        click_filter(selectors["posted_date_today"])
-    elif dice_job_filter.posted_date == "Last 3 Days":
-        click_filter(selectors["posted_date_last_3_days"])
-    elif dice_job_filter.posted_date == "Last 7 Days":
-        click_filter(selectors["posted_date_last_7_days"])
+        # Employment types filter
+        for employment_type in dice_job_filter.employment_types:  # Access the instance attribute
+            if employment_type == JobFilter.EmploymentType.FULL_TIME:
+                click_filter(selectors["employment_type_full_time"])
+            elif employment_type == JobFilter.EmploymentType.CONTRACT:
+                click_filter(selectors["employment_type_contract"])
+            elif employment_type == JobFilter.EmploymentType.THIRD_PARTY:
+                click_filter(selectors["third_party_button"])
 
-    # Employment types filter
-    for employment_type in dice_job_filter.employment_types:  # Access the instance attribute
-        if employment_type == JobFilter.EmploymentType.FULL_TIME:
-            click_filter(selectors["employment_type_full_time"])
-        elif employment_type == JobFilter.EmploymentType.CONTRACT:
-            click_filter(selectors["employment_type_contract"])
-        elif employment_type == JobFilter.EmploymentType.THIRD_PARTY:
-            click_filter(selectors["third_party_button"])
+        # Employer types filter
+        for employer_type in dice_job_filter.employer_types:  # Access the instance attribute
+            if employer_type == JobFilter.EmployerType.DIRECT_HIRE:
+                click_filter(selectors["employer_type_direct_hire"])
+            elif employer_type == JobFilter.EmployerType.RECRUITER:
+                click_filter(selectors["employer_type_recruiter"])
 
-    # Employer types filter
-    for employer_type in dice_job_filter.employer_types:  # Access the instance attribute
-        if employer_type == JobFilter.EmployerType.DIRECT_HIRE:
-            click_filter(selectors["employer_type_direct_hire"])
-        elif employer_type == JobFilter.EmployerType.RECRUITER:
-            click_filter(selectors["employer_type_recruiter"])
+        # Work authorization filter
+        if dice_job_filter.willing_to_sponsor:
+            click_filter(selectors["work_authorization_willing_to_sponsor"])
 
-    # Work authorization filter
-    if dice_job_filter.willing_to_sponsor:
-        click_filter(selectors["work_authorization_willing_to_sponsor"])
+        # Easy apply filter
+        if dice_job_filter.easy_apply:
+            click_filter(selectors["easy_apply_filter"])
 
-    # Easy apply filter
-    if dice_job_filter.easy_apply:
-        click_filter(selectors["easy_apply_filter"])
-
-    print("Filters applied successfully based on JobFilter settings.")
+        print("Filters applied successfully based on JobFilter settings.")
+    else:
+        print("Filters have already been applied, proceeding with search.")
 
 
 def extract_job_ids(page, job_ids):
@@ -291,12 +298,14 @@ def evaluate_and_apply(page, val):
 
             # Wait for the "Application Submitted" confirmation by text content
             if page.is_visible(selectors["application_submitted"]):
-                header_text = page.locator(selectors["application_submitted"]).text_content()
+                header_text = page.locator(
+                    selectors["application_submitted"]).text_content()
                 # Close the current tab
                 last_page = page.context.pages[-1]
                 last_page.close()
             elif page.is_visible(selectors["profile_visible_application_submitted"]):
-                header_text = page.locator(selectors["profile_visible_application_submitted"]).text_content()
+                header_text = page.locator(
+                    selectors["profile_visible_application_submitted"]).text_content()
                 # Close the current tab
                 last_page = page.context.pages[-1]
                 last_page.close()
@@ -420,6 +429,15 @@ def apply_and_upload_resume(page, val):
         print("Next button not found.")
 
 
+def close_extra_tabs(context):
+    # Get the list of all pages (tabs) in the context
+    pages = context.pages
+
+    # Keep the first page open, close all others
+    for i in range(1, len(pages)):
+        pages[i].close()
+
+
 def logout_and_close(page, browser):
 
     selectors = {
@@ -470,14 +488,16 @@ def logout_and_close(page, browser):
             print("once done, log out & close manually")
 
 
+# ?When moving to next job filters arent being applied
 def main():
+    global first_run  # Declare first_run as global to use the global variable
+
     print("started")
     display_profile(user_profile)
+
     # Load environment variables
     secret_email = os.getenv('EMAIL')
     secret_password = os.getenv('PASSWORD')
-    secret_search_keywords = os.getenv('SEARCH_KEYWORDS')
-    print('Search keyword Env ', secret_search_keywords,"Static" ,search_keyword)
     custom_user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.288 Mobile Safari/537.36"
 
     with sync_playwright() as p:
@@ -487,13 +507,27 @@ def main():
 
         page = context.new_page()
         login(page, secret_email, secret_password)
-        perform_job_search(page, search_keyword)
 
-        job_ids = []
-        url = page.url
+        # Loop over each job title in the user profile
+        for job_title in user_profile.job_titles:
+            # Extract the job title's name or any relevant attribute to use as a search keyword
+            search_keyword = job_title.title
+            print('Processing job title:', search_keyword)
 
-        extract_job_ids(page, job_ids)
-        write_job_titles_to_file(page, job_ids, url)
+            perform_job_search(page, search_keyword)  # Call the function
+
+            if not first_run:
+                # Close all tabs except the first one after the first run
+                close_extra_tabs(context)
+            else:
+                first_run = False  # Set flag to False after the first iteration
+
+            job_ids = []
+            url = page.url
+
+            extract_job_ids(page, job_ids)
+            write_job_titles_to_file(page, job_ids, url)
+
         logout_and_close(page, browser)
 
 

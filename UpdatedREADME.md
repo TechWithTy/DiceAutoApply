@@ -26,14 +26,13 @@ Here are some of the current and planned features for the project:
 - [x] **Manage User Profiles**: Create and display user profiles with detailed information.
 - [x] **Integrate Static Interview Questions**: Use predefined questions and answers.
 - [x] **Support Multiple Job Titles**: Manage applications for different job titles within the same user profile.
+- [x] **Auto-apply to Different Job Titles**: Implement functionality to automatically apply for multiple job titles within the profile.
 
 ### Upcoming Features
-
-- [ ] **Auto-apply to Different Job Titles**: Implement functionality to automatically apply for multiple job titles within the profile.
+- [ ] **Scheduled Auto Job Applying**: Apply to these jobs every day at a set time
 - [ ] **Answer Questions with AI**: Leverage LLMs to dynamically generate responses to interview questions based on context and job requirements.
 - [ ] **Improved Decision Making with AI**: Use AI to make decisions during applications, such as selecting suitable options in forms and evaluating job descriptions.
 - [ ] **User Interface for Configurations**: Build a user-friendly interface for setting up profiles and job filters with streamlit.
-- [ ] **Scheduled Auto Job Applying**: Apply to these jobs every day at a set time
 
 ### Stretch Goals
 

@@ -50,26 +50,46 @@ interview_data = InterviewAnswerDataset()
 
 job_titles = [
     JobTitle(
-        title="Software Engineer",
+        title="AI Engineer",
         experience=7,
-        relevant_resume_path=r"_data_\\Resumes\\8-5-24-Ai-Full-Stack.pdf",  # Use raw string
-        skills=["Python", "JavaScript", "React", "Django"],
-        interview_questions=interview_data
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",  # Use raw string
+        skills=[
+            "Python", "TensorFlow", "PyTorch", "Machine Learning", "Docker",
+            "Kubernetes", "CI/CD", "Unit Testing"
+        ],
+        interview_questions=interview_data  # Referencing the provided interview Q&A data
     ),
     JobTitle(
         title="Data Scientist",
-        experience=4,
-        relevant_resume_path=r"_data_\\Resumes\\8-5-24-Ai-Full-Stack.pdf",  # Use raw string
-        skills=["Python", "Machine Learning", "Statistics", "TensorFlow"],
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",  # Use raw string
+        skills=[
+            "Python", "Machine Learning", "Data Analysis", "TensorFlow",
+            "PyTorch", "Sci-kit Learn", "Pandas", "SQL", "Feature Engineering"
+        ],
         interview_questions=interview_data
     ),
     JobTitle(
-        title="Project Manager",
-        experience=4,
-        relevant_resume_path=r"_data_\\Resumes\\8-5-24-Ai-Full-Stack.pdf",  # Use raw string
-        skills=["Project Management", "Agile", "Scrum", "Communication"],
+        title="Full Stack Developer",
+        experience=6,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",  # Use raw string
+        skills=[
+            "JavaScript", "React", "Node.js", "Redux", "GraphQL", "CI/CD",
+            "HTML5", "CSS3", "TypeScript", "Git"
+        ],
         interview_questions=interview_data
     ),
+    JobTitle(
+        title="AI Automation Engineer",
+        experience=3,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",  # Use raw string
+        skills=[
+            "AI Model Optimization", "Automation", "Python", "TensorFlow",
+            "PyTorch", "RAG Systems", "Docker", "Kubernetes"
+        ],
+        interview_questions=interview_data
+    )
+
 ]
 
 about_me = "Enthusiastic software engineer with a keen interest in data science and project management."
