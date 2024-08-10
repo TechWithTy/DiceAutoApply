@@ -7,6 +7,7 @@ about_me: "A brief description about you, highlighting your experience and skill
 city: "Your City"
 country: "Your Country"
 timezone: "Your Timezone (e.g., MST, EST)"
+apply_every: "8Hours" # Options: 1Hour, 4Hours, 8Hours, 16Hours, 24Hours
 
 # Online Presence
 online_presence:
@@ -63,21 +64,86 @@ dice_job_filter:
 
 # Main Interview Questions
 main_interview_questions:
-  citizen_residency_visa: "Yes, I am a citizen and authorized to work in this country without restrictions."
-  strengths: "My strengths include adaptability, problem-solving, and strong communication skills."
-  weaknesses: "One of my weaknesses is being overly detail-oriented, but I am working on balancing attention to detail with efficiency."
-  teamwork_collaboration: "I thrive in team environments and enjoy collaborating with others to achieve shared goals."
-  leadership: "I have experience leading projects and teams, focusing on effective communication and motivating team members."
-  conflict_resolution: "I handle conflicts by understanding all perspectives and finding a mutually beneficial resolution."
-  deadline_management: "I prioritize tasks based on deadlines and importance, using time management tools to ensure timely completion."
-  why_choose_you: "I am a great fit for this role because of my relevant experience, skills, and passion for the industry."
-  past_experience: "My background includes several years of experience in the field, working on diverse projects."
-  goals_future: "My long-term goals include advancing in my career, taking on leadership roles, and continuing to develop my skills."
-  drivers_license: "Yes, I have a valid driver's license."
-  willing_to_relocate: "Yes, I am willing to relocate for the right opportunity."
-  work_overtime_weekends: "Yes, I am available to work overtime and weekends when necessary."
-  currently_employed: "No, I am actively seeking new opportunities."
-  experience_with_technology: "Yes, I have experience with Python."
+  "Are you a citizen or do you have a work permit?":
+    general: "Yes, I am a citizen and authorized to work in this country without restrictions."
+    yes_no: "yes"
 
-# Apply Every
-apply_every: "8Hours" # Options: 1Hour, 4Hours, 8Hours, 16Hours, 24Hours
+  "What are your strengths?":
+    general: "My strengths include adaptability, problem-solving, and strong communication skills."
+
+  "Tell me about your weaknesses.":
+    general: "One of my weaknesses is that I can be overly detail-oriented, but I am working on balancing my attention to detail with efficiency."
+
+  "Do you thrive in team environments and enjoy collaborating with others?":
+    general: "I thrive in team environments and enjoy collaborating with others to achieve shared goals."
+    yes_no: "yes"
+
+  "Do you have experience leading projects and teams?":
+    general: "I have experience leading projects and teams, focusing on effective communication and motivating team members."
+
+  "How do you handle conflict in the workplace?":
+    general: "I handle conflicts by listening to all parties involved, understanding their perspectives, and finding a mutually beneficial resolution."
+
+  "How do you prioritize tasks and manage your time?":
+    general: "I prioritize tasks based on deadlines and importance, using time management tools to ensure timely completion."
+
+  "Why should we choose you for this role?":
+    general: "I am a great fit for this role because of my relevant experience, skills, and passion for the industry."
+
+  "Can you tell us about your past experience?":
+    general: "My background includes several years of experience in the field, working on diverse projects and developing key skills."
+
+  "What are your long-term career goals?":
+    general: "My long-term goals include advancing in my career, taking on leadership roles, and continuing to develop my skills."
+
+  "Do you have a valid driver's license?":
+    general: "Yes, I have a valid driver's license."
+    yes_no: "yes"
+
+  "Are you willing to relocate for the right opportunity?":
+    general: "Yes, I am willing to relocate for the right opportunity."
+    yes_no: "yes"
+
+  "Are you available to work overtime and weekends when necessary?":
+    general: "Yes, I am available to work overtime and weekends when necessary."
+    yes_no: "yes"
+
+  "Are you currently employed?":
+    general: "No, I am actively seeking new opportunities."
+    yes_no: "no"
+
+  "Do you have experience with Python?":
+    general: "Yes, I have experience with Python."
+    yes_no: "yes"
+
+# AI Engineer Interview Questions
+ai_engineer_interview_questions:
+  "Can you describe your experience with machine learning models and their optimization?":
+    general: "I led the design, training, and optimization of machine learning models using TensorFlow and PyTorch, which resulted in a 25% improvement in model accuracy and a 15% reduction in training time. Additionally, I implemented feature engineering techniques like vectorization and dimensionality reduction to enhance model performance by 20%."
+  
+  "How have you utilized your full stack development skills in your previous roles?":
+    general: "In my role as a Full Stack Developer at Preferred Hotels Group, I developed responsive web applications using React.js, React Native, and Apollo GraphQL. This led to a 25% increase in user engagement and 30% faster page load times. I also implemented SEO strategies that improved organic search rankings, leading to a 40% increase in website traffic over a 12-month period."
+  
+  "What experience do you have with CI/CD pipelines, and how have they improved your development process?":
+    general: "I developed and managed CI/CD pipelines, streamlining deployment processes and reducing time to production by 25%. This experience has improved efficiency and reliability in deploying applications across various environments."
+  
+  "How have you managed scalable AI infrastructure in your projects?":
+    general: "I built and managed scalable ML infrastructure using Docker and Kubernetes, ensuring efficient deployment and integration of AI solutions across distributed systems. This management approach allowed for seamless scalability and flexibility in AI deployment."
+  
+  "Can you share an example of successful collaboration with cross-functional teams?":
+    general: "During my time at Google as an AI Automation Engineer, I collaborated with cross-functional teams to create machine learning solutions, resulting in a 20% reduction in processing time for critical data analysis tasks. This collaboration helped align AI initiatives with business goals, enhancing overall project success."
+  
+  "What leadership roles have you undertaken, and how did you motivate your team?":
+    general: "As an AI Training Expert at Outlier, I led the integration of novel AI methodologies into existing systems, achieving a 15% increase in automation efficiency and reducing manual intervention by 25%. I also fostered a culture of continuous learning by organizing workshops and training sessions, improving team proficiency in AI development by 35%."
+  
+  "How have you applied your problem-solving skills to overcome challenges in AI projects?":
+    general: "I conducted comprehensive analyses of AI models to identify and resolve inefficiencies, enhancing model robustness and scalability by 40%. This problem-solving approach has been instrumental in optimizing performance and ensuring the success of complex AI projects."
+  
+  "Which technologies and tools are you most familiar with, and how have you applied them in your projects?":
+    general: "I have extensive experience with TensorFlow, PyTorch, Sci-kit learn, Pandas, Python, R, SQL, Matlab, and React/React Native/TypeScript. These technologies have been pivotal in my roles, allowing me to develop robust AI models and responsive web applications that meet business needs."
+  
+  "Describe a situation where you successfully resolved a conflict within a team.":
+    general: "I handle conflicts by listening to all parties involved, understanding their perspectives, and finding a mutually beneficial resolution. In a previous role, I mediated a disagreement between team members regarding project priorities, facilitating a discussion that led to a more efficient and collaborative workflow."
+  
+  "What are your long-term career aspirations in AI and Full Stack Development?":
+    general: "My long-term goals include advancing in my career by taking on leadership roles and continuing to develop my skills in AI and Full Stack Development. I am passionate about leveraging technology to drive innovation and achieve impactful results."
