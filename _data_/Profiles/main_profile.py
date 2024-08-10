@@ -23,6 +23,7 @@ secrets = {
     "booking_link": os.getenv("BOOKME", "https://google.com")
 }
 
+
 @dataclass
 class JobTitle:
     title: str
@@ -105,6 +106,93 @@ job_titles = [
         ],
         interview_questions=interview_data,
         max_apply_jobs=100
+    ), JobTitle(
+        title="Machine Learning Engineer",
+        experience=7,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "TensorFlow", "PyTorch", "Model Optimization", "Machine Learning",
+            "AI Infrastructure", "Python", "Docker", "Kubernetes"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="AI Research Scientist",
+        experience=7,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "AI Research", "TensorFlow", "PyTorch", "Model Optimization",
+            "AI Methodologies", "Python", "R", "Research Publishing"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=50
+    ),
+    JobTitle(
+        title="DevOps Engineer with AI Focus",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "CI/CD", "Docker", "Kubernetes", "AI Model Deployment",
+            "Python", "Automation", "TensorFlow", "PyTorch"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Data Engineer",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Data Engineering", "SQL", "Python", "Pandas", "Data Infrastructure",
+            "Machine Learning", "TensorFlow", "PyTorch"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="Cloud AI Solutions Architect",
+        experience=6,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Cloud AI", "Azure AI", "TensorFlow", "PyTorch",
+            "Scalable AI Solutions", "Python", "Docker", "Kubernetes"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="AI Product Manager",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "AI Product Management", "AI Model Deployment", "Cross-functional Teams",
+            "TensorFlow", "PyTorch", "Project Management", "Python"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="AI Operations Engineer (AIOps)",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "AIOps", "AI Automation", "Machine Learning", "TensorFlow",
+            "PyTorch", "Docker", "Kubernetes", "Python"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=50
+    ),
+    JobTitle(
+        title="Data Analytics Consultant",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Data Analysis", "Machine Learning", "Data Insights", "TensorFlow",
+            "PyTorch", "Python", "SQL", "Pandas"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=40
     )
 ]
 
@@ -131,6 +219,7 @@ user_profile = UserProfile(
     apply_every=ApplyEvery.EIGHT_HOURS  # Apply every 8 hours
 )
 
+
 def display_profile(profile: UserProfile):
     """
     Display user profile information.
@@ -147,7 +236,8 @@ def display_profile(profile: UserProfile):
 
     print("\nGeneral Interview Questions:")
     for keywords in profile.main_interview_questions.answers:
-        general_answer = profile.main_interview_questions.answers[keywords].get("general")
+        general_answer = profile.main_interview_questions.answers[keywords].get(
+            "general")
         if general_answer:
             print(f"  - {general_answer}")
 
@@ -160,16 +250,20 @@ def display_profile(profile: UserProfile):
             print(f"    - {skill}")
         print("  Interview Questions: ")
         for keywords in job_title.interview_questions.answers:
-            general_answer = job_title.interview_questions.answers[keywords].get("general")
+            general_answer = job_title.interview_questions.answers[keywords].get(
+                "general")
             if general_answer:
                 print(f"    - {general_answer}")
 
     print("\nJob Filter Settings:")
     print(f"  Work Setting: {profile.dice_job_filter.work_setting}")
     print(f"  Posted Date: {profile.dice_job_filter.posted_date}")
-    print(f"  Employment Types: {', '.join(profile.dice_job_filter.employment_types)}")
-    print(f"  Willing to Sponsor: {profile.dice_job_filter.willing_to_sponsor}")
-    print(f"  Employer Types: {', '.join(profile.dice_job_filter.employer_types)}")
+    print(f"  Employment Types: {', '.join(
+        profile.dice_job_filter.employment_types)}")
+    print(f"  Willing to Sponsor: {
+          profile.dice_job_filter.willing_to_sponsor}")
+    print(f"  Employer Types: {', '.join(
+        profile.dice_job_filter.employer_types)}")
     print(f"  Easy Apply: {profile.dice_job_filter.easy_apply}")
 
 

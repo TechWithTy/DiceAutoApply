@@ -1,5 +1,7 @@
+import asyncio
 import streamlit as st
-from AutomateDice import main as run_playwright_script
+import threading
+from _experimental_.asyncAutomateDice import async_main as run_playwright_script
 from _data_.Profiles.main_profile import user_profile, display_profile
 
 # Streamlit UI
@@ -18,8 +20,20 @@ st.write(f"Apply Every: {user_profile.apply_every.value}")
 st.subheader("Full Profile Details")
 st.text(display_profile(user_profile))
 
-# Run the Playwright script
+# Function to run the Playwright script asynchronously on a separate thread
+def run_script():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(run_playwright_script())
+
+# Run the Playwright script in a separate thread
 if st.button("Run Job Search"):
     st.write("Starting job search...")
-    run_playwright_script()
+    
+    # Start the Playwright script in a new thread
+    thread = threading.Thread(target=run_script)
+    thread.start()
+
+    thread.join()  # Wait for the thread to finish
+    
     st.success("Job search completed.")

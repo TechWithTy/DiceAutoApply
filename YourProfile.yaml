@@ -1,0 +1,83 @@
+# User Profile Configuration
+name: "Your Full Name"
+email: "your.email@example.com"
+phone_number: "123-456-7890"
+linkedin_profile: "https://www.linkedin.com/in/yourprofile"
+about_me: "A brief description about you, highlighting your experience and skills."
+city: "Your City"
+country: "Your Country"
+timezone: "Your Timezone (e.g., MST, EST)"
+
+# Online Presence
+online_presence:
+  website: "https://yourwebsite.com"
+  portfolio: "https://yourportfolio.com"
+  booking_link: "https://yourbookinglink.com"
+
+# Job Titles
+job_titles:
+  - title: "AI Engineer"
+    experience: 7
+    relevant_resume_path: "_data_/Resumes/AI_Engineer_Resume.pdf"
+    skills:
+      - "Python"
+      - "TensorFlow"
+      - "PyTorch"
+      - "Machine Learning"
+      - "Docker"
+      - "Kubernetes"
+      - "CI/CD"
+      - "Unit Testing"
+    max_apply_jobs: 100
+
+  - title: "Data Scientist"
+    experience: 5
+    relevant_resume_path: "_data_/Resumes/Data_Scientist_Resume.pdf"
+    skills:
+      - "Python"
+      - "Machine Learning"
+      - "Data Analysis"
+      - "TensorFlow"
+      - "PyTorch"
+      - "Sci-kit Learn"
+      - "Pandas"
+      - "SQL"
+      - "Feature Engineering"
+    max_apply_jobs: 50
+
+  # Add more job titles as needed
+
+# Job Filter Settings
+dice_job_filter:
+  work_setting: "Remote" # Options: On-Site, Remote, Hybrid
+  posted_date: "Today" # Options: Any Date, Today, Last 3 Days, Last 7 Days
+  employment_types:
+    - "Full-time"
+    - "Contract"
+    - "Third Party"
+  willing_to_sponsor: false # true or false
+  employer_types:
+    - "Direct Hire"
+    - "Recruiter"
+  easy_apply: true # true or false
+
+# Main Interview Questions
+main_interview_questions:
+  citizen_residency_visa: "Yes, I am a citizen and authorized to work in this country without restrictions."
+  strengths: "My strengths include adaptability, problem-solving, and strong communication skills."
+  weaknesses: "One of my weaknesses is being overly detail-oriented, but I am working on balancing attention to detail with efficiency."
+  teamwork_collaboration: "I thrive in team environments and enjoy collaborating with others to achieve shared goals."
+  leadership: "I have experience leading projects and teams, focusing on effective communication and motivating team members."
+  conflict_resolution: "I handle conflicts by understanding all perspectives and finding a mutually beneficial resolution."
+  deadline_management: "I prioritize tasks based on deadlines and importance, using time management tools to ensure timely completion."
+  why_choose_you: "I am a great fit for this role because of my relevant experience, skills, and passion for the industry."
+  past_experience: "My background includes several years of experience in the field, working on diverse projects."
+  goals_future: "My long-term goals include advancing in my career, taking on leadership roles, and continuing to develop my skills."
+  drivers_license: "Yes, I have a valid driver's license."
+  willing_to_relocate: "Yes, I am willing to relocate for the right opportunity."
+  work_overtime_weekends: "Yes, I am available to work overtime and weekends when necessary."
+  currently_employed: "No, I am actively seeking new opportunities."
+  experience_with_technology: "Yes, I have experience with Python."
+
+# Apply Every
+apply_every: "8Hours" # Options: 1Hour, 4Hours, 8Hours, 16Hours, 24Hours
