@@ -146,14 +146,21 @@ def extract_job_ids(page, job_ids):
         page.wait_for_load_state("load")
         time.sleep(5)
 
-        page.wait_for_selector(selectors["card_title"])
-        job_links = page.query_selector_all(selectors["card_title"])
+        try:
+                # Try to wait for the job card titles to appear
+                page.wait_for_selector(selectors["card_title"], timeout=30000)
+                job_links = page.query_selector_all(selectors["card_title"])
 
-        if not job_links:
-            break
+                if not job_links:
+                    print("No job results found.")
+                    break
 
-        for job_link in job_links:
-            job_ids.append(job_link.get_attribute('id'))
+                for job_link in job_links:
+                    job_ids.append(job_link.get_attribute('id'))
+
+        except PlaywrightTimeoutError:
+                print("Timeout exceeded while waiting for job results. No job results found.")
+                break
 
         page.wait_for_load_state("load")
 
