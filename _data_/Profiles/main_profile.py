@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Dict, List
 import os
 
@@ -30,6 +31,7 @@ class JobTitle:
     relevant_resume_path: str  # Path to the resume file
     interview_questions: InterviewAnswerDataset  # Move this before skills
     skills: List[str] = field(default_factory=list)
+    max_apply_jobs = int
 
 
 class ApplyEvery(Enum):
@@ -69,7 +71,9 @@ job_titles = [
             "Python", "TensorFlow", "PyTorch", "Machine Learning", "Docker",
             "Kubernetes", "CI/CD", "Unit Testing"
         ],
-        interview_questions=interview_data  # Referencing the provided interview Q&A data
+        # Referencing the provided interview Q&A data,
+        interview_questions=interview_data,
+        max_apply_jobs=100
     ),
     JobTitle(
         title="Data Scientist",
@@ -79,7 +83,9 @@ job_titles = [
             "Python", "Machine Learning", "Data Analysis", "TensorFlow",
             "PyTorch", "Sci-kit Learn", "Pandas", "SQL", "Feature Engineering"
         ],
-        interview_questions=interview_data
+        interview_questions=interview_data,
+        max_apply_jobs=50
+
     ),
     JobTitle(
         title="Full Stack Developer",
@@ -89,7 +95,9 @@ job_titles = [
             "JavaScript", "React", "Node.js", "Redux", "GraphQL", "CI/CD",
             "HTML5", "CSS3", "TypeScript", "Git"
         ],
-        interview_questions=interview_data
+        interview_questions=interview_data,
+        max_apply_jobs=100
+
     ),
     JobTitle(
         title="AI Automation Engineer",
@@ -99,7 +107,9 @@ job_titles = [
             "AI Model Optimization", "Automation", "Python", "TensorFlow",
             "PyTorch", "RAG Systems", "Docker", "Kubernetes"
         ],
-        interview_questions=interview_data
+        interview_questions=interview_data,
+        max_apply_jobs=100
+
     )
 
 ]
