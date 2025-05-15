@@ -4,47 +4,118 @@ Handles job application actions for Dice automation.
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import time
 from typing import List
+import os
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
 
-def write_job_titles_to_file(page: Page, job_ids: List[str], url: str) -> None:
+import csv
+from datetime import datetime
+
+def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file: str = 'output/job_application_results.csv'):
+    """
+    Writes job application results to
+    a CSV file, including job title, URL, date/time, status, and error message.
+    Returns (applied_count, failed_count, failed_jobs)
+    """
     print("number of All job IDs:" + str(len(job_ids)))
     selectors = {
         "apply_button": 'apply-button-wc',
     }
-    with open('output/job_titles.txt', 'w') as file:
-        val = 0
-        parts = url.split('?')
-        for job_id in job_ids:
-            job_id_url = "https://www.dice.com/job-detail/" + job_id + "?" + parts[1]
+    applied = 0
+    failed = 0
+    failed_jobs = []
+    parts = url.split('?')
+    fieldnames = ["job_title", "job_url", "datetime", "status", "error_message"]
+    # Create output directory if it does not exist
+    output_dir = os.path.dirname(csv_file)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    # Write header if file does not exist
+    try:
+        with open(csv_file, 'x', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+    except FileExistsError:
+        pass  # File already exists
+    for job_id in job_ids:
+        job_id_url = "https://www.dice.com/job-detail/" + job_id + "?" + parts[1]
+        dt_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            new_page = page.context.new_page()
+            new_page.goto(job_id_url)
+            new_page.wait_for_load_state("load")
+            time.sleep(3)
+            job_title = new_page.evaluate("document.title")
+            status = "skipped"
+            error_message = ""
             try:
-                new_page = page.context.new_page()
-                new_page.goto(job_id_url)
-                new_page.wait_for_load_state("load")
-                time.sleep(3)
-                job_title = new_page.evaluate("document.title")
-                file.write(job_title + '\n')
-                try:
-                    new_page.wait_for_selector(selectors["apply_button"])
-                    val += 1
-                    success = evaluate_and_apply(new_page, val)
-                    if success:
-                        print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
-                        new_page.close()  # Only close on success
-                    else:
-                        print(f"[APPLY FAILED] {job_title} ({job_id_url})")
-                        # Leave tab open for debugging
-                except Exception as e:
-                    print(f"[APPLY FAILED] {job_title} ({job_id_url}) - Error: {str(e)}")
-                    # Leave tab open for debugging
+                new_page.wait_for_selector(selectors["apply_button"])
+                success = evaluate_and_apply(new_page, applied + 1)
+                if success:
+                    status = "success"
+                    applied += 1
+                    print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
+                    error_message = ""
+                else:
+                    status = "failed"
+                    failed += 1
+                    failed_jobs.append(job_title)
+                    error_message = "evaluate_and_apply returned False"
+                    print(f"[APPLY FAILED] {job_title} ({job_id_url}) - {error_message}")
             except Exception as e:
-                print(f"Error processing job id: {job_id_url}")
-                print(f"Error details: {str(e)}")
-                try:
-                    new_page.close()
-                except Exception:
-                    pass
-                continue
+                status = "no_apply_button"
+                failed += 1
+                failed_jobs.append(job_title)
+                error_message = str(e)
+                print(f"[NO APPLY BUTTON] {job_title} ({job_id_url}) - {error_message}")
+            # Write result to CSV
+            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writerow({
+                    "job_title": job_title,
+                    "job_url": job_id_url,
+                    "datetime": dt_str,
+                    "status": status,
+                    "error_message": error_message
+                })
+        except PlaywrightTimeoutError as e:
+            status = "network_error"
+            failed += 1
+            failed_jobs.append(job_id_url)
+            error_message = str(e)
+            print(f"Network error processing job id: {job_id_url}")
+            print(f"Error details: {error_message}")
+            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writerow({
+                    "job_title": job_id_url,
+                    "job_url": job_id_url,
+                    "datetime": dt_str,
+                    "status": status,
+                    "error_message": error_message
+                })
+        except Exception as e:
+            status = "page_error"
+            failed += 1
+            failed_jobs.append(job_id_url)
+            error_message = str(e)
+            print(f"Page error processing job id: {job_id_url}")
+            print(f"Error details: {error_message}")
+            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writerow({
+                    "job_title": job_id_url,
+                    "job_url": job_id_url,
+                    "datetime": dt_str,
+                    "status": status,
+                    "error_message": error_message
+                })
+        finally:
+            try:
+                new_page.close()
+            except Exception:
+                pass
+    return applied, failed, failed_jobs
 
 def evaluate_and_apply(page: Page, val: int) -> bool:
     selectors = {

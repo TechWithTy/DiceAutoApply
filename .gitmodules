@@ -4,3 +4,6 @@
 [submodule "LI-Easy-Apply-Bot"]
 	path = LI-Easy-Apply-Bot
 	url = https://github.com/TechWithTy/LI-Easy-Apply-Bot.git
+[submodule "app/linkedin"]
+	path = app/linkedin
+	url = https://github.com/TechWithTy/LI-Easy-Apply-Bot.git
