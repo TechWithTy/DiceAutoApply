@@ -24,15 +24,29 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str) -> None:
                 time.sleep(3)
                 job_title = new_page.evaluate("document.title")
                 file.write(job_title + '\n')
-                new_page.wait_for_selector(selectors["apply_button"])
-                val += 1
-                evaluate_and_apply(new_page, val)
+                try:
+                    new_page.wait_for_selector(selectors["apply_button"])
+                    val += 1
+                    success = evaluate_and_apply(new_page, val)
+                    if success:
+                        print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
+                        new_page.close()  # Only close on success
+                    else:
+                        print(f"[APPLY FAILED] {job_title} ({job_id_url})")
+                        # Leave tab open for debugging
+                except Exception as e:
+                    print(f"[APPLY FAILED] {job_title} ({job_id_url}) - Error: {str(e)}")
+                    # Leave tab open for debugging
             except Exception as e:
-                print("Error processing job id:", job_id_url)
-                print("Error details:", str(e))
+                print(f"Error processing job id: {job_id_url}")
+                print(f"Error details: {str(e)}")
+                try:
+                    new_page.close()
+                except Exception:
+                    pass
                 continue
 
-def evaluate_and_apply(page: Page, val: int) -> None:
+def evaluate_and_apply(page: Page, val: int) -> bool:
     selectors = {
         # Updated robust Easy Apply button selector (2025-05-15)
         "easy_apply_button": 'a[href*="job-detail"][class*="bg-interaction"]:has-text("Easy Apply")',
@@ -55,8 +69,10 @@ def evaluate_and_apply(page: Page, val: int) -> None:
                 time.sleep(2)
             else:
                 print("[Easy Apply] Button not found after 3 attempts, skipping this job.")
-                return
+                return False
     # ... rest of your logic for clicking/applying goes here ...
+    # After a successful submit, return True
+    # If submit fails, return False
     js_script = """
         (function() {
             const applyButtonWc = document.querySelector('apply-button-wc');
