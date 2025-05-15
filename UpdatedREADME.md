@@ -156,7 +156,7 @@ Here are some of the current and planned features for the project:
    Execute your main script to start the job application process:
 
    ```bash
-   python AutomateDice.py
+python -m app.dice.AutomateDiceMin
    ```
 
 ### Conclusion

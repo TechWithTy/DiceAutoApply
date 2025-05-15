@@ -61,140 +61,97 @@ class UserProfile:
 
 # Instantiate the user_profile at the module level for importing
 interview_data = InterviewAnswerDataset()
-
 job_titles = [
     JobTitle(
-        title="AI Engineer",
-        experience=7,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "Python", "TensorFlow", "PyTorch", "Machine Learning", "Docker",
-            "Kubernetes", "CI/CD", "Unit Testing"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=100
-    ),
-    JobTitle(
-        title="Data Scientist",
-        experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "Python", "Machine Learning", "Data Analysis", "TensorFlow",
-            "PyTorch", "Sci-kit Learn", "Pandas", "SQL", "Feature Engineering"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=50
-    ),
-    JobTitle(
-        title="Full Stack Developer",
+        title="Full Stack AI Engineer",
         experience=6,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
-            "JavaScript", "React", "Node.js", "Redux", "GraphQL", "CI/CD",
-            "HTML5", "CSS3", "TypeScript", "Git"
+            "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
+            "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
         ],
         interview_questions=interview_data,
         max_apply_jobs=100
     ),
     JobTitle(
-        title="AI Automation Engineer",
-        experience=3,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "AI Model Optimization", "Automation", "Python", "TensorFlow",
-            "PyTorch", "RAG Systems", "Docker", "Kubernetes"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=100
-    ), JobTitle(
-        title="Machine Learning Engineer",
+        title="Senior Full Stack Developer",
         experience=7,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
-            "TensorFlow", "PyTorch", "Model Optimization", "Machine Learning",
-            "AI Infrastructure", "Python", "Docker", "Kubernetes"
+            "JavaScript", "React", "Next.js", "Node.js", "Golang", "GraphQL",
+            "Docker", "Kubernetes", "CI/CD", "TypeScript", "Git"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=100
+    ),
+    JobTitle(
+        title="Full Stack Engineer",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "JavaScript", "React", "Node.js", "Python", "Golang", "Docker",
+            "CI/CD", "Git", "GraphQL", "HTML5", "CSS3"
         ],
         interview_questions=interview_data,
         max_apply_jobs=80
     ),
     JobTitle(
-        title="AI Research Scientist",
-        experience=7,
+        title="Frontend Engineer",
+        experience=4,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
-            "AI Research", "TensorFlow", "PyTorch", "Model Optimization",
-            "AI Methodologies", "Python", "R", "Research Publishing"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=50
-    ),
-    JobTitle(
-        title="DevOps Engineer with AI Focus",
-        experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "CI/CD", "Docker", "Kubernetes", "AI Model Deployment",
-            "Python", "Automation", "TensorFlow", "PyTorch"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=70
-    ),
-    JobTitle(
-        title="Data Engineer",
-        experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "Data Engineering", "SQL", "Python", "Pandas", "Data Infrastructure",
-            "Machine Learning", "TensorFlow", "PyTorch"
+            "JavaScript", "React", "Next.js", "HTML5", "CSS3", "Tailwind CSS",
+            "GraphQL", "REST APIs", "AI Integration"
         ],
         interview_questions=interview_data,
         max_apply_jobs=60
     ),
     JobTitle(
-        title="Cloud AI Solutions Architect",
+        title="Ai Engineer",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Cloud Services", "AWS", "Google Cloud", "Docker", "Kubernetes",
+            "Python", "Node.js", "React", "GraphQL", "CI/CD"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="React Developer",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "React", "JavaScript", "Next.js", "HTML5", "CSS3", "TypeScript",
+            "GraphQL", "REST APIs", "Tailwind CSS"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Full Stack Software Engineer",
         experience=6,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
-            "Cloud AI", "Azure AI", "TensorFlow", "PyTorch",
-            "Scalable AI Solutions", "Python", "Docker", "Kubernetes"
+            "JavaScript", "React", "Node.js", "Golang", "GraphQL", "Docker",
+            "CI/CD", "HTML5", "CSS3", "TypeScript", "Git"
         ],
         interview_questions=interview_data,
-        max_apply_jobs=70
-    ),
-    JobTitle(
-        title="AI Product Manager",
+        max_apply_jobs=90
+    ), JobTitle(
+        title="Web Developer",
         experience=5,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
-            "AI Product Management", "AI Model Deployment", "Cross-functional Teams",
-            "TensorFlow", "PyTorch", "Project Management", "Python"
+            "JavaScript", "Next.js", "React", "TypeScript", "GraphQL",
+            "HTML5", "CSS3", "Tailwind CSS", "REST APIs", "Node.js"
         ],
         interview_questions=interview_data,
-        max_apply_jobs=60
-    ),
-    JobTitle(
-        title="AI Operations Engineer (AIOps)",
-        experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "AIOps", "AI Automation", "Machine Learning", "TensorFlow",
-            "PyTorch", "Docker", "Kubernetes", "Python"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=50
-    ),
-    JobTitle(
-        title="Data Analytics Consultant",
-        experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-        skills=[
-            "Data Analysis", "Machine Learning", "Data Insights", "TensorFlow",
-            "PyTorch", "Python", "SQL", "Pandas"
-        ],
-        interview_questions=interview_data,
-        max_apply_jobs=40
+        max_apply_jobs=80
     )
+
 ]
+
 
 about_me = "Enthusiastic software engineer with a keen interest in data science and project management."
 online_presence = {
