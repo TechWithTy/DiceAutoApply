@@ -43,16 +43,17 @@ def main() -> None:
         for job_title in user_profile.job_titles:
             search_keyword = job_title.title
             print('Processing job title:', search_keyword)
-            # Build the robust Dice search URL from profile and job title
             search_url = userprofile_to_search_url(search_keyword)
             print(f"Navigating to search URL: {search_url}")
+            if not first_run:
+                close_extra_tabs(context)
+                page = context.new_page()  # Always create a new page after closing tabs
+            else:
+                first_run = False
+                # Use the original page created before the loop
             page.goto(search_url)
             page.wait_for_load_state("load")
             time.sleep(3)
-            if not first_run:
-                close_extra_tabs(context)
-            else:
-                first_run = False
             job_ids: List[str] = []
             url = page.url
             extract_job_ids(page, job_ids)
