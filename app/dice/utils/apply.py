@@ -157,6 +157,19 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
         "application_submitted_any_h1": 'h1:has-text("Application submitted")',
         "profile_visible_application_submitted":   'div.banner-message.sc-dhi-candidates-modal-2:has-text("Your Application is on its way.")'
     }
+    # * Check if already applied by looking for <application-submitted> with 'Application Submitted' text in shadow DOM of <apply-button-wc>
+    already_applied_elem = page.query_selector('div#applyButton apply-button-wc')
+    if already_applied_elem is not None:
+        is_submitted = page.evaluate('''
+            (el) => {
+                if (!el.shadowRoot) return false;
+                const submitted = el.shadowRoot.querySelector("application-submitted .app-text");
+                return submitted && submitted.textContent.includes("Application Submitted");
+            }
+        ''', already_applied_elem)
+        if is_submitted:
+            print("[ALREADY APPLIED] Application Submitted found in <apply-button-wc> shadow DOM. Skipping job as already applied.")
+            return False
     # ! Removed all page refreshes when waiting for Easy Apply button (per user request)
     # * Extended wait time and improved logs
     # * Selector is now robust to match <div id="applyButton"><apply-button-wc ...></apply-button-wc></div>

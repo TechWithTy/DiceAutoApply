@@ -77,6 +77,12 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                         print(f"[SKIP] Job already applied (found 'Applied' button in card): {job_id}")
             next_button = page.query_selector(selectors["list_pagination_next"])
             if next_button and next_button.is_visible():
+                # Check for disabled state via aria-disabled or data-disabled attribute
+                aria_disabled = next_button.get_attribute("aria-disabled")
+                data_disabled = next_button.get_attribute("data-disabled")
+                if aria_disabled == "true" or data_disabled == "true":
+                    print("Next button is disabled. No more pages.")
+                    break
                 print("Navigating to next page...")
                 next_button.click()
                 time.sleep(3)

@@ -63,7 +63,7 @@ class UserProfile:
 interview_data = InterviewAnswerDataset()
 job_titles = [
      JobTitle(
-        title="Python Developer",
+        title="Rust ",
         experience=6,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
@@ -75,6 +75,16 @@ job_titles = [
     ),
     JobTitle(
         title="Full Stack AI Engineer",
+        experience=6,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
+            "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=100
+    ),  JobTitle(
+        title="AI Integration Engineer",
         experience=6,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
@@ -118,12 +128,11 @@ job_titles = [
         max_apply_jobs=60
     ),
     JobTitle(
-        title="Ai Engineer",
+        title="TypeScript Developer",
         experience=5,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
-            "Cloud Services", "AWS", "Google Cloud", "Docker", "Kubernetes",
-            "Python", "Node.js", "React", "GraphQL", "CI/CD"
+            "TypeScript", "JavaScript", "React", "Next.js", "Node.js", "Python", "Golang", "Docker", "CI/CD", "GraphQL", "HTML5", "CSS3"
         ],
         interview_questions=interview_data,
         max_apply_jobs=70
@@ -134,6 +143,17 @@ job_titles = [
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
             "React", "JavaScript", "Next.js", "HTML5", "CSS3", "TypeScript",
+            "GraphQL", "REST APIs", "Tailwind CSS"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Next.js Developer",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Next.js", "React", "JavaScript", "TypeScript", "HTML5", "CSS3",
             "GraphQL", "REST APIs", "Tailwind CSS"
         ],
         interview_questions=interview_data,
@@ -151,6 +171,16 @@ job_titles = [
         max_apply_jobs=90
     ), JobTitle(
         title="Web Developer",
+        experience=5,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "JavaScript", "Next.js", "React", "TypeScript", "GraphQL",
+            "HTML5", "CSS3", "Tailwind CSS", "REST APIs", "Node.js"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),JobTitle(
+        title="Founding Engineer",
         experience=5,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
         skills=[
