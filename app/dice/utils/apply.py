@@ -283,16 +283,23 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
                 submit_button = page.wait_for_selector(
                     selectors["submit_button"], timeout=10000)
                 submit_button.click()
-                # After submit, check for confirmation
-                if page.is_visible(selectors["application_submitted"]):
-                    print("[CONFIRMATION] Application submitted!")
-                    return True
-                elif page.is_visible(selectors["profile_visible_application_submitted"]):
-                    print("[CONFIRMATION] Application submitted (profile visible)!")
-                    return True
-                else:
-                    print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
-                    return False
+                # After submit, robustly wait for confirmation selectors
+                try:
+                    page.wait_for_selector(selectors["application_submitted"], timeout=15000)
+                    if page.is_visible(selectors["application_submitted"]):
+                        print("[CONFIRMATION] Application submitted!")
+                        return True
+                except PlaywrightTimeoutError:
+                    pass
+                try:
+                    page.wait_for_selector(selectors["profile_visible_application_submitted"], timeout=15000)
+                    if page.is_visible(selectors["profile_visible_application_submitted"]):
+                        print("[CONFIRMATION] Application submitted (profile visible)!")
+                        return True
+                except PlaywrightTimeoutError:
+                    pass
+                print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
+                return False
             while attempt < max_attempts:
                 try:
                     page.wait_for_url(expected_url_pattern, timeout=10000)
@@ -313,22 +320,39 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
                 selectors["submit_button"], timeout=10000)
             submit_button.click()
             last_page = page.context.pages[-1]
-            last_page.close()
-            # First, try new robust selectors
-            if page.is_visible(selectors["application_submitted"]):
-                header_text = page.locator(selectors["application_submitted"]).text_content()
-                print(f"[CONFIRMATION] Application submitted! Banner: {header_text}")
-                return True
-            elif page.is_visible(selectors["application_submitted_any_h1"]):
-                header_text = page.locator(selectors["application_submitted_any_h1"]).text_content()
-                print(f"[CONFIRMATION] Application submitted! (Any h1): {header_text}")
-                return True
-            elif page.is_visible(selectors["profile_visible_application_submitted"]):
-                header_text = page.locator(selectors["profile_visible_application_submitted"]).text_content()
-                print(f"[CONFIRMATION] Application submitted (profile visible)! Banner: {header_text}")
+            # * Robust polling loop for confirmation selectors after submit
+            confirmation_selectors = [
+                ("application_submitted", selectors["application_submitted"]),
+                ("application_submitted_any_h1", selectors["application_submitted_any_h1"]),
+                ("profile_visible_application_submitted", selectors["profile_visible_application_submitted"])
+            ]
+            confirmation_found = False
+            confirmation_text = ""
+            max_wait_seconds = 30
+            poll_interval = 0.5
+            start_time = time.time()
+
+            while time.time() - start_time < max_wait_seconds:
+                for name, selector in confirmation_selectors:
+                    try:
+                        if page.is_visible(selector):
+                            header_text = page.locator(selector).text_content()
+                            print(f"[CONFIRMATION] Application submitted! ({name}): {header_text}")
+                            confirmation_found = True
+                            confirmation_text = header_text
+                            break
+                    except Exception:
+                        continue
+                if confirmation_found:
+                    break
+                time.sleep(poll_interval)
+
+            if confirmation_found:
+                last_page.close()
                 return True
             else:
-                print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
+                print("[FAILURE] Confirmation banner did not appear after waiting.")
+                last_page.close()
                 return False
         except PlaywrightTimeoutError as e:
             print(f"Timeout during the application process: {e}")
