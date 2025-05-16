@@ -57,7 +57,15 @@ def main() -> None:
             job_ids: List[str] = []
             url = page.url
             extract_job_ids(page, job_ids)
-            write_job_titles_to_file(page, job_ids, url)
+            applied, failed, failed_jobs = write_job_titles_to_file(page, job_ids, url)
+            print("\n========== APPLICATION SUMMARY ==========")
+            print(f"Jobs successfully applied: {applied}")
+            print(f"Jobs failed: {failed}")
+            if failed_jobs:
+                print("Failed jobs:")
+                for job in failed_jobs:
+                    print("-", job)
+            print("========================================\n")
         logout_and_close(page, browser)
 
 if __name__ == "__main__":

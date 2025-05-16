@@ -18,6 +18,11 @@ class JobFilter:
         DIRECT_HIRE = "Direct Hire"
         RECRUITER = "Recruiter"
         OTHER = "Other"
+    class PostedDate:
+        ANY_DATE = "Any Date"
+        TODAY = "Today"
+        LAST_3_DAYS = "Last 3 Days"
+        LAST_7_DAYS = "Last 7 Days"
 
     work_setting: Optional[str] = None  # Only one can be selected
     posted_date: Optional[str] = None  # Only one can be selected
@@ -32,7 +37,7 @@ class JobFilter:
         self.work_setting = setting
 
     def set_posted_date(self, date: str):
-        if date not in ["Any Date", "Today", "Last 3 Days", "Last 7 Days"]:
+        if date not in [self.PostedDate.ANY_DATE, self.PostedDate.TODAY, self.PostedDate.LAST_3_DAYS, self.PostedDate.LAST_7_DAYS]:
             raise ValueError(f"Invalid posted date: {date}")
         self.posted_date = date
 
@@ -58,8 +63,7 @@ class JobFilter:
 
 # Example usage
 dice_job_filter = JobFilter()
-dice_job_filter.set_posted_date("Today")  # Added posted date of today
-print('Dice Prefilter',dice_job_filter)  # Check intermediate output
+dice_job_filter.set_posted_date(JobFilter.PostedDate.LAST_3_DAYS)  # Added posted date of today
 dice_job_filter.set_work_setting(JobFilter.WorkSetting.REMOTE)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.CONTRACT)
@@ -68,5 +72,6 @@ dice_job_filter.set_willing_to_sponsor(False)
 dice_job_filter.add_employer_type(JobFilter.EmployerType.DIRECT_HIRE)
 dice_job_filter.add_employer_type(JobFilter.EmployerType.RECRUITER)
 dice_job_filter.set_easy_apply(True)
+print('Dice Filter',dice_job_filter)  # Check intermediate output
 
 print(dice_job_filter)

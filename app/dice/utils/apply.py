@@ -153,7 +153,8 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
         # ! Use Playwright shadow selector, filter for text in code
         "easy_apply_wc_button": 'div#applyButton apply-button-wc >> shadow=button',
         "submit_button": '//button/span[text()="Submit"]/..',
-        "application_submitted": 'h1:has-text("Application submitted. We\'re rooting for you.")',
+        "application_submitted": 'div.post-apply-header-text > h1:has-text("Application submitted")',
+        "application_submitted_any_h1": 'h1:has-text("Application submitted")',
         "profile_visible_application_submitted":   'div.banner-message.sc-dhi-candidates-modal-2:has-text("Your Application is on its way.")'
     }
     # ! Removed all page refreshes when waiting for Easy Apply button (per user request)
@@ -282,7 +283,16 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
                 submit_button = page.wait_for_selector(
                     selectors["submit_button"], timeout=10000)
                 submit_button.click()
-                return
+                # After submit, check for confirmation
+                if page.is_visible(selectors["application_submitted"]):
+                    print("[CONFIRMATION] Application submitted!")
+                    return True
+                elif page.is_visible(selectors["profile_visible_application_submitted"]):
+                    print("[CONFIRMATION] Application submitted (profile visible)!")
+                    return True
+                else:
+                    print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
+                    return False
             while attempt < max_attempts:
                 try:
                     page.wait_for_url(expected_url_pattern, timeout=10000)
@@ -294,7 +304,8 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
                     print(f"Attempt {attempt} failed. Expected: {expected_url_pattern}, but got: {current_url}")
                     time.sleep(3)
             if attempt == max_attempts:
-                raise Exception(f"Failed to navigate to the expected URL after {max_attempts} attempts. Last URL: {current_url}")
+                print(f"[FAILURE] Failed to navigate to the expected URL after {max_attempts} attempts. Last URL: {current_url}")
+                return False
             next_button = page.wait_for_selector(
                 next_in_application_button, timeout=10000)
             next_button.click()
@@ -303,22 +314,30 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
             submit_button.click()
             last_page = page.context.pages[-1]
             last_page.close()
+            # First, try new robust selectors
             if page.is_visible(selectors["application_submitted"]):
-                header_text = page.locator(
-                    selectors["application_submitted"]).text_content()
-                last_page = page.context.pages[-1]
-                last_page.close()
+                header_text = page.locator(selectors["application_submitted"]).text_content()
+                print(f"[CONFIRMATION] Application submitted! Banner: {header_text}")
+                return True
+            elif page.is_visible(selectors["application_submitted_any_h1"]):
+                header_text = page.locator(selectors["application_submitted_any_h1"]).text_content()
+                print(f"[CONFIRMATION] Application submitted! (Any h1): {header_text}")
+                return True
             elif page.is_visible(selectors["profile_visible_application_submitted"]):
-                header_text = page.locator(
-                    selectors["profile_visible_application_submitted"]).text_content()
-                last_page = page.context.pages[-1]
-                last_page.close()
+                header_text = page.locator(selectors["profile_visible_application_submitted"]).text_content()
+                print(f"[CONFIRMATION] Application submitted (profile visible)! Banner: {header_text}")
+                return True
+            else:
+                print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
+                return False
         except PlaywrightTimeoutError as e:
             print(f"Timeout during the application process: {e}")
-            val = 1
+            return False
         except Exception as e:
             print(f"Error during the application process: {e}")
-            val = 1
+            return False
     else:
         last_page = page.context.pages[-1]
         last_page.close()
+        print("[FAILURE] Easy Apply button clicked but application was not confirmed submitted.")
+        return False

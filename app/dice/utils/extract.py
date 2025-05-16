@@ -27,6 +27,7 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                     continue
                 job_id = href.split("/")[-1]
                 applied = False
+                easy_apply = False
                 try:
                     # Use XPath to get ancestor card as ElementHandle (never use evaluate_handle)
                     card_container = job_link.query_selector('xpath=ancestor::div[contains(@data-job-guid, "")]')
@@ -36,12 +37,25 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                     action_elements = card_container.query_selector_all('a,button')
                     for elem in action_elements:
                         spans = elem.query_selector_all('span')
+                        elem_href = elem.get_attribute('href') or ''
                         for span in spans:
                             text = span.inner_text().strip().lower()
-                            if text == 'applied':
+                            if text == 'applied' and job_id in elem_href:
                                 applied = True
-                                print(f"[SKIP] Found <a>/<button> with <span>'Applied'</span> for job_id={job_id}: {elem.evaluate('node => node.outerHTML')}")
-                                break
+                            if text == 'easy apply' and job_id in elem_href:
+                                easy_apply = True
+                        if applied:
+                            break
+                    if applied:
+                        print(f"[SKIP] Already applied for job_id={job_id}")
+                        continue  # Skip this job
+                    elif easy_apply:
+                        print(f"[QUEUE] Easy Apply available for job_id={job_id}")
+                        job_ids.append(job_id)
+                    else:
+                        print(f"[SKIP] No Easy Apply or already applied for job_id={job_id}")
+                        continue  # Optionally skip or log as not applicable
+
                         if not applied:
                             elem_text = elem.inner_text().strip().lower()
                             if elem_text == 'applied':

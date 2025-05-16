@@ -62,6 +62,17 @@ class UserProfile:
 # Instantiate the user_profile at the module level for importing
 interview_data = InterviewAnswerDataset()
 job_titles = [
+     JobTitle(
+        title="Python Developer",
+        experience=6,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        skills=[
+            "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
+            "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=100
+    ),
     JobTitle(
         title="Full Stack AI Engineer",
         experience=6,
