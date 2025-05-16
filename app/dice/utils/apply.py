@@ -149,28 +149,104 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
 
 def evaluate_and_apply(page: Page, val: int) -> bool:
     selectors = {
-        # Updated robust Easy Apply button selector (2025-05-15)
-        "easy_apply_button": 'a[href*="job-detail"][class*="bg-interaction"]:has-text("Easy Apply")',
+        # * Updated Easy Apply button selector to target <apply-button-wc> inside #applyButton (pierce shadow DOM)
+        # ! Use Playwright shadow selector, filter for text in code
+        "easy_apply_wc_button": 'div#applyButton apply-button-wc >> shadow=button',
         "submit_button": '//button/span[text()="Submit"]/..',
         "application_submitted": 'h1:has-text("Application submitted. We\'re rooting for you.")',
         "profile_visible_application_submitted":   'div.banner-message.sc-dhi-candidates-modal-2:has-text("Your Application is on its way.")'
     }
-    max_attempts = 3
-    for attempt in range(max_attempts):
-        try:
-            print(f"[Easy Apply] Attempt {attempt+1} waiting for button...")
-            page.wait_for_selector(selectors["easy_apply_button"], timeout=5000)
-            print("[Easy Apply] Button found!")
+    # ! Removed all page refreshes when waiting for Easy Apply button (per user request)
+    # * Extended wait time and improved logs
+    # * Selector is now robust to match <div id="applyButton"><apply-button-wc ...></apply-button-wc></div>
+
+    # * Wait up to 20 seconds for Easy Apply button, no refreshes (!)
+    EASY_APPLY_WAIT_SECONDS = 20
+    print(f"[Easy Apply] Waiting up to {EASY_APPLY_WAIT_SECONDS}s for Easy Apply button to appear in <apply-button-wc>...")
+    found = False
+    # Wait specifically for a button with text 'Easy apply' (case-insensitive) in the shadow DOM using JS polling
+    found = False
+    start_time = time.time()
+    while time.time() - start_time < EASY_APPLY_WAIT_SECONDS:
+        returned_value = page.evaluate('''
+            (function() {
+                const wc = document.querySelector('div#applyButton apply-button-wc');
+                if (wc && wc.shadowRoot) {
+                    const btns = wc.shadowRoot.querySelectorAll('button');
+                    for (const btn of btns) {
+                        if (btn.innerText.trim().toLowerCase() === "easy apply") {
+                            btn.scrollIntoView({behavior: "smooth", block: "center"});
+                            btn.focus();
+                            btn.click();
+                            return 1;
+                        }
+                    }
+                }
+                return 0;
+            })();
+        ''')
+        if returned_value == 1:
+            print("[Easy Apply] Clicked Easy Apply button via JS polling.")
+            found = True
             break
-        except Exception:
-            if attempt < max_attempts - 1:
-                print(f"[Easy Apply] Button not found, refreshing page (attempt {attempt+2})...")
-                page.reload()
-                page.wait_for_load_state("load")
-                time.sleep(2)
+        time.sleep(0.5)
+
+    if not found:
+        print(f"[Easy Apply] No Easy Apply button found in shadow DOM after waiting {EASY_APPLY_WAIT_SECONDS}s. Skipping this job.")
+        # Debug: print all button texts in shadow DOM to help diagnose selector issues
+        try:
+            wc = page.evaluate_handle("document.querySelector('div#applyButton apply-button-wc')")
+            if wc:
+                shadow_buttons = wc.evaluate('el => el.shadowRoot ? Array.from(el.shadowRoot.querySelectorAll(\'button\')).map(b => b.innerText) : []')
+                print("[DEBUG] Button texts in <apply-button-wc> shadow root:")
+                for text in shadow_buttons:
+                    print("-", text)
             else:
-                print("[Easy Apply] Button not found after 3 attempts, skipping this job.")
-                return False
+                print("[DEBUG] <apply-button-wc> not found.")
+        except Exception:
+            print("[DEBUG] Could not enumerate shadow DOM buttons.")
+        return False
+
+        js_script = '''
+            (function() {
+                const applyButtonWc = document.querySelector('div#applyButton apply-button-wc');
+                if (applyButtonWc && applyButtonWc.shadowRoot) {
+                    const btns = Array.from(applyButtonWc.shadowRoot.querySelectorAll('button'));
+                    for (const btn of btns) {
+                        const txt = btn.innerText.trim().toLowerCase();
+                        if (txt === "easy apply" || txt === "apply") {
+                            btn.click();
+                            return 1;
+                        }
+                    }
+                }
+                return 0;
+            })();
+        '''
+        returned_value = page.evaluate(js_script)
+        if returned_value == 1:
+            print("[Easy Apply] Clicked Easy Apply button via JS fallback.")
+            found = True
+        else:
+            print("[Easy Apply] Could not find Easy Apply button even via JS fallback. Skipping this job.")
+            # Debug: print all button texts in shadow DOM to help diagnose selector issues
+            try:
+                wc = page.query_selector('div#applyButton apply-button-wc')
+                if wc:
+                    shadow_buttons = wc.query_selector_all('button')
+                    print("[DEBUG] Button texts in <apply-button-wc> shadow root:")
+                    for b in shadow_buttons:
+                        try:
+                            print("-", b.inner_text())
+                        except Exception:
+                            pass
+                else:
+                    print("[DEBUG] <apply-button-wc> not found.")
+            except Exception:
+                print("[DEBUG] Could not enumerate shadow DOM buttons.")
+            return False
+    # * End of Easy Apply wait logic
+
     # ... rest of your logic for clicking/applying goes here ...
     # After a successful submit, return True
     # If submit fails, return False
