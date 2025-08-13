@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dice-auto-apply"
+version = "0.1.0"
+description = "Automate Dice job applications with Playwright"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Your Name" }]
+
+# Project dependencies
+# Kept in sync with requirements.txt
+dependencies = [
+  "playwright==1.45.1",
+  "python-dotenv",
+]
+
+[project.scripts]
+# Console entry point to run the app
+apply-dice = "app.dice.AutomateDiceMin:main"
+
+[tool.uv]
+# uv will create and manage a project-local virtualenv automatically
+# You can also pin a python version via `uv python pin` if desired
+
+[tool.hatch.metadata]
+# Allow direct references (e.g., git+ URLs) in project.dependencies
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+# Explicitly include our package directories so Hatch can build the wheel
+packages = ["app", "_data_"]
+
