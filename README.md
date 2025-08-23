@@ -81,6 +81,48 @@ Chromium browser (automatically installed by Playwright)
 
 ## Usage
 
+### Quickstart (uv)
+
+Use uv to manage the virtualenv and run the app with the shortest command.
+
+1) Install uv (one-time)
+
+```powershell
+winget install Astral-uv
+# or
+pipx install uv
+```
+
+2) Install project dependencies
+
+```bash
+uv sync
+```
+
+3) Install Playwright browser
+
+```bash
+uv run playwright install chromium
+```
+
+4) Configure environment
+
+```bash
+cp .env.example .env   # On Windows PowerShell: copy .env.example .env
+# Then edit .env and fill EMAIL, PASSWORD, NAME, etc.
+```
+
+5) Run the automation (short command)
+
+```bash
+uv run --env-file .env apply-dice
+```
+
+Notes:
+
+- You can also run `uv run apply-dice` if `.env` is auto-detected. The entry point is defined in `pyproject.toml` under `[project.scripts]` as `apply-dice = "app.dice.AutomateDiceMin:main"`.
+- First-time runs may take longer due to dependency and browser downloads.
+
 1. Open the script (`AutomateDice.py`) and fill in your Dice.com login credentials:
     `email = "your_email@example.com" password = "your_password"`
     

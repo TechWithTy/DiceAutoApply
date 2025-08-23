@@ -107,6 +107,12 @@ def main() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         context = browser.new_context(user_agent=custom_user_agent)
+        # Increase default timeouts to make navigation more resilient on slower pages
+        try:
+            context.set_default_navigation_timeout(60000)  # 60s
+            context.set_default_timeout(45000)  # 45s for general operations
+        except Exception as e:
+            print(f"[timeouts] Could not set default timeouts: {e}")
         context.clear_cookies()
         page = context.new_page()
         login(page, secret_email, secret_password)
@@ -122,9 +128,29 @@ def main() -> None:
             else:
                 first_run = False
                 # Use the original page created before the loop
-            page.goto(search_url)
-            page.wait_for_load_state("load")
-            time.sleep(3)
+            # More robust navigation with retry and longer timeouts
+            try:
+                page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
+            except Exception as e:
+                print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...")
+                try:
+                    page.close()
+                except Exception:
+                    pass
+                page = context.new_page()
+                try:
+                    page.goto(search_url, wait_until="domcontentloaded", timeout=90000)
+                except Exception as e2:
+                    print(f"[NAVIGATE] Second attempt failed: {e2}")
+                    # Skip this job title and continue to the next to keep the run alive
+                    continue
+            # Wait a bit more for network to settle before scraping
+            try:
+                page.wait_for_load_state("networkidle", timeout=30000)
+            except Exception:
+                # Not fatal; proceed with a short sleep buffer
+                pass
+            time.sleep(2)
             job_ids: List[str] = []
             url = page.url
             extract_job_ids(page, job_ids)

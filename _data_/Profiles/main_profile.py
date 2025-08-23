@@ -62,18 +62,19 @@ class UserProfile:
 # Instantiate the user_profile at the module level for importing
 interview_data = InterviewAnswerDataset()
 job_titles = [
-     JobTitle(
-    #     title="Rust ",
-    #     experience=6,
-    #     relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
-    #     skills=[
-    #         "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
-    #         "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
-    #     ],
-    #     interview_questions=interview_data,
-    #     max_apply_jobs=100
-    # ),
     JobTitle(
+        title="CTO",
+        experience=12,
+        relevant_resume_path=r"_data_\\Resumes\\8-6-24-CTO.pdf",
+        skills=[
+            "Leadership", "Strategic Planning", "Cloud Architecture", "Fundraising",
+            "Product Management", "DevOps", "Security", "AI/ML Strategy"
+        ],
+        interview_questions=interview_data,
+        max_apply_jobs=20
+    ),
+
+         JobTitle(
         title="Full Stack AI Engineer",
         experience=6,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
@@ -83,7 +84,8 @@ job_titles = [
         ],
         interview_questions=interview_data,
         max_apply_jobs=100
-    ),  JobTitle(
+    ),
+    JobTitle(
         title="AI Integration Engineer",
         experience=6,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
@@ -169,7 +171,8 @@ job_titles = [
         ],
         interview_questions=interview_data,
         max_apply_jobs=90
-    ), JobTitle(
+    ),
+    JobTitle(
         title="Web Developer",
         experience=5,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
@@ -179,7 +182,8 @@ job_titles = [
         ],
         interview_questions=interview_data,
         max_apply_jobs=80
-    ),JobTitle(
+    ),
+    JobTitle(
         title="Founding Engineer",
         experience=5,
         relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",

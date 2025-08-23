@@ -1,7 +1,3 @@
-Sure, let's enhance the `README.md` with a **Roadmap** section to provide a clear path of current and future features for your job application automation project. Here's the updated version with the roadmap included.
-
----
-
 # Job Application Automation Project
 
 ## Overview
@@ -43,8 +39,9 @@ Here are some of the current and planned features for the project:
 
 ### Prerequisites
 
-- Python 3.7+
-- `python-dotenv` package
+ - Python 3.8+
+ - uv (install via `winget install Astral-uv` or `pipx install uv`)
+ - Playwright browsers (installed via a command below)
 
 ### Installation
 
@@ -52,13 +49,19 @@ Here are some of the current and planned features for the project:
 
    ```bash
    git clone {repo}
-   cd automate-job-application
+   cd DiceAutoApply
    ```
 
-2. **Install Required Packages**:
+2. **Install Project Dependencies (uv)**:
 
    ```bash
-   pip install -r requirements.txt
+   uv sync
+   ```
+
+3. **Install Playwright Browser (Chromium)**:
+
+   ```bash
+   uv run playwright install chromium
    ```
 
 3. **Setup Environment Variables**:
@@ -78,6 +81,11 @@ Here are some of the current and planned features for the project:
    ```
 
    Update these values with your actual data.
+   
+   Tip (Windows):
+   ```powershell
+   copy .env.example .env
+   ```
 
 ### Environment Variables Usage
 
@@ -94,70 +102,18 @@ Here are some of the current and planned features for the project:
 
 ### Running the Project
 
-1. **Load Environment Variables**:
-
-   Use `python-dotenv` to load your environment variables at the start of your Python scripts:
-
-   ```python
-   from dotenv import load_dotenv
-   import os
-
-   # Load environment variables
-   load_dotenv()
-
-   # Access variables
-   email = os.getenv('EMAIL')
-   name = os.getenv('NAME')
-   ```
-
-2. **Setting Up User Profile and Job Filters**:
-
-   - **User Profile**: The `UserProfile` class manages user details and job preferences.
-   - **Job Filters**: Customize job searches using the `JobFilter` class.
-
-   ```python
-   from _data_.filterSettings import JobFilter
-   from _data_.interviewQuestions import InterviewAnswerDataset
-
-   # Define Job Filters
-   job_filter = JobFilter()
-   job_filter.set_work_setting(JobFilter.WorkSetting.REMOTE)
-   job_filter.set_posted_date("Last 7 Days")
-   job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
-   job_filter.add_employer_type(JobFilter.EmployerType.DIRECT_HIRE)
-
-   # User Profile Setup
-   user_profile = UserProfile(
-       name=os.getenv('NAME'),
-       email=os.getenv('EMAIL'),
-       phone_number=os.getenv('PHONE_NUMBER'),
-       linkedin_profile=os.getenv('LINKEDIN_PROFILE'),
-       about_me="A passionate software engineer with extensive experience.",
-       job_titles=[
-           JobTitle(
-               title="Software Engineer",
-               experience=5,
-               relevant_resume_path="/path/to/resume.pdf",
-               skills=["Python", "Java", "AWS"],
-               interview_questions=InterviewAnswerDataset()
-           )
-       ],
-       job_filter=job_filter,
-       online_presence={
-           "website": os.getenv('WEBSITE'),
-           "portfolio": os.getenv('PORTFOLIO'),
-           "booking_link": os.getenv('BOOKME')
-       }
-   )
-   ```
-
-3. **Running the Application**:
-
-   Execute your main script to start the job application process:
+1. **Run the automation (uv)**:
 
    ```bash
-python -m app.dice.AutomateDiceMin
+   uv run --env-file .env apply-dice
    ```
+
+   Notes:
+   - The console entry point `apply-dice` is defined in `pyproject.toml` under `[project.scripts]` as `app.dice.AutomateDiceMin:main`.
+   - Alternatively, you can run the module directly:
+     ```bash
+     uv run python -m app.dice.AutomateDiceMin
+     ```
 
 ### Conclusion
 
