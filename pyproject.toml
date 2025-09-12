@@ -21,6 +21,7 @@ dependencies = [
 [project.scripts]
 # Console entry point to run the app
 apply-dice = "app.dice.AutomateDiceMin:main"
+apply-dice-headless = "app.dice._experimental_.headless_test:main"
 
 [tool.uv]
 # uv will create and manage a project-local virtualenv automatically
@@ -33,4 +34,3 @@ allow-direct-references = true
 [tool.hatch.build.targets.wheel]
 # Explicitly include our package directories so Hatch can build the wheel
 packages = ["app", "_data_"]
-
