@@ -115,6 +115,20 @@ Here are some of the current and planned features for the project:
      uv run python -m app.dice.AutomateDiceMin
      ```
 
+### Headless Mode
+
+To run the automation in headless mode:
+
+```bash
+uv run apply-dice-headless
+```
+
+Or use the batch script on Windows:
+
+```cmd
+run_headless.bat
+```
+
 ### Conclusion
 
 This project provides a comprehensive framework for automating job applications, managing user profiles, and preparing for interviews. By leveraging environment variables and integrating LLMs, the system offers flexibility and dynamic response generation.

@@ -16,6 +16,8 @@ authors = [{ name = "Your Name" }]
 dependencies = [
   "playwright==1.45.1",
   "python-dotenv",
+  "browser-use",
+  "langchain-openai",
 ]
 
 [project.scripts]
