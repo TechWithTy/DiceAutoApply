@@ -95,6 +95,13 @@ def main() -> None:
     masked_email = (secret_email[:2] + "***" + secret_email[-2:]) if secret_email else None
     print(f"[dotenv] EMAIL present: {'yes' if secret_email else 'no'} ({masked_email if secret_email else ''})")
     print(f"[dotenv] PASSWORD present: {'yes' if bool(secret_password) else 'no'}")
+    print("Current environment variables:")
+    for key, value in os.environ.items():
+        if 'PASSWORD' in key or 'EMAIL' in key:
+            masked_value = value[:2] + "***" + value[-2:] if value else ""
+            print(f"  {key}: {masked_value}")
+        else:
+            print(f"  {key}: {value}")
     # Validate credentials early to avoid Playwright fill() receiving a missing value
     if not secret_email or not secret_password:
         raise RuntimeError(
