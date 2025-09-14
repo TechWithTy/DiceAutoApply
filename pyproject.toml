@@ -18,6 +18,7 @@ dependencies = [
   "python-dotenv",
   "browser-use",
   "langchain-openai",
+  "lettuce==0.2.23",
 ]
 
 [project.scripts]
@@ -36,3 +37,4 @@ allow-direct-references = true
 [tool.hatch.build.targets.wheel]
 # Explicitly include our package directories so Hatch can build the wheel
 packages = ["app", "_data_"]
+
