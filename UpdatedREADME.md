@@ -119,12 +119,17 @@ Here are some of the current and planned features for the project:
 
 To run the automation in headless mode:
 
-```bash
-uv run apply-dice-headless
+**PowerShell:**
+```powershell
+.\run_headless.ps1
 ```
 
-Or use the batch script on Windows:
+**Git Bash:**
+```bash
+./run_headless.sh
+```
 
+**Windows CMD:**
 ```cmd
 run_headless.bat
 ```

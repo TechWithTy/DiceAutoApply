@@ -1,0 +1,87 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, asdict
+from typing import Dict, Any
+import streamlit as st
+
+AUTH_KEY = "auth"
+PARAMS_KEY = "params"
+LOGS_KEY = "logs"
+SUMMARY_KEY = "summary"
+
+
+@dataclass
+class Credentials:
+    email: str = ""
+    password: str = ""
+
+    def to_env(self) -> Dict[str, str]:
+        return {
+            "DICE_EMAIL": self.email or "",
+            "EMAIL": self.email or "",
+            "DICE_PASSWORD": self.password or "",
+            "PASSWORD": self.password or "",
+        }
+
+
+DEFAULT_PARAMS: Dict[str, Any] = {
+    "keywords": "software engineer",
+    "location": "United States",
+    "radius": 50,
+    "filters": {
+        "work_setting": "Remote",
+        "posted_date": "Last 3 Days",
+        "employment_types": ["Full-time", "Contract", "Third Party"],
+        "employer_types": ["Direct Hire", "Recruiter"],
+        "willing_to_sponsor": False,
+        "easy_apply": True,
+    },
+    "target": {
+        "job_title": "Full Stack AI Engineer",
+        "max_apply_jobs": 100,
+    },
+}
+
+
+def ensure_session_defaults() -> None:
+    if AUTH_KEY not in st.session_state:
+        st.session_state[AUTH_KEY] = asdict(Credentials())
+    if PARAMS_KEY not in st.session_state:
+        st.session_state[PARAMS_KEY] = DEFAULT_PARAMS.copy()
+    if LOGS_KEY not in st.session_state:
+        st.session_state[LOGS_KEY] = []
+    if SUMMARY_KEY not in st.session_state:
+        st.session_state[SUMMARY_KEY] = None
+
+
+def get_credentials() -> Credentials:
+    data = st.session_state.get(AUTH_KEY, {})
+    return Credentials(email=data.get("email", ""), password=data.get("password", ""))
+
+
+def set_credentials(creds: Credentials) -> None:
+    st.session_state[AUTH_KEY] = asdict(creds)
+
+
+def get_params() -> Dict[str, Any]:
+    return st.session_state.get(PARAMS_KEY, DEFAULT_PARAMS.copy())
+
+
+def set_params(params: Dict[str, Any]) -> None:
+    st.session_state[PARAMS_KEY] = params
+
+
+def append_log(line: str) -> None:
+    st.session_state[LOGS_KEY].append(line)
+
+
+def clear_logs() -> None:
+    st.session_state[LOGS_KEY] = []
+
+
+def set_summary(summary: Dict[str, Any] | None) -> None:
+    st.session_state[SUMMARY_KEY] = summary
+
+
+def get_summary() -> Dict[str, Any] | None:
+    return st.session_state.get(SUMMARY_KEY)

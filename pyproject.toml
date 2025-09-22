@@ -7,7 +7,7 @@ name = "dice-auto-apply"
 version = "0.1.0"
 description = "Automate Dice job applications with Playwright"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Your Name" }]
 
@@ -19,6 +19,7 @@ dependencies = [
   "browser-use",
   "langchain-openai",
   "lettuce==0.2.23",
+  "streamlit>=1.36.0",
 ]
 
 [project.scripts]
@@ -37,4 +38,3 @@ allow-direct-references = true
 [tool.hatch.build.targets.wheel]
 # Explicitly include our package directories so Hatch can build the wheel
 packages = ["app", "_data_"]
-
