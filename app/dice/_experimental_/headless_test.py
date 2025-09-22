@@ -36,11 +36,26 @@ if not loaded_from:
 
 print(f"[dotenv] Loaded from: {loaded_from if loaded_from else 'None found'}")
 
+def _print_compact_profile() -> None:
+    """Print a compact summary of the active job filter to reduce log noise."""
+    jf = getattr(user_profile, "job_filter", None) or getattr(user_profile, "jobFilter", None)
+    def _get(obj, name, default=None):
+        return getattr(obj, name, default) if obj else default
+    print("Job Filter Settings:", flush=True)
+    print(f"  Work Setting: {_get(jf, 'work_setting', 'Unknown')}", flush=True)
+    print(f"  Posted Date: {_get(jf, 'posted_date', 'Unknown')}", flush=True)
+    print(f"  Employment Types: {_get(jf, 'employment_types', [])}", flush=True)
+    print(f"  Willing to Sponsor: {_get(jf, 'willing_to_sponsor', False)}", flush=True)
+    print(f"  Employer Types: {_get(jf, 'employer_types', [])}", flush=True)
+    print(f"  Easy Apply: {_get(jf, 'easy_apply', True)}", flush=True)
+
+
 def main() -> None:
     """
     Main workflow for headless Dice automation.
     """
-    display_profile(user_profile)
+    # Use a compact profile log instead of full Q&A to keep Streamlit logs clean
+    _print_compact_profile()
 
     secret_email = os.getenv('EMAIL') or os.getenv('DICE_EMAIL')
     secret_password = os.getenv('PASSWORD') or os.getenv('DICE_PASSWORD')
@@ -92,11 +107,15 @@ def main() -> None:
         page = context.new_page()
         login(page, secret_email, secret_password)
 
+        grand_applied = 0
+        grand_failed = 0
+        grand_failed_jobs: List[str] = []
+
         for job_title in user_profile.job_titles:
             search_keyword = job_title.title
-            print('Processing job title:', search_keyword)
+            print('Processing job title:', search_keyword, flush=True)
             search_url = userprofile_to_search_url(search_keyword)
-            print(f"Navigating to search URL: {search_url}")
+            print(f"Navigating to search URL: {search_url}", flush=True)
             if not first_run:
                 close_extra_tabs(context)
                 page = context.new_page()
@@ -106,7 +125,7 @@ def main() -> None:
             try:
                 page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
             except Exception as e:
-                print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...")
+                print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...", flush=True)
                 try:
                     page.close()
                 except Exception:
@@ -115,7 +134,7 @@ def main() -> None:
                 try:
                     page.goto(search_url, wait_until="domcontentloaded", timeout=90000)
                 except Exception as e2:
-                    print(f"[NAVIGATE] Second attempt failed: {e2}")
+                    print(f"[NAVIGATE] Second attempt failed: {e2}", flush=True)
                     continue
 
             try:
@@ -126,15 +145,38 @@ def main() -> None:
             job_ids: List[str] = []
             url = page.url
             extract_job_ids(page, job_ids)
+            print(f"[JOBS] Extracted job IDs: {len(job_ids)}", flush=True)
+            if len(job_ids) == 0:
+                # Provide hints for why this might be zero to aid debugging
+                print("[ZERO_JOBS] No jobs found. Possible reasons:", flush=True)
+                print(" - Filters too strict (try widening date/employment types/location)", flush=True)
+                print(" - DOM selectors outdated (check extract_job_ids)", flush=True)
+                print(" - Page not fully loaded (increase waits)", flush=True)
+
             applied, failed, failed_jobs = write_job_titles_to_file(page, job_ids, url)
-            print("\n========== APPLICATION SUMMARY ==========")
-            print(f"Jobs successfully applied: {applied}")
-            print(f"Jobs failed: {failed}")
+            grand_applied += int(applied or 0)
+            grand_failed += int(failed or 0)
             if failed_jobs:
-                print("Failed jobs:")
+                grand_failed_jobs.extend(failed_jobs)
+
+            print("\n========== APPLICATION SUMMARY ==========", flush=True)
+            print(f"Jobs successfully applied: {applied}", flush=True)
+            print(f"Jobs failed: {failed}", flush=True)
+            if failed_jobs:
+                print("Failed jobs:", flush=True)
                 for job in failed_jobs:
-                    print("-", job)
-            print("========================================\n")
+                    print("-", job, flush=True)
+            print("========================================\n", flush=True)
+        # Grand totals across all job titles
+        print("\n========== GRAND SUMMARY ==========", flush=True)
+        print(f"Total applied: {grand_applied}", flush=True)
+        print(f"Total failed: {grand_failed}", flush=True)
+        if grand_failed_jobs:
+            print("All failed jobs:", flush=True)
+            for job in grand_failed_jobs:
+                print("-", job, flush=True)
+        print("===================================\n", flush=True)
+
         logout_and_close(page, browser)
 
 if __name__ == "__main__":
