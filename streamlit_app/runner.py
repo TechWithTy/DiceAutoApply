@@ -26,10 +26,19 @@ def stream_headless_run(creds: Dict[str, str]) -> Tuple[int, Iterator[str]]:
     Returns (return_code, iterator_over_lines). The iterator should be consumed to execute the process.
     """
     env = _build_env_with_creds(creds)
+    # Force unbuffered stdout in child so logs stream line-by-line
+    env["PYTHONUNBUFFERED"] = "1"
     # Using uv ensures project deps/env are resolved.
     # headless_test currently takes no CLI args; it relies on env + _data_ profile.
     process = subprocess.Popen(
-        ["uv", "run", "apply-dice-headless"],
+        [
+            "uv",
+            "run",
+            "python",
+            "-u",
+            "-m",
+            "app.dice._experimental_.headless_test",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -40,8 +49,11 @@ def stream_headless_run(creds: Dict[str, str]) -> Tuple[int, Iterator[str]]:
 
     def _iter() -> Iterator[str]:
         assert process.stdout is not None
-        for line in process.stdout:
+        for line in iter(process.stdout.readline, ""):
+            if not line:
+                break
             yield line.rstrip("\n")
+        # Ensure process completes
         process.wait()
 
     return process.returncode or 0, _iter()

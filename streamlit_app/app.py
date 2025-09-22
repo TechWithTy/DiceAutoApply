@@ -49,6 +49,8 @@ def run_headless_once() -> None:
 
     status_placeholder = st.empty()
     progress = st.progress(0)
+    # Single live log placeholder (keeps UI stable while streaming)
+    live_log_block = st.empty()
 
     # Stream lines
     for i, line in enumerate(line_iter):
@@ -67,7 +69,13 @@ def run_headless_once() -> None:
         elif line.strip().startswith("- "):
             failed_jobs.append(line.strip()[2:])
 
-        # Update progress only; the logs are rendered once below in main()
+        # Update a compact live log view here (full controls are below in the main logs section)
+        try:
+            live_text = "\n".join(st.session_state.get("logs", [])[-200:])
+            if live_text:
+                live_log_block.code(live_text, language="text")
+        except Exception:
+            pass
         progress.progress(min(((i + 1) % 100), 100))
         time.sleep(0.02)
 
