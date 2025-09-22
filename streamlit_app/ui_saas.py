@@ -40,14 +40,54 @@ def render_login_prompt() -> None:
     st.markdown(f"[Login Here]({url})")
 
 
+def render_demo_login(sim_credits: int = 10) -> None:
+    """Provide a demo-only way to simulate a successful redirect and entitlements.
+
+    - Sets a demo token in session
+    - Updates the URL's query params with ?token=DEMO_TOKEN to mimic redirect
+    - Seeds entitlements with provided credits
+    """
+    with st.expander("Demo: Simulate Login (No Backend)"):
+        credits = st.number_input("Demo credits", min_value=0, max_value=10000, value=sim_credits, step=1)
+        if st.button("Simulate Login"):
+            demo_token = "DEMO_TOKEN"
+            set_auth_token(demo_token)
+            set_entitlements_state({"credits": int(credits)})
+            try:
+                # Newer Streamlit supports dict-like assignment
+                st.query_params["token"] = demo_token  # type: ignore[attr-defined]
+            except Exception:
+                # Fallback for older versions
+                st.experimental_set_query_params(token=demo_token)
+            st.success(f"Demo login complete. Token set and {credits} credits granted.")
+            # Immediately rerun so main() sees the token and proceeds to dashboard
+            try:
+                st.rerun()
+            except Exception:
+                # Fallback for very old Streamlit versions
+                try:
+                    st.experimental_rerun()  # type: ignore[attr-defined]
+                except Exception:
+                    pass
+
+
 def fetch_and_display_entitlements() -> int:
     """Fetch entitlements for token and show credits metric in sidebar. Returns credits."""
     token = get_auth_token()
     if not token:
         return 0
+    # If we are in demo mode, keep the locally set credits and skip API calls
+    if token == "DEMO_TOKEN":
+        credits = get_credits()
+        st.sidebar.metric("Credits", credits)
+        return credits
     data = get_entitlements(token)
-    set_entitlements_state(data)
-    credits = get_credits()
+    # If the remote call fails or returns fewer credits than we already have, keep the higher value
+    if not data or data.get("credits", 0) < get_credits():
+        credits = get_credits()
+    else:
+        set_entitlements_state(data)
+        credits = get_credits()
     st.sidebar.metric("Credits", credits)
     return credits
 

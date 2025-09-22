@@ -4,16 +4,42 @@ from typing import List, Dict, Any
 import io
 import csv
 import streamlit as st
+from streamlit_app.state import clear_logs
 
 
 def render_live_logs(logs: List[str]) -> None:
-    """Render the last N lines of logs with auto-scroll behavior."""
+    """Render live logs with UX controls and download option."""
     st.subheader("Live Logs")
+    colA, colB, colC, colD = st.columns([1, 1, 1, 2])
+    with colA:
+        max_lines = st.selectbox("Lines", options=[100, 200, 500, 1000], index=1)
+    with colB:
+        wrap = st.toggle("Wrap", value=True)
+    with colC:
+        if st.button("Clear"):
+            clear_logs()
+            st.experimental_rerun() if hasattr(st, "experimental_rerun") else st.rerun()
+    with colD:
+        st.caption("Tip: Streamlit updates logs when new lines arrive. Use Clear to reset view.")
+
     if not logs:
         st.info("No logs yet.")
         return
-    # Show last 200 lines to keep UI fast
-    st.code("\n".join(logs[-200:]), language="text")
+
+    text = "\n".join(logs[-int(max_lines):])
+    if wrap:
+        st.text_area("Logs", value=text, height=240, label_visibility="collapsed")
+    else:
+        st.code(text, language="text")
+
+    # Download full logs
+    buf = io.StringIO("\n".join(logs))
+    st.download_button(
+        label="Download Full Logs",
+        data=buf.getvalue(),
+        file_name="dice_automation_logs.txt",
+        mime="text/plain",
+    )
 
 
 def _summary_to_rows(summary: Dict[str, Any]) -> List[Dict[str, Any]]:

@@ -116,3 +116,12 @@ def get_credits() -> int:
         return int(ents.get("credits", 0))
     except Exception:
         return 0
+
+
+def logout_user() -> None:
+    """Clear all authentication-related state and transient data."""
+    for k in [AUTH_TOKEN_KEY, ENTITLEMENTS_KEY, AUTH_KEY, LOGS_KEY, SUMMARY_KEY]:
+        if k in st.session_state:
+            del st.session_state[k]
+    # Re-seed defaults so app doesn't error on next render
+    ensure_session_defaults()

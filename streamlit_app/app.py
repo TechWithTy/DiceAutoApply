@@ -21,6 +21,9 @@ from streamlit_app.ui_saas import (
     can_use_features,
 )
 from streamlit_app.api import generate_report
+from streamlit_app.ui_saas import render_demo_login
+from streamlit_app.state import logout_user
+from streamlit_app.ui_settings import render_settings
 
 
 st.set_page_config(page_title="Dice Job Automation Dashboard", layout="wide")
@@ -64,8 +67,7 @@ def run_headless_once() -> None:
         elif line.strip().startswith("- "):
             failed_jobs.append(line.strip()[2:])
 
-        # Update UI
-        render_live_logs(st.session_state.get("logs", []))
+        # Update progress only; the logs are rendered once below in main()
         progress.progress(min(((i + 1) % 100), 100))
         time.sleep(0.02)
 
@@ -88,19 +90,36 @@ def main() -> None:
     token = ensure_token_from_query()
     if not token:
         render_login_prompt()
+        # Demo-only helper to simulate a successful redirect/token without a backend
+        render_demo_login(sim_credits=10)
         st.stop()
     credits = fetch_and_display_entitlements()
     if credits <= 0:
         st.info("You need credits to use automation features.")
+
+    # --- Sidebar navigation & logout ---
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", options=["Dashboard", "Settings"], index=0)
+    if st.sidebar.button("Logout"):
+        logout_user()
+        try:
+            st.rerun()
+        except Exception:
+            pass
 
     # Auth
     authed = render_login()
     if not authed:
         st.stop()
 
-    # Parameters
-    render_search_and_filters()
-    render_profile_and_target()
+    # Render selected page
+    if page == "Settings":
+        render_settings()
+        return
+    else:
+        # Dashboard contents
+        render_search_and_filters()
+        render_profile_and_target()
 
     # Run controls
     col1, col2, col3 = st.columns([1, 1, 3])
