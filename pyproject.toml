@@ -18,8 +18,9 @@ dependencies = [
   "python-dotenv",
   "browser-use",
   "langchain-openai",
-  "lettuce==0.2.23",
+  "behave>=1.2.6",
   "streamlit>=1.36.0",
+  "requests>=2.31.0",
 ]
 
 [project.scripts]

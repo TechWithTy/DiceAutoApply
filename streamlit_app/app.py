@@ -14,6 +14,13 @@ from streamlit_app.ui_auth import render_login
 from streamlit_app.ui_params import render_search_and_filters, render_profile_and_target
 from streamlit_app.ui_results import render_live_logs, render_summary
 from streamlit_app.runner import stream_headless_run
+from streamlit_app.ui_saas import (
+    ensure_token_from_query,
+    render_login_prompt,
+    fetch_and_display_entitlements,
+    can_use_features,
+)
+from streamlit_app.api import generate_report
 
 
 st.set_page_config(page_title="Dice Job Automation Dashboard", layout="wide")
@@ -77,6 +84,15 @@ def main() -> None:
 
     st.title("Dice Job Automation Dashboard")
 
+    # --- SaaS auth & credits ---
+    token = ensure_token_from_query()
+    if not token:
+        render_login_prompt()
+        st.stop()
+    credits = fetch_and_display_entitlements()
+    if credits <= 0:
+        st.info("You need credits to use automation features.")
+
     # Auth
     authed = render_login()
     if not authed:
@@ -89,11 +105,22 @@ def main() -> None:
     # Run controls
     col1, col2, col3 = st.columns([1, 1, 3])
     with col1:
-        if st.button("Run Automation (Headless)"):
+        run_disabled = not can_use_features()
+        if st.button("Run Automation (Headless)", disabled=run_disabled):
             run_headless_once()
     with col2:
         if st.button("Clear Logs"):
             clear_logs()
+
+    # Example SaaS-gated feature: Generate Report
+    st.subheader("SaaS Features")
+    gen_disabled = not can_use_features()
+    if st.button("Generate Report", disabled=gen_disabled):
+        r = generate_report(token)
+        if r.get("ok"):
+            st.success("Report generated!")
+        else:
+            st.error(f"Error generating report: {r.get('detail')}")
 
     # Live logs
     render_live_logs(st.session_state.get("logs", []))

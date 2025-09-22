@@ -8,6 +8,8 @@ AUTH_KEY = "auth"
 PARAMS_KEY = "params"
 LOGS_KEY = "logs"
 SUMMARY_KEY = "summary"
+AUTH_TOKEN_KEY = "auth_token"
+ENTITLEMENTS_KEY = "entitlements"
 
 
 @dataclass
@@ -52,6 +54,10 @@ def ensure_session_defaults() -> None:
         st.session_state[LOGS_KEY] = []
     if SUMMARY_KEY not in st.session_state:
         st.session_state[SUMMARY_KEY] = None
+    if AUTH_TOKEN_KEY not in st.session_state:
+        st.session_state[AUTH_TOKEN_KEY] = None
+    if ENTITLEMENTS_KEY not in st.session_state:
+        st.session_state[ENTITLEMENTS_KEY] = {"credits": 0}
 
 
 def get_credentials() -> Credentials:
@@ -85,3 +91,28 @@ def set_summary(summary: Dict[str, Any] | None) -> None:
 
 def get_summary() -> Dict[str, Any] | None:
     return st.session_state.get(SUMMARY_KEY)
+
+
+# --- Token & entitlements utilities ---
+def get_auth_token() -> str | None:
+    return st.session_state.get(AUTH_TOKEN_KEY)
+
+
+def set_auth_token(token: str | None) -> None:
+    st.session_state[AUTH_TOKEN_KEY] = token
+
+
+def get_entitlements_state() -> Dict[str, Any]:
+    return st.session_state.get(ENTITLEMENTS_KEY, {"credits": 0})
+
+
+def set_entitlements_state(data: Dict[str, Any]) -> None:
+    st.session_state[ENTITLEMENTS_KEY] = data or {"credits": 0}
+
+
+def get_credits() -> int:
+    ents = get_entitlements_state()
+    try:
+        return int(ents.get("credits", 0))
+    except Exception:
+        return 0
