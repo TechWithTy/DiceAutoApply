@@ -34,7 +34,7 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                 page.wait_for_selector(selectors["card_title_alt"], timeout=12000)
                 card_selector = selectors["card_title_alt"]
 
-            time.sleep(1.5)  # allow late paints
+            time.sleep(1.8)  # allow late paints a bit longer
             job_links = page.query_selector_all(card_selector)
             if not job_links:
                 print("[RESULTS] No job cards on this page.")
@@ -61,12 +61,11 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                     pass
 
                 if applied:
-                    print(f"[SKIP] Already applied for job_id={job_id}")
-                    continue
+                    # Queue anyway so apply() can confirm and count as skipped; keeps metrics accurate
+                    print(f"[QUEUE] Suspected already-applied job_id={job_id}")
+                # Include both Easy Apply and non-Easy-Apply; let apply() decide/no_apply_button
                 if not easy_apply:
-                    print(f"[SKIP] No Easy Apply for job_id={job_id}")
-                    continue
-
+                    print(f"[QUEUE] Non-Easy-Apply candidate job_id={job_id}")
                 job_ids.append(job_id)
                 seen.add(job_id)
                 added_this_page += 1

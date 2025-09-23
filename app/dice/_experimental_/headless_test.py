@@ -42,12 +42,24 @@ def _print_compact_profile() -> None:
     def _get(obj, name, default=None):
         return getattr(obj, name, default) if obj else default
     print("Job Filter Settings:", flush=True)
-    print(f"  Work Setting: {_get(jf, 'work_setting', 'Unknown')}", flush=True)
-    print(f"  Posted Date: {_get(jf, 'posted_date', 'Unknown')}", flush=True)
-    print(f"  Employment Types: {_get(jf, 'employment_types', [])}", flush=True)
-    print(f"  Willing to Sponsor: {_get(jf, 'willing_to_sponsor', False)}", flush=True)
-    print(f"  Employer Types: {_get(jf, 'employer_types', [])}", flush=True)
-    print(f"  Easy Apply: {_get(jf, 'easy_apply', True)}", flush=True)
+    ws = _get(jf, 'work_setting', None)
+    pd = _get(jf, 'posted_date', None)
+    et = _get(jf, 'employment_types', None)
+    wts = _get(jf, 'willing_to_sponsor', None)
+    emt = _get(jf, 'employer_types', None)
+    ea = _get(jf, 'easy_apply', None)
+    print(f"  Work Setting: {ws if ws is not None else 'n/a'}", flush=True)
+    print(f"  Posted Date: {pd if pd is not None else 'n/a'}", flush=True)
+    print(f"  Employment Types: {et if et is not None else 'n/a'}", flush=True)
+    print(f"  Willing to Sponsor: {wts if wts is not None else 'n/a'}", flush=True)
+    print(f"  Employer Types: {emt if emt is not None else 'n/a'}", flush=True)
+    print(f"  Easy Apply: {ea if ea is not None else 'n/a'}", flush=True)
+    if jf is not None and any(v is None for v in [ws, pd, et, wts, emt, ea]):
+        # Raw fallback so we never show meaningless Unknowns
+        try:
+            print(f"  Raw Filter: {repr(jf)}", flush=True)
+        except Exception:
+            pass
 
 
 def main() -> None:
@@ -109,6 +121,10 @@ def main() -> None:
 
         grand_applied = 0
         grand_failed = 0
+        grand_skipped = 0
+        grand_already_applied = 0
+        grand_no_apply_button = 0
+        grand_success = 0
         grand_failed_jobs: List[str] = []
 
         for job_title in user_profile.job_titles:
@@ -146,22 +162,29 @@ def main() -> None:
             url = page.url
             extract_job_ids(page, job_ids)
             print(f"[JOBS] Extracted job IDs: {len(job_ids)}", flush=True)
-            if len(job_ids) == 0:
-                # Provide hints for why this might be zero to aid debugging
+            zero_hint_printed = False
+            if len(job_ids) == 0 and not zero_hint_printed:
+                # Provide hints for why this might be zero to aid debugging (only once per title)
                 print("[ZERO_JOBS] No jobs found. Possible reasons:", flush=True)
                 print(" - Filters too strict (try widening date/employment types/location)", flush=True)
                 print(" - DOM selectors outdated (check extract_job_ids)", flush=True)
                 print(" - Page not fully loaded (increase waits)", flush=True)
+                zero_hint_printed = True
 
-            applied, failed, failed_jobs = write_job_titles_to_file(page, job_ids, url)
+            applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count = write_job_titles_to_file(page, job_ids, url)
             grand_applied += int(applied or 0)
             grand_failed += int(failed or 0)
+            grand_skipped += int(skipped or 0)
+            grand_already_applied += int(already_applied_count or 0)
+            grand_no_apply_button += int(no_apply_button_count or 0)
+            grand_success += int(success_count or 0)
             if failed_jobs:
                 grand_failed_jobs.extend(failed_jobs)
 
             print("\n========== APPLICATION SUMMARY ==========", flush=True)
             print(f"Jobs successfully applied: {applied}", flush=True)
             print(f"Jobs failed: {failed}", flush=True)
+            print(f"Jobs skipped: {skipped}", flush=True)
             if failed_jobs:
                 print("Failed jobs:", flush=True)
                 for job in failed_jobs:
@@ -171,6 +194,8 @@ def main() -> None:
         print("\n========== GRAND SUMMARY ==========", flush=True)
         print(f"Total applied: {grand_applied}", flush=True)
         print(f"Total failed: {grand_failed}", flush=True)
+        print(f"Total skipped: {grand_skipped}", flush=True)
+        print(f"Breakdown — already_applied: {grand_already_applied}, no_apply_button: {grand_no_apply_button}, success: {grand_success}", flush=True)
         if grand_failed_jobs:
             print("All failed jobs:", flush=True)
             for job in grand_failed_jobs:

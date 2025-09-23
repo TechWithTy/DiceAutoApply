@@ -23,6 +23,11 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
     }
     applied = 0
     failed = 0
+    skipped = 0  # already applied, etc.
+    # Detailed counters for GRAND SUMMARY
+    already_applied_count = 0
+    no_apply_button_count = 0
+    success_count = 0
     failed_jobs = []
     parts = url.split('?')
     fieldnames = ["job_title", "job_url", "datetime", "status", "error_message"]
@@ -65,6 +70,8 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
                             status = "already_applied"
                             error_message = "Job already applied (button text) or application submitted text found."
                             print(f"[ALREADY APPLIED] {job_title} ({job_id_url})")
+                            skipped += 1
+                            already_applied_count += 1
                             with open(csv_file, 'a', newline='', encoding='utf-8') as f:
                                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                                 writer.writerow({
@@ -100,12 +107,14 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
                         print(f"[NO APPLY BUTTON] {job_title} ({job_id_url})")
                         failed += 1
                         failed_jobs.append(job_title)
+                        no_apply_button_count += 1
                     else:
                         try:
                             success = evaluate_and_apply(new_page, applied + 1)
                             if success:
                                 status = "success"
                                 applied += 1
+                                success_count += 1
                                 print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
                                 error_message = ""
                             else:
@@ -145,7 +154,7 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
                 "status": status,
                 "error_message": error_message
             })
-    return applied, failed, failed_jobs
+    return applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count
 
 def evaluate_and_apply(page: Page, val: int) -> bool:
     selectors = {

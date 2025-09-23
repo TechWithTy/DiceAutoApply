@@ -45,6 +45,7 @@ def run_headless_once() -> None:
 
     applied: Optional[int] = None
     failed: Optional[int] = None
+    skipped: Optional[int] = None
     failed_jobs: list[str] = []
 
     status_placeholder = st.empty()
@@ -66,6 +67,11 @@ def run_headless_once() -> None:
                 failed = int(line.split(":", 1)[1].strip())
             except Exception:
                 pass
+        elif line.startswith("Jobs skipped:"):
+            try:
+                skipped = int(line.split(":", 1)[1].strip())
+            except Exception:
+                pass
         elif line.strip().startswith("- "):
             failed_jobs.append(line.strip()[2:])
 
@@ -83,6 +89,7 @@ def run_headless_once() -> None:
     summary = {
         "applied": applied or 0,
         "failed": failed or 0,
+        "skipped": skipped or 0,
         "failed_jobs": failed_jobs,
     }
     set_summary(summary)

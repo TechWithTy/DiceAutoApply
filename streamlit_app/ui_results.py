@@ -55,6 +55,10 @@ def _summary_to_rows(summary: Dict[str, Any]) -> List[Dict[str, Any]]:
         "metric": "failed",
         "value": summary.get("failed", 0),
     })
+    rows.append({
+        "metric": "skipped",
+        "value": summary.get("skipped", 0),
+    })
     if summary.get("failed_jobs"):
         rows.append({
             "metric": "failed_jobs_count",
