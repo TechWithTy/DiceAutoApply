@@ -127,6 +127,7 @@ To run the automation in headless mode:
 **Git Bash:**
 ```bash
 ./run_headless.sh
+python -m app.dice._experimental_.headless_test
 ```
 
 **Windows CMD:**
