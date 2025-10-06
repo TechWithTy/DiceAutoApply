@@ -1,0 +1,147 @@
+name: Dice Job Automation (6-Hour Schedule)
+
+on:
+  schedule:
+    # Run every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allow manual trigger
+  push:
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/**'
+
+env:
+  # These environment variables should be set in repository secrets/settings
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  DICE_EMAIL: ${{ secrets.DICE_EMAIL }}
+  DICE_PASSWORD: ${{ secrets.DICE_PASSWORD }}
+  # Add other required environment variables as needed
+
+jobs:
+  dice-automation:
+    name: Run Dice Job Automation
+    runs-on: windows-latest  # Use Windows runner for compatibility
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install uv package manager
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Create virtual environment
+      run: |
+        uv venv .venv
+
+    - name: Activate virtual environment and install dependencies
+      run: |
+        .\.venv\Scripts\activate
+        uv sync
+
+    - name: Run Dice automation script
+      id: run-automation
+      run: |
+        .\.venv\Scripts\activate
+        .\scripts\run_headless_scheduled.bat
+      continue-on-error: true
+      timeout-minutes: 60
+
+    - name: Upload execution logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: dice-automation-logs-${{ github.run_id }}
+        path: |
+          logs/
+          job_summary.json
+        retention-days: 7
+
+    - name: Read job summary
+      id: read-summary
+      if: always()
+      run: |
+        if (Test-Path "job_summary.json") {
+          $summary = Get-Content "job_summary.json" -Raw | ConvertFrom-Json
+          echo "status=$($summary.status)" >> $env:GITHUB_OUTPUT
+          echo "jobs_attempted=$($summary.jobs_attempted)" >> $env:GITHUB_OUTPUT
+          echo "jobs_succeeded=$($summary.jobs_succeeded)" >> $env:GITHUB_OUTPUT
+          echo "jobs_failed=$($summary.jobs_failed)" >> $env:GITHUB_OUTPUT
+          echo "message=$($summary.message)" >> $env:GITHUB_OUTPUT
+          echo "execution_id=$($summary.execution_id)" >> $env:GITHUB_OUTPUT
+        } else {
+          echo "status=FAILED" >> $env:GITHUB_OUTPUT
+          echo "jobs_attempted=0" >> $env:GITHUB_OUTPUT
+          echo "jobs_succeeded=0" >> $env:GITHUB_OUTPUT
+          echo "jobs_failed=1" >> $env:GITHUB_OUTPUT
+          echo "message=No summary file found" >> $env:GITHUB_OUTPUT
+          echo "execution_id=${{ github.run_id }}" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: Send Slack notification
+      if: always()
+      run: |
+        $status = "${{ steps.read-summary.outputs.status }}"
+        $jobsAttempted = "${{ steps.read-summary.outputs.jobs_attempted }}"
+        $jobsSucceeded = "${{ steps.read-summary.outputs.jobs_succeeded }}"
+        $jobsFailed = "${{ steps.read-summary.outputs.jobs_failed }}"
+        $message = "${{ steps.read-summary.outputs.message }}"
+        $executionId = "${{ steps.read-summary.outputs.execution_id }}"
+
+        if ($status -eq "SUCCESS") {
+          $color = "good"
+          $emoji = ":white_check_mark:"
+        } else {
+          $color = "danger"
+          $emoji = ":x:"
+        }
+
+        $payload = @{
+          text = "Dice Automation $emoji"
+          attachments = @(
+            @{
+              color = $color
+              fields = @(
+                @{
+                  title = "Execution Summary"
+                  value = "*Status:* $status`n*Jobs Attempted:* $jobsAttempted`n*Jobs Succeeded:* $jobsSucceeded`n*Jobs Failed:* $jobsFailed`n*Message:* $message`n*Execution ID:* $executionId"
+                  short = $false
+                }
+              )
+            }
+          )
+        } | ConvertTo-Json -Depth 3
+
+        if ($env:SLACK_WEBHOOK_URL) {
+          Invoke-RestMethod -Uri $env:SLACK_WEBHOOK_URL -Method Post -Body $payload -ContentType 'application/json'
+          Write-Host "Slack notification sent successfully"
+        } else {
+          Write-Host "SLACK_WEBHOOK_URL not configured, skipping notification"
+        }
+
+    - name: Comment on PR (if triggered by push)
+      if: github.event_name == 'push' && github.event.head_commit
+      uses: actions/github-script@v7
+      with:
+        script: |-
+          const status = '${{ steps.read-summary.outputs.status }}';
+          const jobsAttempted = '${{ steps.read-summary.outputs.jobs_attempted }}';
+          const jobsSucceeded = '${{ steps.read-summary.outputs.jobs_succeeded }}';
+          const jobsFailed = '${{ steps.read-summary.outputs.jobs_failed }}';
+          const message = '${{ steps.read-summary.outputs.message }}';
+          const executionId = '${{ steps.read-summary.outputs.execution_id }}';
+
+          const body = `## \ud83e\udd16 Dice Automation Results\n\n**Status:** ${status}\n**Jobs Attempted:** ${jobsAttempted}\n**Jobs Succeeded:** ${jobsSucceeded}\n**Jobs Failed:** ${jobsFailed}\n**Message:** ${message}\n**Execution ID:** ${executionId}\n\n[View Logs](${github.server_url}/${github.repository}/actions/runs/${github.run_id})`;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });

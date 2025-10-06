@@ -1,0 +1,45 @@
+# =================================================================
+# GitHub Actions Environment Configuration
+# Copy this file to your repository secrets or use it as a template
+# =================================================================
+
+# Required Environment Variables for GitHub Actions:
+# SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+# DICE_EMAIL=your-dice-email@example.com
+# DICE_PASSWORD=your-dice-password
+
+# Optional Environment Variables:
+# DICE_SEARCH_TERMS=python developer,data scientist
+# DICE_LOCATION=remote,new york,san francisco
+# DICE_JOB_TYPES=full-time,contract
+# MAX_APPLICATIONS_PER_RUN=10
+# HEADLESS_BROWSER=true
+
+# Slack Configuration:
+# SLACK_CHANNEL=#job-applications
+# SLACK_USERNAME=Dice-Bot
+# SLACK_ICON_EMOJI=:robot_face:
+
+# Logging Configuration:
+# LOG_LEVEL=INFO
+# LOG_TO_FILE=true
+# LOG_RETENTION_DAYS=7
+
+# Rate Limiting:
+# REQUESTS_PER_MINUTE=10
+# MAX_CONCURRENT_APPLICATIONS=3
+
+# Error Handling:
+# MAX_RETRY_ATTEMPTS=3
+# RETRY_DELAY_SECONDS=60
+# FAIL_ON_ERROR=false
+
+# Notification Settings:
+# NOTIFY_ON_SUCCESS=true
+# NOTIFY_ON_FAILURE=true
+# NOTIFY_ON_START=true
+
+# GitHub Integration:
+# GITHUB_TOKEN=your-github-token
+# CREATE_PR_COMMENTS=true
+# UPLOAD_LOGS_AS_ARTIFACTS=true
