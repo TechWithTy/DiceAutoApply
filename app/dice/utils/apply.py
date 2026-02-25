@@ -5,11 +5,67 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import time
 from typing import List
 import os
+from pathlib import Path
+from datetime import datetime
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
 
 import csv
-from datetime import datetime
+
+
+def _slugify(value: str) -> str:
+    return "".join(ch if ch.isalnum() else "_" for ch in value).strip("_").lower() or "job"
+
+
+def _dump_no_apply_debug(page: Page, job_title: str, job_url: str) -> None:
+    debug_dir = Path(os.getenv("DICE_APPLY_DEBUG_DIR", "app/dice/_experimental_/debug"))
+    debug_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base = f"{stamp}_{_slugify(job_title)}"
+    html_path = debug_dir / f"{base}_job_detail_no_apply.html"
+    txt_path = debug_dir / f"{base}_button_targets.txt"
+    png_path = debug_dir / f"{base}_job_detail_no_apply.png"
+    try:
+        html_path.write_text(page.content(), encoding="utf-8")
+    except Exception as e:
+        print(f"[DEBUG] Could not save detail HTML: {e}")
+    try:
+        page.screenshot(path=str(png_path), full_page=True)
+    except Exception as e:
+        print(f"[DEBUG] Could not save detail screenshot: {e}")
+    try:
+        targets = page.evaluate('''
+            () => {
+                const rows = [];
+                const els = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"], apply-button-wc, [data-testid], [data-cy]'));
+                for (const el of els) {
+                    const text = (el.innerText || el.textContent || el.value || '').trim().replace(/\\s+/g, ' ');
+                    const attr = (name) => el.getAttribute && el.getAttribute(name) ? el.getAttribute(name) : '';
+                    if (!text && !attr('data-testid') && !attr('data-cy') && !attr('aria-label')) continue;
+                    const row = {
+                        tag: el.tagName,
+                        id: el.id || '',
+                        cls: (el.className || '').toString().slice(0, 120),
+                        text: text.slice(0, 160),
+                        testid: attr('data-testid'),
+                        cy: attr('data-cy'),
+                        aria: attr('aria-label'),
+                        href: attr('href'),
+                    };
+                    rows.push(row);
+                }
+                return rows;
+            }
+        ''')
+        lines = [f"URL: {job_url}", ""]
+        for r in targets:
+            lines.append(
+                f"{r['tag']} id={r['id']} data-testid={r['testid']} data-cy={r['cy']} aria={r['aria']} href={r['href']} class={r['cls']} text={r['text']}"
+            )
+        txt_path.write_text("\n".join(lines), encoding="utf-8")
+        print(f"[DEBUG] Saved no-apply debug bundle: {html_path}, {png_path}, {txt_path}")
+    except Exception as e:
+        print(f"[DEBUG] Could not enumerate button targets: {e}")
 
 def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file: str = 'output/job_application_results.csv'):
     """
@@ -18,9 +74,6 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
     Returns (applied_count, failed_count, failed_jobs)
     """
     print("number of All job IDs:" + str(len(job_ids)))
-    selectors = {
-        "apply_button": 'apply-button-wc',
-    }
     applied = 0
     failed = 0
     skipped = 0  # already applied, etc.
@@ -29,7 +82,8 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
     no_apply_button_count = 0
     success_count = 0
     failed_jobs = []
-    parts = url.split('?')
+    parts = url.split('?', 1)
+    query_string = parts[1] if len(parts) > 1 else ""
     fieldnames = ["job_title", "job_url", "datetime", "status", "error_message"]
     # Create output directory if it does not exist
     output_dir = os.path.dirname(csv_file)
@@ -43,7 +97,9 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
     except FileExistsError:
         pass  # File already exists
     for job_id in job_ids:
-        job_id_url = "https://www.dice.com/job-detail/" + job_id + "?" + parts[1]
+        job_id_url = "https://www.dice.com/job-detail/" + job_id
+        if query_string:
+            job_id_url = job_id_url + "?" + query_string
         dt_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         job_title = job_id_url  # fallback
         status = "failed"
@@ -93,42 +149,40 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
                     failed += 1
                     failed_jobs.append(job_title)
                     raise  # Will be caught by outer except to write CSV
-                # Simulate skip logic (customize as needed)
-                if False:  # e.g., if already_applied(job_title):
-                    status = "skipped"
-                    error_message = "Already applied (simulated)"
-                    print(f"[SKIPPED] {job_title} ({job_id_url})")
-                else:
-                    try:
-                        new_page.wait_for_selector(selectors["apply_button"], timeout=5000)
-                    except Exception as e:
+                try:
+                    apply_result = evaluate_and_apply(new_page, applied + 1)
+                    if apply_result == "success":
+                        status = "success"
+                        applied += 1
+                        success_count += 1
+                        print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
+                        error_message = ""
+                    elif apply_result == "already_applied":
+                        status = "already_applied"
+                        skipped += 1
+                        already_applied_count += 1
+                        error_message = "Application already submitted."
+                        print(f"[ALREADY APPLIED] {job_title} ({job_id_url})")
+                    elif apply_result == "no_easy_apply":
                         status = "no_apply_button"
-                        error_message = f"No apply button: {e}"
+                        skipped += 1
+                        no_apply_button_count += 1
+                        error_message = "Easy Apply button not found on job detail page."
                         print(f"[NO APPLY BUTTON] {job_title} ({job_id_url})")
+                        _dump_no_apply_debug(new_page, job_title, job_id_url)
+                    else:
+                        status = "failed"
                         failed += 1
                         failed_jobs.append(job_title)
-                        no_apply_button_count += 1
-                    else:
-                        try:
-                            success = evaluate_and_apply(new_page, applied + 1)
-                            if success:
-                                status = "success"
-                                applied += 1
-                                success_count += 1
-                                print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
-                                error_message = ""
-                            else:
-                                status = "failed"
-                                failed += 1
-                                failed_jobs.append(job_title)
-                                error_message = "evaluate_and_apply returned False"
-                                print(f"[APPLY FAILED] {job_title} ({job_id_url}) - {error_message}")
-                        except Exception as e:
-                            status = "exception"
-                            error_message = f"Exception during apply: {e}"
-                            failed += 1
-                            failed_jobs.append(job_title)
-                            print(f"[EXCEPTION] {job_title} ({job_id_url}) - {error_message}")
+                        error_message = "evaluate_and_apply returned failed"
+                        print(f"[APPLY FAILED] {job_title} ({job_id_url}) - {error_message}")
+                        _dump_no_apply_debug(new_page, job_title, job_id_url)
+                except Exception as e:
+                    status = "exception"
+                    error_message = f"Exception during apply: {e}"
+                    failed += 1
+                    failed_jobs.append(job_title)
+                    print(f"[EXCEPTION] {job_title} ({job_id_url}) - {error_message}")
                 new_page.close()
             except Exception as e:
                 if status not in ("page_error", "no_apply_button", "skipped", "exception"):
@@ -156,7 +210,7 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
             })
     return applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count
 
-def evaluate_and_apply(page: Page, val: int) -> bool:
+def evaluate_and_apply(page: Page, val: int) -> str:
     selectors = {
         # * Updated Easy Apply button selector to target <apply-button-wc> inside #applyButton (pierce shadow DOM)
         # ! Use Playwright shadow selector, filter for text in code
@@ -164,8 +218,37 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
         "submit_button": '//button/span[text()="Submit"]/..',
         "application_submitted": 'div.post-apply-header-text > h1:has-text("Application submitted")',
         "application_submitted_any_h1": 'h1:has-text("Application submitted")',
-        "profile_visible_application_submitted":   'div.banner-message.sc-dhi-candidates-modal-2:has-text("Your Application is on its way.")'
+        "profile_visible_application_submitted":   'div.banner-message.sc-dhi-candidates-modal-2:has-text("Your Application is on its way.")',
+        "application_success_card": '[data-testid="job-application-success-card"]',
     }
+
+    def _first_visible(selectors_list, timeout_ms=2500):
+        for sel in selectors_list:
+            try:
+                loc = page.locator(sel).first
+                loc.wait_for(state="visible", timeout=timeout_ms)
+                return loc
+            except Exception:
+                continue
+        return None
+
+    def _is_apply_flow_url(url: str) -> bool:
+        return (
+            "/apply" in url
+            or "/job-detail/" in url
+            or "/job-applications/" in url
+        )
+    # Check common already-applied cues in both modern and legacy layouts.
+    try:
+        direct_apply_btn = page.query_selector('button[data-testid="apply-button"], [data-testid="apply-button"]')
+        if direct_apply_btn is not None:
+            txt = (direct_apply_btn.inner_text() or "").strip().lower()
+            if "applied" in txt or "application submitted" in txt:
+                print("[ALREADY APPLIED] apply-button indicates already applied.")
+                return "already_applied"
+    except Exception:
+        pass
+
     # * Check if already applied by looking for <application-submitted> with 'Application Submitted' text in shadow DOM of <apply-button-wc>
     already_applied_elem = page.query_selector('div#applyButton apply-button-wc')
     if already_applied_elem is not None:
@@ -178,212 +261,213 @@ def evaluate_and_apply(page: Page, val: int) -> bool:
         ''', already_applied_elem)
         if is_submitted:
             print("[ALREADY APPLIED] Application Submitted found in <apply-button-wc> shadow DOM. Skipping job as already applied.")
-            return False
+            return "already_applied"
     # ! Removed all page refreshes when waiting for Easy Apply button (per user request)
     # * Extended wait time and improved logs
     # * Selector is now robust to match <div id="applyButton"><apply-button-wc ...></apply-button-wc></div>
 
-    # * Wait up to 20 seconds for Easy Apply button, no refreshes (!)
-    EASY_APPLY_WAIT_SECONDS = 20
-    print(f"[Easy Apply] Waiting up to {EASY_APPLY_WAIT_SECONDS}s for Easy Apply button to appear in <apply-button-wc>...")
-    found = False
-    # Wait specifically for a button with text 'Easy apply' (case-insensitive) in the shadow DOM using JS polling
-    found = False
-    start_time = time.time()
-    while time.time() - start_time < EASY_APPLY_WAIT_SECONDS:
+    # Prefer current Dice target discovered from captured HTML.
+    try:
+        direct_apply_btn = page.query_selector('button[data-testid="apply-button"], [data-testid="apply-button"]')
+        if direct_apply_btn is not None and direct_apply_btn.is_visible():
+            button_text = (direct_apply_btn.inner_text() or "").strip()
+            print(f"[Easy Apply] Clicking direct apply target data-testid=apply-button (text='{button_text}')")
+            direct_apply_btn.click()
+            found = True
+        else:
+            found = False
+    except Exception:
+        found = False
+
+    # Keep this bounded so one slow card does not stall the whole run.
+    EASY_APPLY_WAIT_SECONDS = int(os.getenv("DICE_EASY_APPLY_WAIT_SECONDS", "8"))
+    if not found:
+        print(f"[Easy Apply] Waiting up to {EASY_APPLY_WAIT_SECONDS}s for Easy Apply button to appear in <apply-button-wc>...")
+        start_time = time.time()
+        while time.time() - start_time < EASY_APPLY_WAIT_SECONDS:
+            returned_value = page.evaluate('''
+                (function() {
+                    const wc = document.querySelector('div#applyButton apply-button-wc');
+                    if (wc && wc.shadowRoot) {
+                        const btns = wc.shadowRoot.querySelectorAll('button');
+                        for (const btn of btns) {
+                            const txt = btn.innerText.trim().toLowerCase();
+                            if (txt === "easy apply" || txt === "apply now" || txt === "apply") {
+                                btn.scrollIntoView({behavior: "smooth", block: "center"});
+                                btn.focus();
+                                btn.click();
+                                return 1;
+                            }
+                        }
+                    }
+                    return 0;
+                })();
+            ''')
+            if returned_value == 1:
+                print("[Easy Apply] Clicked Easy Apply button via JS polling.")
+                found = True
+                break
+            time.sleep(0.4)
+
+    if not found:
+        # Fallback: try regular DOM buttons/links that mention Easy Apply.
         returned_value = page.evaluate('''
             (function() {
-                const wc = document.querySelector('div#applyButton apply-button-wc');
-                if (wc && wc.shadowRoot) {
-                    const btns = wc.shadowRoot.querySelectorAll('button');
-                    for (const btn of btns) {
-                        if (btn.innerText.trim().toLowerCase() === "easy apply") {
-                            btn.scrollIntoView({behavior: "smooth", block: "center"});
-                            btn.focus();
-                            btn.click();
-                            return 1;
-                        }
+                const candidates = Array.from(
+                    document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]')
+                );
+                for (const el of candidates) {
+                    const txt = ((el.innerText || el.textContent || el.value || '') + '').trim().toLowerCase();
+                    if (txt.includes('easy apply') || txt.includes('apply now') || txt === 'apply') {
+                        try { el.scrollIntoView({behavior: 'instant', block: 'center'}); } catch (_) {}
+                        try { el.click(); return 1; } catch (_) {}
                     }
                 }
                 return 0;
             })();
         ''')
         if returned_value == 1:
-            print("[Easy Apply] Clicked Easy Apply button via JS polling.")
-            found = True
-            break
-        time.sleep(0.5)
-
-    if not found:
-        print(f"[Easy Apply] No Easy Apply button found in shadow DOM after waiting {EASY_APPLY_WAIT_SECONDS}s. Skipping this job.")
-        # Debug: print all button texts in shadow DOM to help diagnose selector issues
-        try:
-            wc = page.evaluate_handle("document.querySelector('div#applyButton apply-button-wc')")
-            if wc:
-                shadow_buttons = wc.evaluate('el => el.shadowRoot ? Array.from(el.shadowRoot.querySelectorAll(\'button\')).map(b => b.innerText) : []')
-                print("[DEBUG] Button texts in <apply-button-wc> shadow root:")
-                for text in shadow_buttons:
-                    print("-", text)
-            else:
-                print("[DEBUG] <apply-button-wc> not found.")
-        except Exception:
-            print("[DEBUG] Could not enumerate shadow DOM buttons.")
-        return False
-
-        js_script = '''
-            (function() {
-                const applyButtonWc = document.querySelector('div#applyButton apply-button-wc');
-                if (applyButtonWc && applyButtonWc.shadowRoot) {
-                    const btns = Array.from(applyButtonWc.shadowRoot.querySelectorAll('button'));
-                    for (const btn of btns) {
-                        const txt = btn.innerText.trim().toLowerCase();
-                        if (txt === "easy apply" || txt === "apply") {
-                            btn.click();
-                            return 1;
-                        }
-                    }
-                }
-                return 0;
-            })();
-        '''
-        returned_value = page.evaluate(js_script)
-        if returned_value == 1:
-            print("[Easy Apply] Clicked Easy Apply button via JS fallback.")
+            print("[Easy Apply] Clicked Easy Apply button via DOM fallback.")
             found = True
         else:
-            print("[Easy Apply] Could not find Easy Apply button even via JS fallback. Skipping this job.")
+            print(f"[Easy Apply] No Easy Apply button found after {EASY_APPLY_WAIT_SECONDS}s + DOM fallback. Skipping this job.")
             # Debug: print all button texts in shadow DOM to help diagnose selector issues
             try:
-                wc = page.query_selector('div#applyButton apply-button-wc')
+                wc = page.evaluate_handle("document.querySelector('div#applyButton apply-button-wc')")
                 if wc:
-                    shadow_buttons = wc.query_selector_all('button')
+                    shadow_buttons = wc.evaluate('el => el.shadowRoot ? Array.from(el.shadowRoot.querySelectorAll(\'button\')).map(b => b.innerText) : []')
                     print("[DEBUG] Button texts in <apply-button-wc> shadow root:")
-                    for b in shadow_buttons:
-                        try:
-                            print("-", b.inner_text())
-                        except Exception:
-                            pass
+                    for text in shadow_buttons:
+                        print("-", text)
                 else:
                     print("[DEBUG] <apply-button-wc> not found.")
             except Exception:
                 print("[DEBUG] Could not enumerate shadow DOM buttons.")
-            return False
-    # * End of Easy Apply wait logic
-
-    # ... rest of your logic for clicking/applying goes here ...
-    # After a successful submit, return True
-    # If submit fails, return False
-    js_script = """
-        (function() {
-            const applyButtonWc = document.querySelector('apply-button-wc');
-            let value = 0;
-            if (applyButtonWc) {
-                const shadowRoot = applyButtonWc.shadowRoot;
-                const easyApplyButton = shadowRoot.querySelector('button.btn.btn-primary');
-                if (easyApplyButton) {
-                    easyApplyButton.click();
-                    return 1;
-                }
-            }
-            return 0;
-        })();
-    """
-    returned_value = page.evaluate(js_script)
-    if returned_value == 1:
-        page.wait_for_load_state("load")
+            return "no_easy_apply"
+    # * End of Easy Apply wait logic: proceed from the first successful click.
+    page.wait_for_load_state("load")
+    try:
+        time.sleep(2)
+        # Detect login block after clicking apply.
         try:
-            time.sleep(3)
-            max_attempts = 3
-            attempt = 0
-            expected_url_pattern = "https://www.dice.com/**/{apply,job-detail}**"
-            current_url = page.url
-            if "apply" in current_url or "job-detail" in current_url:
-                print(f"Already on the correct URL: {current_url}")
-                next_button = page.wait_for_selector(
-                    next_in_application_button, timeout=10000)
+            if page.locator('a[href*="/dashboard/login"], a[href*="/register"]').count() > 0:
+                print("[APPLY BLOCKED] Login/register prompt detected after apply click.")
+                return "failed"
+        except Exception:
+            pass
+
+        max_attempts = 3
+        attempt = 0
+        current_url = page.url
+
+        next_candidates = [
+            next_in_application_button,
+            'button:has-text("Next")',
+            'button:has-text("Continue")',
+            'button[data-testid*="next"]',
+        ]
+        submit_candidates = [
+            selectors["submit_button"],
+            'button:has-text("Submit")',
+            'button[data-testid*="submit"]',
+            'button:has-text("Apply")',
+        ]
+
+        if _is_apply_flow_url(current_url):
+            print(f"Already on the correct URL: {current_url}")
+            # Some Dice flows land directly on success without intermediate controls.
+            try:
+                if page.is_visible(selectors["application_success_card"]):
+                    print("[CONFIRMATION] Application submitted (success card)!")
+                    return "success"
+            except Exception:
+                pass
+            next_button = _first_visible(next_candidates, timeout_ms=3000)
+            if next_button is not None:
                 next_button.click()
-                submit_button = page.wait_for_selector(
-                    selectors["submit_button"], timeout=10000)
+                time.sleep(1)
+            submit_button = _first_visible(submit_candidates, timeout_ms=3000)
+            if submit_button is not None:
                 submit_button.click()
-                # After submit, robustly wait for confirmation selectors
-                try:
-                    page.wait_for_selector(selectors["application_submitted"], timeout=15000)
-                    if page.is_visible(selectors["application_submitted"]):
-                        print("[CONFIRMATION] Application submitted!")
-                        return True
-                except PlaywrightTimeoutError:
-                    pass
-                try:
-                    page.wait_for_selector(selectors["profile_visible_application_submitted"], timeout=15000)
-                    if page.is_visible(selectors["profile_visible_application_submitted"]):
-                        print("[CONFIRMATION] Application submitted (profile visible)!")
-                        return True
-                except PlaywrightTimeoutError:
-                    pass
-                print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
-                return False
-            while attempt < max_attempts:
-                try:
-                    page.wait_for_url(expected_url_pattern, timeout=10000)
-                    print(f"Successfully navigated to URL: {page.url}")
-                    break
-                except PlaywrightTimeoutError:
-                    attempt += 1
-                    current_url = page.url
-                    print(f"Attempt {attempt} failed. Expected: {expected_url_pattern}, but got: {current_url}")
-                    time.sleep(3)
-            if attempt == max_attempts:
-                print(f"[FAILURE] Failed to navigate to the expected URL after {max_attempts} attempts. Last URL: {current_url}")
-                return False
-            next_button = page.wait_for_selector(
-                next_in_application_button, timeout=10000)
-            next_button.click()
-            submit_button = page.wait_for_selector(
-                selectors["submit_button"], timeout=10000)
-            submit_button.click()
-            last_page = page.context.pages[-1]
-            # * Robust polling loop for confirmation selectors after submit
-            confirmation_selectors = [
-                ("application_submitted", selectors["application_submitted"]),
-                ("application_submitted_any_h1", selectors["application_submitted_any_h1"]),
-                ("profile_visible_application_submitted", selectors["profile_visible_application_submitted"])
-            ]
-            confirmation_found = False
-            confirmation_text = ""
-            max_wait_seconds = 30
-            poll_interval = 0.5
-            start_time = time.time()
-
-            while time.time() - start_time < max_wait_seconds:
-                for name, selector in confirmation_selectors:
-                    try:
-                        if page.is_visible(selector):
-                            header_text = page.locator(selector).text_content()
-                            print(f"[CONFIRMATION] Application submitted! ({name}): {header_text}")
-                            confirmation_found = True
-                            confirmation_text = header_text
-                            break
-                    except Exception:
-                        continue
-                if confirmation_found:
-                    break
-                time.sleep(poll_interval)
-
-            if confirmation_found:
-                last_page.close()
-                return True
             else:
-                print("[FAILURE] Confirmation banner did not appear after waiting.")
-                last_page.close()
-                return False
-        except PlaywrightTimeoutError as e:
-            print(f"Timeout during the application process: {e}")
-            return False
-        except Exception as e:
-            print(f"Error during the application process: {e}")
-            return False
-    else:
-        last_page = page.context.pages[-1]
-        last_page.close()
-        print("[FAILURE] Easy Apply button clicked but application was not confirmed submitted.")
-        return False
+                print("[APPLY FLOW] No submit/next controls found after apply click.")
+            # After submit, robustly wait for confirmation selectors
+            try:
+                page.wait_for_selector(selectors["application_submitted"], timeout=15000)
+                if page.is_visible(selectors["application_submitted"]):
+                    print("[CONFIRMATION] Application submitted!")
+                    return "success"
+            except PlaywrightTimeoutError:
+                pass
+            try:
+                page.wait_for_selector(selectors["profile_visible_application_submitted"], timeout=15000)
+                if page.is_visible(selectors["profile_visible_application_submitted"]):
+                    print("[CONFIRMATION] Application submitted (profile visible)!")
+                    return "success"
+            except PlaywrightTimeoutError:
+                pass
+            try:
+                page.wait_for_selector(selectors["application_success_card"], timeout=10000)
+                if page.is_visible(selectors["application_success_card"]):
+                    print("[CONFIRMATION] Application submitted (success card)!")
+                    return "success"
+            except PlaywrightTimeoutError:
+                pass
+            print("[FAILURE] Clicked Easy Apply but did not reach confirmation.")
+            return "failed"
+        while attempt < max_attempts:
+            current_url = page.url
+            if _is_apply_flow_url(current_url):
+                print(f"Successfully navigated to apply flow URL: {current_url}")
+                break
+            attempt += 1
+            print(f"Attempt {attempt} failed. Waiting for apply flow URL, got: {current_url}")
+            time.sleep(2)
+        if attempt == max_attempts:
+            print(f"[FAILURE] Failed to navigate to apply flow URL after {max_attempts} attempts. Last URL: {current_url}")
+            return "failed"
+        next_button = _first_visible(next_candidates, timeout_ms=5000)
+        if next_button is not None:
+            next_button.click()
+            time.sleep(1)
+        submit_button = _first_visible(submit_candidates, timeout_ms=5000)
+        if submit_button is not None:
+            submit_button.click()
+        else:
+            print("[APPLY FLOW] Submit control not found after navigation.")
+        # Robust polling loop for confirmation selectors after submit
+        confirmation_selectors = [
+            ("application_submitted", selectors["application_submitted"]),
+            ("application_submitted_any_h1", selectors["application_submitted_any_h1"]),
+            ("profile_visible_application_submitted", selectors["profile_visible_application_submitted"]),
+            ("application_success_card", selectors["application_success_card"]),
+        ]
+        confirmation_found = False
+        max_wait_seconds = 30
+        poll_interval = 0.5
+        start_time = time.time()
+
+        while time.time() - start_time < max_wait_seconds:
+            for name, selector in confirmation_selectors:
+                try:
+                    if page.is_visible(selector):
+                        header_text = page.locator(selector).text_content()
+                        print(f"[CONFIRMATION] Application submitted! ({name}): {header_text}")
+                        confirmation_found = True
+                        break
+                except Exception:
+                    continue
+            if confirmation_found:
+                break
+            time.sleep(poll_interval)
+
+        if confirmation_found:
+            return "success"
+        print("[FAILURE] Confirmation banner did not appear after waiting.")
+        return "failed"
+    except PlaywrightTimeoutError as e:
+        print(f"Timeout during the application process: {e}")
+        return "failed"
+    except Exception as e:
+        print(f"Error during the application process: {e}")
+        return "failed"

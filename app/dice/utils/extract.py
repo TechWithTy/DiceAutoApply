@@ -3,7 +3,28 @@ Handles extraction of job IDs from search results.
 """
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import time
+import re
 from typing import List, Set
+
+
+def _add_ids_from_html_payload(page: Page, seen: Set[str], job_ids: List[str]) -> int:
+    """Fallback extractor for Next.js payloads when card selectors do not render."""
+    try:
+        html = page.content()
+    except Exception:
+        return 0
+
+    added = 0
+    # Most stable path: detailsPageUrl in embedded JSON payload.
+    for match in re.findall(r'job-detail/([a-f0-9\-]{16,})', html, flags=re.IGNORECASE):
+        job_id = match.strip()
+        if not job_id or job_id in seen:
+            continue
+        seen.add(job_id)
+        job_ids.append(job_id)
+        added += 1
+        print(f"[EXTRACTED/FALLBACK] Job ID: {job_id}")
+    return added
 
 def extract_job_ids(page: Page, job_ids: List[str]) -> None:
     """Populate job_ids with unique IDs found on the results list.
@@ -28,14 +49,23 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
         try:
             # Wait for either primary or alt cards
             try:
-                page.wait_for_selector(selectors["card_title_primary"], timeout=12000)
+                page.wait_for_selector(selectors["card_title_primary"], timeout=6000)
                 card_selector = selectors["card_title_primary"]
             except PlaywrightTimeoutError:
-                page.wait_for_selector(selectors["card_title_alt"], timeout=12000)
-                card_selector = selectors["card_title_alt"]
+                try:
+                    page.wait_for_selector(selectors["card_title_alt"], timeout=6000)
+                    card_selector = selectors["card_title_alt"]
+                except PlaywrightTimeoutError:
+                    card_selector = ""
+                    added_from_payload = _add_ids_from_html_payload(page, seen, job_ids)
+                    if added_from_payload > 0:
+                        print(f"[RESULTS/FALLBACK] Added {added_from_payload} IDs from embedded payload.")
+                    else:
+                        print("[TIMEOUT] Card selectors not found and payload fallback found no IDs.")
+                    break
 
             time.sleep(1.8)  # allow late paints a bit longer
-            job_links = page.query_selector_all(card_selector)
+            job_links = page.query_selector_all(card_selector) if card_selector else []
             if not job_links:
                 print("[RESULTS] No job cards on this page.")
             added_this_page = 0
@@ -43,7 +73,7 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                 href = job_link.get_attribute('href') or ''
                 if not href:
                     continue
-                job_id = href.split("/")[-1]
+                job_id = href.split("/")[-1].split("?")[0].strip()
                 if not job_id or job_id in seen:
                     continue
                 # Check for cues on the card for already applied / easy apply

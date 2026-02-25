@@ -14,8 +14,9 @@ from app.dice.utils.login import login
 from app.dice.utils.extract import extract_job_ids
 from app.dice.utils.apply import write_job_titles_to_file
 from app.dice.utils.utils import close_extra_tabs, logout_and_close
-from typing import List
+from typing import List, Optional
 import time
+from datetime import datetime
 from app.dice.utils.profile_to_url import userprofile_to_search_url
 
 # Load environment variables from .env file (robust search)
@@ -53,12 +54,67 @@ if not loaded_from:
 
 print(f"[dotenv] Loaded from: {loaded_from if loaded_from else 'None found'}")
 
-def main() -> None:
+def _slugify(value: str) -> str:
+    return "".join(ch if ch.isalnum() else "_" for ch in value).strip("_").lower() or "untitled"
+
+
+def _save_debug_html(page, debug_dir: Path, job_title: str) -> Optional[Path]:
+    try:
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_path = debug_dir / f"{stamp}_{_slugify(job_title)}.html"
+        file_path.write_text(page.content(), encoding="utf-8")
+        print(f"[DEBUG] Saved HTML snapshot: {file_path}")
+        return file_path
+    except Exception as e:
+        print(f"[DEBUG] Failed to save HTML snapshot: {e}")
+        return None
+
+
+def _session_is_valid(page) -> bool:
+    """Check if current browser context is already authenticated on Dice."""
+    try:
+        page.goto("https://www.dice.com/jobs", wait_until="domcontentloaded", timeout=60000)
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except Exception:
+            pass
+        lower_url = page.url.lower()
+        if "dashboard/login" in lower_url or "/login" in lower_url:
+            return False
+        # Dice can still render jobs while anonymous; detect login/register prompts.
+        try:
+            login_links = page.locator('a[href*="/dashboard/login"], a[href*="/register"], a[href*="/employers/login"]').count()
+            login_register_text = page.locator("button:has-text('Login/Register'), a:has-text('Login'), a:has-text('Register')").count()
+            if login_links > 0 or login_register_text > 0:
+                return False
+        except Exception:
+            pass
+        return True
+    except Exception:
+        return False
+
+
+def main(
+    max_jobs: Optional[int] = None,
+    max_jobs_per_title: Optional[int] = None,
+    debug_html_dir: Optional[str] = "app/dice/_experimental_/debug",
+    session_state_path: Optional[str] = "storage/dice_session_state.json",
+    reuse_session: bool = True,
+    logout_on_exit: bool = False,
+    headless: bool = False,
+) -> None:
     """
     Main workflow for automating Dice job applications.
     """
     print("started")
     display_profile(user_profile)
+    if max_jobs is not None and max_jobs <= 0:
+        print(f"[LIMIT] Ignoring non-positive max_jobs value: {max_jobs}")
+        max_jobs = None
+    if max_jobs_per_title is not None and max_jobs_per_title <= 0:
+        print(f"[LIMIT] Ignoring non-positive max_jobs_per_title value: {max_jobs_per_title}")
+        max_jobs_per_title = None
 
     # Support alternate variable names as fallback
     secret_email = os.getenv('EMAIL') or os.getenv('DICE_EMAIL')
@@ -107,24 +163,57 @@ def main() -> None:
         raise RuntimeError(
             "Missing EMAIL or PASSWORD environment variables. Ensure your .env contains EMAIL=... and PASSWORD=... and that it is discoverable."
         )
-    custom_user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.288 Mobile Safari/537.36"
-
+    custom_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+    debug_dir = Path(debug_html_dir) if debug_html_dir else None
+    session_file = Path(session_state_path) if session_state_path else None
+    if session_file:
+        session_file.parent.mkdir(parents=True, exist_ok=True)
+    total_jobs_processed = 0
     first_run = True
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context(user_agent=custom_user_agent)
-        # Increase default timeouts to make navigation more resilient on slower pages
+        browser = p.chromium.launch(headless=headless)
+
+        context_kwargs = {"user_agent": custom_user_agent}
+        if reuse_session and session_file and session_file.is_file():
+            context_kwargs["storage_state"] = str(session_file)
+            print(f"[SESSION] Using existing storage state: {session_file}")
+        context = browser.new_context(**context_kwargs)
         try:
-            context.set_default_navigation_timeout(60000)  # 60s
-            context.set_default_timeout(45000)  # 45s for general operations
+            context.set_default_navigation_timeout(60000)
+            context.set_default_timeout(45000)
         except Exception as e:
             print(f"[timeouts] Could not set default timeouts: {e}")
-        context.clear_cookies()
+
         page = context.new_page()
-        login(page, secret_email, secret_password)
+
+        authenticated = _session_is_valid(page) if reuse_session else False
+        if authenticated:
+            print("[SESSION] Existing Dice session is valid. Skipping login.")
+        else:
+            print("[SESSION] Session invalid or reuse disabled. Performing login.")
+            login(page, secret_email, secret_password)
+            if reuse_session and session_file:
+                try:
+                    context.storage_state(path=str(session_file))
+                    print(f"[SESSION] Saved refreshed storage state: {session_file}")
+                except Exception as e:
+                    print(f"[SESSION] Failed to save storage state: {e}")
 
         for job_title in user_profile.job_titles:
+            if max_jobs is not None and total_jobs_processed >= max_jobs:
+                print(f"[LIMIT] Reached max jobs for run ({max_jobs}). Stopping.")
+                break
+            # Session can expire during long runs; re-auth before each title.
+            if not _session_is_valid(page):
+                print("[SESSION] Detected logged-out state before title search. Re-authenticating.")
+                login(page, secret_email, secret_password)
+                if reuse_session and session_file:
+                    try:
+                        context.storage_state(path=str(session_file))
+                        print(f"[SESSION] Saved refreshed storage state: {session_file}")
+                    except Exception as e:
+                        print(f"[SESSION] Failed to save refreshed storage state: {e}")
             search_keyword = job_title.title
             print('Processing job title:', search_keyword)
             search_url = userprofile_to_search_url(search_keyword)
@@ -158,19 +247,68 @@ def main() -> None:
                 # Not fatal; proceed with a short sleep buffer
                 pass
             time.sleep(2)
+            if debug_dir:
+                _save_debug_html(page, debug_dir, search_keyword)
             job_ids: List[str] = []
             url = page.url
             extract_job_ids(page, job_ids)
-            applied, failed, failed_jobs = write_job_titles_to_file(page, job_ids, url)
+
+            if max_jobs_per_title is not None:
+                job_ids = job_ids[:max_jobs_per_title]
+                print(f"[LIMIT] Per-title cap applied ({max_jobs_per_title}). Jobs queued: {len(job_ids)}")
+            if max_jobs is not None:
+                remaining = max_jobs - total_jobs_processed
+                if remaining <= 0:
+                    print(f"[LIMIT] Reached max jobs for run ({max_jobs}).")
+                    break
+                if len(job_ids) > remaining:
+                    job_ids = job_ids[:remaining]
+                    print(f"[LIMIT] Run cap remaining {remaining}. Trimming current queue to {len(job_ids)}.")
+
+            if not job_ids:
+                print("[SKIP] No jobs queued for this title after filters/limits.")
+                continue
+
+            (
+                applied,
+                failed,
+                failed_jobs,
+                skipped,
+                already_applied_count,
+                no_apply_button_count,
+                success_count,
+            ) = write_job_titles_to_file(page, job_ids, url)
             print("\n========== APPLICATION SUMMARY ==========")
             print(f"Jobs successfully applied: {applied}")
             print(f"Jobs failed: {failed}")
+            print(f"Jobs skipped: {skipped}")
+            print(
+                "Breakdown - already_applied: "
+                f"{already_applied_count}, no_apply_button: {no_apply_button_count}, success: {success_count}"
+            )
+            total_jobs_processed += len(job_ids)
+            print(f"[TOTAL] Jobs processed so far: {total_jobs_processed}")
             if failed_jobs:
                 print("Failed jobs:")
                 for job in failed_jobs:
                     print("-", job)
             print("========================================\n")
-        logout_and_close(page, browser)
+        if reuse_session and session_file:
+            try:
+                context.storage_state(path=str(session_file))
+                print(f"[SESSION] Persisted storage state: {session_file}")
+            except Exception as e:
+                print(f"[SESSION] Failed to persist storage state at shutdown: {e}")
+
+        if logout_on_exit:
+            logout_and_close(page, browser)
+        else:
+            print("[SESSION] Keeping session active (no logout) to reduce repeated logins.")
+            try:
+                page.close()
+            except Exception:
+                pass
+            browser.close()
 
 if __name__ == "__main__":
     main()

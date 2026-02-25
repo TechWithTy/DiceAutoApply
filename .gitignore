@@ -74,3 +74,4 @@ dist/
 bin/
 obj/
 output/
+storage/
