@@ -12,9 +12,9 @@ from _data_.Profiles.main_profile import user_profile, display_profile
 # from _data_.Filters.diceFilterSettings import dice_job_filter, JobFilter  # Removed unused imports
 from app.dice.utils.login import login
 from app.dice.utils.extract import extract_job_ids
-from app.dice.utils.apply import write_job_titles_to_file
+from app.dice.utils.apply import load_applied_job_ids, write_job_titles_to_file
 from app.dice.utils.utils import close_extra_tabs, logout_and_close
-from typing import List, Optional
+from typing import List, Optional, Set
 import time
 from datetime import datetime
 from app.dice.utils.profile_to_url import userprofile_to_search_url
@@ -151,13 +151,6 @@ def main(
     masked_email = (secret_email[:2] + "***" + secret_email[-2:]) if secret_email else None
     print(f"[dotenv] EMAIL present: {'yes' if secret_email else 'no'} ({masked_email if secret_email else ''})")
     print(f"[dotenv] PASSWORD present: {'yes' if bool(secret_password) else 'no'}")
-    print("Current environment variables:")
-    for key, value in os.environ.items():
-        if 'PASSWORD' in key or 'EMAIL' in key:
-            masked_value = value[:2] + "***" + value[-2:] if value else ""
-            print(f"  {key}: {masked_value}")
-        else:
-            print(f"  {key}: {value}")
     # Validate credentials early to avoid Playwright fill() receiving a missing value
     if not secret_email or not secret_password:
         raise RuntimeError(
@@ -169,6 +162,10 @@ def main(
     if session_file:
         session_file.parent.mkdir(parents=True, exist_ok=True)
     total_jobs_processed = 0
+    applied_job_ids = load_applied_job_ids()
+    processed_job_ids: Set[str] = set()
+    if applied_job_ids:
+        print(f"[TRACKING] Loaded {len(applied_job_ids)} previously applied Dice job IDs.")
     first_run = True
 
     with sync_playwright() as p:
@@ -253,6 +250,22 @@ def main(
             url = page.url
             extract_job_ids(page, job_ids)
 
+            filtered_job_ids: List[str] = []
+            for job_id in job_ids:
+                if job_id in processed_job_ids:
+                    print(f"[SKIP/RUN DUPLICATE] Already processed in this run: {job_id}")
+                    continue
+                if job_id in applied_job_ids:
+                    print(f"[SKIP/TRACKED] Already applied from local history: {job_id}")
+                    continue
+                filtered_job_ids.append(job_id)
+            if len(filtered_job_ids) != len(job_ids):
+                print(
+                    f"[TRACKING] Queued {len(filtered_job_ids)} new IDs "
+                    f"after removing {len(job_ids) - len(filtered_job_ids)} tracked/duplicate IDs."
+                )
+            job_ids = filtered_job_ids
+
             if max_jobs_per_title is not None:
                 job_ids = job_ids[:max_jobs_per_title]
                 print(f"[LIMIT] Per-title cap applied ({max_jobs_per_title}). Jobs queued: {len(job_ids)}")
@@ -268,6 +281,7 @@ def main(
             if not job_ids:
                 print("[SKIP] No jobs queued for this title after filters/limits.")
                 continue
+            processed_job_ids.update(job_ids)
 
             (
                 applied,
@@ -277,7 +291,7 @@ def main(
                 already_applied_count,
                 no_apply_button_count,
                 success_count,
-            ) = write_job_titles_to_file(page, job_ids, url)
+            ) = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
             print("\n========== APPLICATION SUMMARY ==========")
             print(f"Jobs successfully applied: {applied}")
             print(f"Jobs failed: {failed}")

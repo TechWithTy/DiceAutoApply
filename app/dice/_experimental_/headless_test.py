@@ -5,9 +5,9 @@ from pathlib import Path
 from _data_.Profiles.main_profile import user_profile, display_profile
 from app.dice.utils.login import login
 from app.dice.utils.extract import extract_job_ids
-from app.dice.utils.apply import write_job_titles_to_file
+from app.dice.utils.apply import load_applied_job_ids, write_job_titles_to_file
 from app.dice.utils.utils import close_extra_tabs, logout_and_close
-from typing import List
+from typing import List, Set
 import time
 from app.dice.utils.profile_to_url import userprofile_to_search_url
 
@@ -126,6 +126,10 @@ def main() -> None:
         grand_no_apply_button = 0
         grand_success = 0
         grand_failed_jobs: List[str] = []
+        applied_job_ids = load_applied_job_ids()
+        processed_job_ids: Set[str] = set()
+        if applied_job_ids:
+            print(f"[TRACKING] Loaded {len(applied_job_ids)} previously applied Dice job IDs.", flush=True)
 
         for job_title in user_profile.job_titles:
             search_keyword = job_title.title
@@ -161,6 +165,23 @@ def main() -> None:
             job_ids: List[str] = []
             url = page.url
             extract_job_ids(page, job_ids)
+            filtered_job_ids: List[str] = []
+            for job_id in job_ids:
+                if job_id in processed_job_ids:
+                    print(f"[SKIP/RUN DUPLICATE] Already processed in this run: {job_id}", flush=True)
+                    continue
+                if job_id in applied_job_ids:
+                    print(f"[SKIP/TRACKED] Already applied from local history: {job_id}", flush=True)
+                    continue
+                filtered_job_ids.append(job_id)
+            if len(filtered_job_ids) != len(job_ids):
+                print(
+                    f"[TRACKING] Queued {len(filtered_job_ids)} new IDs "
+                    f"after removing {len(job_ids) - len(filtered_job_ids)} tracked/duplicate IDs.",
+                    flush=True,
+                )
+            job_ids = filtered_job_ids
+            processed_job_ids.update(job_ids)
             print(f"[JOBS] Extracted job IDs: {len(job_ids)}", flush=True)
             zero_hint_printed = False
             if len(job_ids) == 0 and not zero_hint_printed:
@@ -171,7 +192,7 @@ def main() -> None:
                 print(" - Page not fully loaded (increase waits)", flush=True)
                 zero_hint_printed = True
 
-            applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count = write_job_titles_to_file(page, job_ids, url)
+            applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
             grand_applied += int(applied or 0)
             grand_failed += int(failed or 0)
             grand_skipped += int(skipped or 0)

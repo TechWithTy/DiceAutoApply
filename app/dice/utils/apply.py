@@ -3,18 +3,117 @@ Handles job application actions for Dice automation.
 """
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import time
-from typing import List
+from typing import List, Optional, Set
 import os
 from pathlib import Path
 from datetime import datetime
+from urllib.parse import urlparse
 
 next_in_application_button = 'button.seds-button-primary.btn-next'
 
 import csv
 
+CSV_FIELDNAMES = ["job_id", "job_title", "job_url", "datetime", "status", "error_message"]
+APPLIED_STATUSES = {"success", "already_applied"}
+
 
 def _slugify(value: str) -> str:
     return "".join(ch if ch.isalnum() else "_" for ch in value).strip("_").lower() or "job"
+
+
+def _extract_job_id_from_url(value: str) -> str:
+    try:
+        path = urlparse(value).path
+    except Exception:
+        path = value.split("?", 1)[0]
+    marker = "/job-detail/"
+    if marker not in path:
+        return ""
+    return path.split(marker, 1)[1].strip("/").split("/", 1)[0]
+
+
+def _looks_like_header(row: List[str]) -> bool:
+    normalized = {cell.strip().lower() for cell in row}
+    return "job_url" in normalized and "status" in normalized
+
+
+def _ensure_results_csv(csv_file: str) -> None:
+    output_dir = os.path.dirname(csv_file)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    path = Path(csv_file)
+    if not path.exists() or path.stat().st_size == 0:
+        with path.open("w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=CSV_FIELDNAMES).writeheader()
+        return
+
+    with path.open(newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+    if not rows:
+        with path.open("w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=CSV_FIELDNAMES).writeheader()
+        return
+
+    first_row = rows[0]
+    if _looks_like_header(first_row) and first_row == CSV_FIELDNAMES:
+        return
+
+    migrated_rows = []
+    if _looks_like_header(first_row):
+        old_fieldnames = first_row
+        data_rows = rows[1:]
+        for row in data_rows:
+            record = dict(zip(old_fieldnames, row))
+            job_url = record.get("job_url", "")
+            migrated_rows.append({
+                "job_id": record.get("job_id") or _extract_job_id_from_url(job_url),
+                "job_title": record.get("job_title", ""),
+                "job_url": job_url,
+                "datetime": record.get("datetime", ""),
+                "status": record.get("status", ""),
+                "error_message": record.get("error_message", ""),
+            })
+    else:
+        for row in rows:
+            padded = row + [""] * max(0, 5 - len(row))
+            job_title, job_url, dt_str, status, error_message = padded[:5]
+            migrated_rows.append({
+                "job_id": _extract_job_id_from_url(job_url),
+                "job_title": job_title,
+                "job_url": job_url,
+                "datetime": dt_str,
+                "status": status,
+                "error_message": error_message,
+            })
+
+    backup_path = path.with_suffix(path.suffix + ".bak")
+    if not backup_path.exists():
+        backup_path.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(migrated_rows)
+
+
+def load_applied_job_ids(csv_file: str = "output/job_application_results.csv") -> Set[str]:
+    """Load Dice job IDs that should not be applied to again."""
+    path = Path(csv_file)
+    if not path.exists():
+        return set()
+    _ensure_results_csv(csv_file)
+    applied_job_ids: Set[str] = set()
+    with path.open(newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            status = (row.get("status") or "").strip().lower()
+            if status not in APPLIED_STATUSES:
+                continue
+            job_id = (row.get("job_id") or "").strip()
+            if not job_id:
+                job_id = _extract_job_id_from_url(row.get("job_url", ""))
+            if job_id:
+                applied_job_ids.add(job_id)
+    return applied_job_ids
 
 
 def _dump_no_apply_debug(page: Page, job_title: str, job_url: str) -> None:
@@ -67,7 +166,13 @@ def _dump_no_apply_debug(page: Page, job_title: str, job_url: str) -> None:
     except Exception as e:
         print(f"[DEBUG] Could not enumerate button targets: {e}")
 
-def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file: str = 'output/job_application_results.csv'):
+def write_job_titles_to_file(
+    page: Page,
+    job_ids: List[str],
+    url: str,
+    csv_file: str = 'output/job_application_results.csv',
+    known_applied_job_ids: Optional[Set[str]] = None,
+):
     """
     Writes job application results to
     a CSV file, including job title, URL, date/time, status, and error message.
@@ -84,18 +189,8 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
     failed_jobs = []
     parts = url.split('?', 1)
     query_string = parts[1] if len(parts) > 1 else ""
-    fieldnames = ["job_title", "job_url", "datetime", "status", "error_message"]
-    # Create output directory if it does not exist
-    output_dir = os.path.dirname(csv_file)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    # Write header if file does not exist
-    try:
-        with open(csv_file, 'x', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-    except FileExistsError:
-        pass  # File already exists
+    known_applied_job_ids = known_applied_job_ids if known_applied_job_ids is not None else set()
+    _ensure_results_csv(csv_file)
     for job_id in job_ids:
         job_id_url = "https://www.dice.com/job-detail/" + job_id
         if query_string:
@@ -104,6 +199,23 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
         job_title = job_id_url  # fallback
         status = "failed"
         error_message = ""
+        if job_id in known_applied_job_ids:
+            status = "already_applied"
+            error_message = "Skipped from local application history."
+            skipped += 1
+            already_applied_count += 1
+            print(f"[SKIP/TRACKED] Already applied according to local history: {job_id}")
+            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
+                writer.writerow({
+                    "job_id": job_id,
+                    "job_title": job_title,
+                    "job_url": job_id_url,
+                    "datetime": dt_str,
+                    "status": status,
+                    "error_message": error_message
+                })
+            continue
         try:
             try:
                 new_page = page.context.new_page()
@@ -128,9 +240,11 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
                             print(f"[ALREADY APPLIED] {job_title} ({job_id_url})")
                             skipped += 1
                             already_applied_count += 1
+                            known_applied_job_ids.add(job_id)
                             with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-                                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                                writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
                                 writer.writerow({
+                                    "job_id": job_id,
                                     "job_title": job_title,
                                     "job_url": job_id_url,
                                     "datetime": dt_str,
@@ -155,12 +269,14 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
                         status = "success"
                         applied += 1
                         success_count += 1
+                        known_applied_job_ids.add(job_id)
                         print(f"[APPLY SUCCESS] {job_title} ({job_id_url})")
                         error_message = ""
                     elif apply_result == "already_applied":
                         status = "already_applied"
                         skipped += 1
                         already_applied_count += 1
+                        known_applied_job_ids.add(job_id)
                         error_message = "Application already submitted."
                         print(f"[ALREADY APPLIED] {job_title} ({job_id_url})")
                     elif apply_result == "no_easy_apply":
@@ -200,8 +316,9 @@ def write_job_titles_to_file(page: Page, job_ids: List[str], url: str, csv_file:
             failed_jobs.append(job_title)
         # Write result to CSV
         with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
             writer.writerow({
+                "job_id": job_id,
                 "job_title": job_title,
                 "job_url": job_id_url,
                 "datetime": dt_str,
