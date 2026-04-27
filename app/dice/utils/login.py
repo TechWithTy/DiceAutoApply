@@ -30,6 +30,11 @@ def login(page: Page, email: str, password: str) -> None:
     except Exception:
         pass
 
+    # Check if already logged in by looking at the URL
+    if "login" not in page.url.lower():
+        print(f"[LOGIN] Redirected to {page.url}. Assuming already logged in.", flush=True)
+        return
+
     # Step 1: Email
     email_selectors = [
         'input[name="email"]',
@@ -39,13 +44,16 @@ def login(page: Page, email: str, password: str) -> None:
     email_sel_found = None
     for sel in email_selectors:
         try:
-            if page.wait_for_selector(sel, timeout=15000):
+            if page.wait_for_selector(sel, timeout=10000):
                 email_sel_found = sel
                 break
         except Exception:
             continue
     if not email_sel_found:
-        raise RuntimeError("[LOGIN] Could not locate email input field.")
+        if "login" not in page.url.lower():
+            print(f"[LOGIN] Redirected to {page.url} while waiting. Assuming already logged in.", flush=True)
+            return
+        raise RuntimeError(f"[LOGIN] Could not locate email input field. Current URL: {page.url}")
     page.fill(email_sel_found, email)
     print("[LOGIN] Filled email", flush=True)
 
