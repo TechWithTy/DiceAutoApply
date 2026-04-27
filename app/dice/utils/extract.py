@@ -26,7 +26,7 @@ def _add_ids_from_html_payload(page: Page, seen: Set[str], job_ids: List[str]) -
         print(f"[EXTRACTED/FALLBACK] Job ID: {job_id}")
     return added
 
-def extract_job_ids(page: Page, job_ids: List[str]) -> None:
+def extract_job_ids(page: Page, job_ids: List[str], only_easy_apply: bool = False) -> None:
     """Populate job_ids with unique IDs found on the results list.
 
     Adds robust selectors, dedupe, and safer pagination to reduce zero-result scenarios.
@@ -93,9 +93,14 @@ def extract_job_ids(page: Page, job_ids: List[str]) -> None:
                 if applied:
                     # Queue anyway so apply() can confirm and count as skipped; keeps metrics accurate
                     print(f"[QUEUE] Suspected already-applied job_id={job_id}")
-                # Include both Easy Apply and non-Easy-Apply; let apply() decide/no_apply_button
+                
                 if not easy_apply:
-                    print(f"[QUEUE] Non-Easy-Apply candidate job_id={job_id}")
+                    if only_easy_apply:
+                        print(f"[SKIP] Non-Easy-Apply candidate skipped due to flag: job_id={job_id}")
+                        continue
+                    else:
+                        print(f"[QUEUE] Non-Easy-Apply candidate job_id={job_id}")
+
                 job_ids.append(job_id)
                 seen.add(job_id)
                 added_this_page += 1

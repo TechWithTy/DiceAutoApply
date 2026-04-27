@@ -11,6 +11,8 @@ if __name__ == "__main__":
     parser.add_argument("--no-session-reuse", action="store_true", help="Disable reusing saved login session.")
     parser.add_argument("--logout-on-exit", action="store_true", help="Explicitly log out at the end of the run.")
     parser.add_argument("--headless", action="store_true", help="Run browser in headless mode.")
+    parser.add_argument("--no-recommended", action="store_true", help="Disable processing of recommended jobs.")
+    parser.add_argument("--only-recommended", action="store_true", help="Only process recommended jobs and skip custom job titles.")
     args = parser.parse_args()
 
     main(
@@ -21,4 +23,6 @@ if __name__ == "__main__":
         reuse_session=not args.no_session_reuse,
         logout_on_exit=args.logout_on_exit,
         headless=args.headless,
+        process_recommended=not args.no_recommended,
+        only_recommended=args.only_recommended,
     )

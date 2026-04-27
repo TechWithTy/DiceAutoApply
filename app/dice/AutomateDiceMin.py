@@ -103,6 +103,8 @@ def main(
     reuse_session: bool = True,
     logout_on_exit: bool = False,
     headless: bool = False,
+    process_recommended: bool = True,
+    only_recommended: bool = False,
 ) -> None:
     """
     Main workflow for automating Dice job applications.
@@ -197,7 +199,53 @@ def main(
                 except Exception as e:
                     print(f"[SESSION] Failed to save storage state: {e}")
 
-        for job_title in user_profile.job_titles:
+        if process_recommended:
+            print("\n========== RECOMMENDED JOBS ==========")
+            print("Navigating to recommended jobs page...")
+            try:
+                page.goto("https://www.dice.com/recommended-jobs", wait_until="domcontentloaded", timeout=60000)
+                try:
+                    page.wait_for_load_state("networkidle", timeout=20000)
+                except Exception:
+                    pass
+                
+                if page.locator('[data-testid="recommended-jobs-list"]').count() > 0:
+                    print("Found Recommended Jobs list!")
+                    rec_job_ids: List[str] = []
+                    extract_job_ids(page, rec_job_ids, only_easy_apply=True)
+                    
+                    filtered_rec_job_ids: List[str] = []
+                    for job_id in rec_job_ids:
+                        if job_id in processed_job_ids or job_id in applied_job_ids:
+                            continue
+                        filtered_rec_job_ids.append(job_id)
+                    
+                    if filtered_rec_job_ids:
+                        if max_jobs is not None:
+                            remaining = max_jobs - total_jobs_processed
+                            if remaining > 0 and len(filtered_rec_job_ids) > remaining:
+                                filtered_rec_job_ids = filtered_rec_job_ids[:remaining]
+                                print(f"[LIMIT] Trimming recommended jobs queue to {len(filtered_rec_job_ids)}.")
+                        
+                        if filtered_rec_job_ids and (max_jobs is None or total_jobs_processed < max_jobs):
+                            print(f"Applying to {len(filtered_rec_job_ids)} Recommended Easy Apply Jobs...")
+                            processed_job_ids.update(filtered_rec_job_ids)
+                            (
+                                app, fail, fail_jobs, skip, alr, no_btn, succ
+                            ) = write_job_titles_to_file(page, filtered_rec_job_ids, page.url, known_applied_job_ids=applied_job_ids)
+                            
+                            print(f"Recommended Jobs successfully applied: {app}")
+                            total_jobs_processed += len(filtered_rec_job_ids)
+                    else:
+                        print("No new Easy Apply recommended jobs found to apply for.")
+                else:
+                    print("No recommended jobs list found on dashboard.")
+            except Exception as e:
+                print(f"Error processing recommended jobs: {e}")
+            print("======================================\n")
+
+        job_titles_to_process = [] if only_recommended else user_profile.job_titles
+        for job_title in job_titles_to_process:
             if max_jobs is not None and total_jobs_processed >= max_jobs:
                 print(f"[LIMIT] Reached max jobs for run ({max_jobs}). Stopping.")
                 break
