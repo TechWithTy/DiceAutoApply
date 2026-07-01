@@ -2,6 +2,7 @@
 Main entrypoint for Dice automation using refactored modular utilities.
 """
 import sys
+import argparse
 print(sys.path)
 
 from playwright.sync_api import sync_playwright
@@ -106,9 +107,40 @@ def main(
     process_recommended: bool = True,
     only_recommended: bool = False,
 ) -> None:
-    """
-    Main workflow for automating Dice job applications.
-    """
+    # Parse CLI args when invoked via the console entry point (apply-dice).
+    # Only parse if main() was called with all defaults (i.e. from the entry point,
+    # not from run_dice.py which already parsed args and passes them explicitly).
+    import inspect
+    frame = inspect.currentframe()
+    caller_locals = frame.f_back.f_locals if frame and frame.f_back else {}
+    _called_from_entry_point = (
+        max_jobs is None
+        and max_jobs_per_title is None
+        and headless is False
+        and reuse_session is True
+    )
+    if _called_from_entry_point and len(sys.argv) > 1:
+        parser = argparse.ArgumentParser(description="Run Dice auto-apply workflow.")
+        parser.add_argument("--max-jobs", type=int, default=None)
+        parser.add_argument("--max-jobs-per-title", type=int, default=None)
+        parser.add_argument("--debug-html-dir", type=str, default="app/dice/_experimental_/debug")
+        parser.add_argument("--session-state", type=str, default="storage/dice_session_state.json")
+        parser.add_argument("--no-session-reuse", action="store_true")
+        parser.add_argument("--logout-on-exit", action="store_true")
+        parser.add_argument("--headless", action="store_true")
+        parser.add_argument("--no-recommended", action="store_true")
+        parser.add_argument("--only-recommended", action="store_true")
+        args = parser.parse_args()
+        max_jobs = args.max_jobs
+        max_jobs_per_title = args.max_jobs_per_title
+        debug_html_dir = args.debug_html_dir
+        session_state_path = args.session_state
+        reuse_session = not args.no_session_reuse
+        logout_on_exit = args.logout_on_exit
+        headless = args.headless
+        process_recommended = not args.no_recommended
+        only_recommended = args.only_recommended
+        print(f"[CLI] headless={headless}, max_jobs={max_jobs}, only_recommended={only_recommended}")
     print("started")
     display_profile(user_profile)
     if max_jobs is not None and max_jobs <= 0:
