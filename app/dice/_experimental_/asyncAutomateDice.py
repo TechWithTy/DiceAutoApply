@@ -428,7 +428,14 @@ async def logout_and_close(page, browser):
     }
     await page.wait_for_load_state("load")
     await asyncio.sleep(3)
-    await page.wait_for_selector(selectors["nav_header"])
+    try:
+        await page.wait_for_selector(selectors["nav_header"], timeout=10000)
+    except PlaywrightTimeoutError:
+        print("[logout] Nav header not found; closing browser without interactive logout.")
+        await page.context.clear_cookies()
+        await page.close()
+        await browser.close()
+        return
 
     js_code = """
         const headerDisplay = document.querySelector('dhi-seds-nav-header-display');

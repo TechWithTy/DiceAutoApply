@@ -3,7 +3,7 @@ from _data_.Filters.diceFilterSettings import dice_job_filter, JobFilter
 from _data_.Profiles.main_profile import UserProfile, user_profile, display_profile
 import time
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 import time
@@ -456,7 +456,14 @@ def logout_and_close(page, browser):
     }
     page.wait_for_load_state("load")
     time.sleep(3)
-    page.wait_for_selector(selectors["nav_header"])
+    try:
+        page.wait_for_selector(selectors["nav_header"], timeout=10000)
+    except PlaywrightTimeoutError:
+        print("[logout] Nav header not found; closing browser without interactive logout.")
+        page.context.clear_cookies()
+        page.close()
+        browser.close()
+        return
 
     js_code = """
         const headerDisplay = document.querySelector('dhi-seds-nav-header-display');

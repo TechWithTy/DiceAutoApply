@@ -9,6 +9,7 @@ from app.dice.utils.apply import load_applied_job_ids, write_job_titles_to_file
 from app.dice.utils.utils import close_extra_tabs, logout_and_close
 from typing import List, Set
 import time
+import traceback
 from app.dice.utils.profile_to_url import userprofile_to_search_url
 
 # Load environment variables
@@ -62,6 +63,31 @@ def _print_compact_profile() -> None:
             pass
 
 
+def _print_grand_summary(
+    grand_applied: int,
+    grand_failed: int,
+    grand_skipped: int,
+    grand_already_applied: int,
+    grand_no_apply_button: int,
+    grand_success: int,
+    grand_failed_jobs: List[str],
+) -> None:
+    print("\n========== GRAND SUMMARY ==========", flush=True)
+    print(f"Total applied: {grand_applied}", flush=True)
+    print(f"Total failed: {grand_failed}", flush=True)
+    print(f"Total skipped: {grand_skipped}", flush=True)
+    print(
+        f"Breakdown — already_applied: {grand_already_applied}, "
+        f"no_apply_button: {grand_no_apply_button}, success: {grand_success}",
+        flush=True,
+    )
+    if grand_failed_jobs:
+        print("All failed jobs:", flush=True)
+        for job in grand_failed_jobs:
+            print("-", job, flush=True)
+    print("===================================\n", flush=True)
+
+
 def main() -> None:
     """
     Main workflow for headless Dice automation.
@@ -106,124 +132,145 @@ def main() -> None:
 
     first_run = True
 
-    with sync_playwright() as p:
-        # Launch in headless mode
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(user_agent=custom_user_agent)
-        try:
-            context.set_default_navigation_timeout(60000)
-            context.set_default_timeout(45000)
-        except Exception as e:
-            print(f"[timeouts] Could not set default timeouts: {e}")
-        context.clear_cookies()
-        page = context.new_page()
-        login(page, secret_email, secret_password)
+    grand_applied = 0
+    grand_failed = 0
+    grand_skipped = 0
+    grand_already_applied = 0
+    grand_no_apply_button = 0
+    grand_success = 0
+    grand_failed_jobs: List[str] = []
+    summary_printed = False
+    fatal_error = None
 
-        grand_applied = 0
-        grand_failed = 0
-        grand_skipped = 0
-        grand_already_applied = 0
-        grand_no_apply_button = 0
-        grand_success = 0
-        grand_failed_jobs: List[str] = []
-        applied_job_ids = load_applied_job_ids()
-        processed_job_ids: Set[str] = set()
-        if applied_job_ids:
-            print(f"[TRACKING] Loaded {len(applied_job_ids)} previously applied Dice job IDs.", flush=True)
-
-        for job_title in user_profile.job_titles:
-            search_keyword = job_title.title
-            print('Processing job title:', search_keyword, flush=True)
-            search_url = userprofile_to_search_url(search_keyword)
-            print(f"Navigating to search URL: {search_url}", flush=True)
-            if not first_run:
-                close_extra_tabs(context)
-                page = context.new_page()
-            else:
-                first_run = False
-
+    try:
+        with sync_playwright() as p:
+            # Launch in headless mode
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(user_agent=custom_user_agent)
             try:
-                page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
+                context.set_default_navigation_timeout(60000)
+                context.set_default_timeout(45000)
             except Exception as e:
-                print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...", flush=True)
+                print(f"[timeouts] Could not set default timeouts: {e}")
+            context.clear_cookies()
+            page = context.new_page()
+            login(page, secret_email, secret_password)
+
+            applied_job_ids = load_applied_job_ids()
+            processed_job_ids: Set[str] = set()
+            if applied_job_ids:
+                print(f"[TRACKING] Loaded {len(applied_job_ids)} previously applied Dice job IDs.", flush=True)
+
+            for job_title in user_profile.job_titles:
+                search_keyword = job_title.title
+                print('Processing job title:', search_keyword, flush=True)
+                search_url = userprofile_to_search_url(search_keyword)
+                print(f"Navigating to search URL: {search_url}", flush=True)
+                if not first_run:
+                    close_extra_tabs(context)
+                    page = context.new_page()
+                else:
+                    first_run = False
+
                 try:
-                    page.close()
+                    page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
+                except Exception as e:
+                    print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...", flush=True)
+                    try:
+                        page.close()
+                    except Exception:
+                        pass
+                    page = context.new_page()
+                    try:
+                        page.goto(search_url, wait_until="domcontentloaded", timeout=90000)
+                    except Exception as e2:
+                        print(f"[NAVIGATE] Second attempt failed: {e2}", flush=True)
+                        continue
+
+                try:
+                    page.wait_for_load_state("networkidle", timeout=30000)
                 except Exception:
                     pass
-                page = context.new_page()
-                try:
-                    page.goto(search_url, wait_until="domcontentloaded", timeout=90000)
-                except Exception as e2:
-                    print(f"[NAVIGATE] Second attempt failed: {e2}", flush=True)
-                    continue
+                time.sleep(2)
+                job_ids: List[str] = []
+                url = page.url
+                extract_job_ids(page, job_ids)
+                filtered_job_ids: List[str] = []
+                for job_id in job_ids:
+                    if job_id in processed_job_ids:
+                        print(f"[SKIP/RUN DUPLICATE] Already processed in this run: {job_id}", flush=True)
+                        continue
+                    if job_id in applied_job_ids:
+                        print(f"[SKIP/TRACKED] Already applied from local history: {job_id}", flush=True)
+                        continue
+                    filtered_job_ids.append(job_id)
+                if len(filtered_job_ids) != len(job_ids):
+                    print(
+                        f"[TRACKING] Queued {len(filtered_job_ids)} new IDs "
+                        f"after removing {len(job_ids) - len(filtered_job_ids)} tracked/duplicate IDs.",
+                        flush=True,
+                    )
+                job_ids = filtered_job_ids
+                processed_job_ids.update(job_ids)
+                print(f"[JOBS] Extracted job IDs: {len(job_ids)}", flush=True)
+                zero_hint_printed = False
+                if len(job_ids) == 0 and not zero_hint_printed:
+                    # Provide hints for why this might be zero to aid debugging (only once per title)
+                    print("[ZERO_JOBS] No jobs found. Possible reasons:", flush=True)
+                    print(" - Filters too strict (try widening date/employment types/location)", flush=True)
+                    print(" - DOM selectors outdated (check extract_job_ids)", flush=True)
+                    print(" - Page not fully loaded (increase waits)", flush=True)
+                    zero_hint_printed = True
 
-            try:
-                page.wait_for_load_state("networkidle", timeout=30000)
-            except Exception:
-                pass
-            time.sleep(2)
-            job_ids: List[str] = []
-            url = page.url
-            extract_job_ids(page, job_ids)
-            filtered_job_ids: List[str] = []
-            for job_id in job_ids:
-                if job_id in processed_job_ids:
-                    print(f"[SKIP/RUN DUPLICATE] Already processed in this run: {job_id}", flush=True)
-                    continue
-                if job_id in applied_job_ids:
-                    print(f"[SKIP/TRACKED] Already applied from local history: {job_id}", flush=True)
-                    continue
-                filtered_job_ids.append(job_id)
-            if len(filtered_job_ids) != len(job_ids):
-                print(
-                    f"[TRACKING] Queued {len(filtered_job_ids)} new IDs "
-                    f"after removing {len(job_ids) - len(filtered_job_ids)} tracked/duplicate IDs.",
-                    flush=True,
-                )
-            job_ids = filtered_job_ids
-            processed_job_ids.update(job_ids)
-            print(f"[JOBS] Extracted job IDs: {len(job_ids)}", flush=True)
-            zero_hint_printed = False
-            if len(job_ids) == 0 and not zero_hint_printed:
-                # Provide hints for why this might be zero to aid debugging (only once per title)
-                print("[ZERO_JOBS] No jobs found. Possible reasons:", flush=True)
-                print(" - Filters too strict (try widening date/employment types/location)", flush=True)
-                print(" - DOM selectors outdated (check extract_job_ids)", flush=True)
-                print(" - Page not fully loaded (increase waits)", flush=True)
-                zero_hint_printed = True
+                applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
+                grand_applied += int(applied or 0)
+                grand_failed += int(failed or 0)
+                grand_skipped += int(skipped or 0)
+                grand_already_applied += int(already_applied_count or 0)
+                grand_no_apply_button += int(no_apply_button_count or 0)
+                grand_success += int(success_count or 0)
+                if failed_jobs:
+                    grand_failed_jobs.extend(failed_jobs)
 
-            applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
-            grand_applied += int(applied or 0)
-            grand_failed += int(failed or 0)
-            grand_skipped += int(skipped or 0)
-            grand_already_applied += int(already_applied_count or 0)
-            grand_no_apply_button += int(no_apply_button_count or 0)
-            grand_success += int(success_count or 0)
-            if failed_jobs:
-                grand_failed_jobs.extend(failed_jobs)
+                print("\n========== APPLICATION SUMMARY ==========", flush=True)
+                print(f"Jobs successfully applied: {applied}", flush=True)
+                print(f"Jobs failed: {failed}", flush=True)
+                print(f"Jobs skipped: {skipped}", flush=True)
+                if failed_jobs:
+                    print("Failed jobs:", flush=True)
+                    for job in failed_jobs:
+                        print("-", job, flush=True)
+                print("========================================\n", flush=True)
 
-            print("\n========== APPLICATION SUMMARY ==========", flush=True)
-            print(f"Jobs successfully applied: {applied}", flush=True)
-            print(f"Jobs failed: {failed}", flush=True)
-            print(f"Jobs skipped: {skipped}", flush=True)
-            if failed_jobs:
-                print("Failed jobs:", flush=True)
-                for job in failed_jobs:
-                    print("-", job, flush=True)
-            print("========================================\n", flush=True)
-        # Grand totals across all job titles
-        print("\n========== GRAND SUMMARY ==========", flush=True)
-        print(f"Total applied: {grand_applied}", flush=True)
-        print(f"Total failed: {grand_failed}", flush=True)
-        print(f"Total skipped: {grand_skipped}", flush=True)
-        print(f"Breakdown — already_applied: {grand_already_applied}, no_apply_button: {grand_no_apply_button}, success: {grand_success}", flush=True)
-        if grand_failed_jobs:
-            print("All failed jobs:", flush=True)
-            for job in grand_failed_jobs:
-                print("-", job, flush=True)
-        print("===================================\n", flush=True)
+            _print_grand_summary(
+                grand_applied,
+                grand_failed,
+                grand_skipped,
+                grand_already_applied,
+                grand_no_apply_button,
+                grand_success,
+                grand_failed_jobs,
+            )
+            summary_printed = True
 
-        logout_and_close(page, browser)
+            logout_and_close(page, browser)
+    except Exception as exc:
+        fatal_error = exc
+        print(f"[FATAL] Headless run aborted: {exc}", flush=True)
+        traceback.print_exc()
+    finally:
+        if not summary_printed:
+            _print_grand_summary(
+                grand_applied,
+                grand_failed,
+                grand_skipped,
+                grand_already_applied,
+                grand_no_apply_button,
+                grand_success,
+                grand_failed_jobs,
+            )
+        if fatal_error is not None:
+            raise fatal_error
 
 if __name__ == "__main__":
     main()
