@@ -1,0 +1,60 @@
+URL: https://www.dice.com/job-detail/f5ca5658-9751-4124-bd48-d64d504ae03b?page=6
+
+A id= data-testid= data-cy= aria=Dice home href=https://www.dice.com/home/home-feed class=inline-block shrink-0 focus:outline-none focus-visible:bg-[#4d4d4d] text=
+A id= data-testid= data-cy= aria= href=https://www.dice.com/jobs class=block px-[10px] py-[15px] no-underline hover:bg-[#4d4d4d] hover:text-white focus:bg-[#4d4d4d] focus:text-white focus:out text=Job Search
+A id= data-testid= data-cy= aria= href=https://www.dice.com/companies class=block px-[10px] py-[15px] no-underline hover:bg-[#4d4d4d] hover:text-white focus:bg-[#4d4d4d] focus:text-white focus:out text=Companies
+BUTTON id= data-testid= data-cy= aria= href= class=relative flex items-center gap-[4px] border-none px-[10px] py-[15px] text-left focus:outline-none bg-transparent hover:b text=Career Resources
+A id= data-testid= data-cy= aria= href=https://www.dice.com/career-advice class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Tech Career Advice
+A id= data-testid= data-cy= aria= href=https://www.dice.com/ai-careers-and-resource-center class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=AI Careers Center
+A id= data-testid= data-cy= aria= href=https://www.dice.com/career-events class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Career Events
+A id= data-testid= data-cy= aria= href=https://www.dice.com/my-jobs class=block px-[10px] py-[15px] no-underline hover:bg-[#4d4d4d] hover:text-white focus:bg-[#4d4d4d] focus:text-white focus:out text=My Jobs
+A id= data-testid= data-cy= aria=Messages href=https://www.dice.com/message-center class=block px-[10px] py-[15px] no-underline hover:bg-[#4d4d4d] hover:text-white focus:bg-[#4d4d4d] focus:text-white focus:out text=
+A id= data-testid= data-cy= aria=Connect href=https://www.dice.com/dashboard/connections/ class=block px-[10px] py-[15px] no-underline hover:bg-[#4d4d4d] hover:text-white focus:bg-[#4d4d4d] focus:text-white focus:out text=
+BUTTON id= data-testid= data-cy= aria= href= class=relative flex items-center gap-[4px] border-none px-[10px] py-[15px] text-left focus:outline-none bg-transparent hover:b text=Tyrique Daniel
+A id= data-testid= data-cy= aria= href=https://www.dice.com/dashboard/profiles class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Profile
+A id= data-testid= data-cy= aria= href=https://www.dice.com/recommended-jobs class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Recommended Jobs
+A id= data-testid= data-cy= aria= href=https://www.dice.com/my-jobs class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=My Jobs
+A id= data-testid= data-cy= aria= href=https://www.dice.com/dashboard/alerts class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Alerts
+A id= data-testid= data-cy= aria= href=https://www.dice.com/settings class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Settings
+BUTTON id= data-testid= data-cy= aria= href= class=block w-full px-[10px] py-[8px] text-left text-[14px] text-white no-underline hover:bg-[#4d4d4d] focus:bg-[#4d4d4d] focu text=Log Out
+BUTTON id= data-testid= data-cy= aria=Toggle menu href= class=inline-block border-none bg-transparent px-[10px] py-[11px] font-[inherit] text-[24px] leading-none text-white focus:out text=
+A id= data-testid= data-cy= aria= href=/jobs class=outline-offset-2 outline-stroke-focus forced-colors:outline-[Highlight] inline-flex items-center gap-1 text-interaction  text=Search for jobs
+A id= data-testid= data-cy= aria=Dice home href=https://www.dice.com class=inline-block rounded focus:outline-none text=
+A id= data-testid= data-cy= aria=LinkedIn href=https://www.linkedin.com/company/dice class=block rounded text-white transition-colors hover:text-[#8FB5BD] focus:outline-none focus-visible:text-[#8FB5BD] focus-vi text=
+A id= data-testid= data-cy= aria=YouTube href=https://www.youtube.com/Dice class=block rounded text-white transition-colors hover:text-[#8FB5BD] focus:outline-none focus-visible:text-[#8FB5BD] focus-vi text=
+A id= data-testid= data-cy= aria=Instagram href=https://www.instagram.com/dicedotcom class=block rounded text-white transition-colors hover:text-[#8FB5BD] focus:outline-none focus-visible:text-[#8FB5BD] focus-vi text=
+A id= data-testid= data-cy= aria=TikTok href=https://www.tiktok.com/@dicetechjobs class=block rounded text-white transition-colors hover:text-[#8FB5BD] focus:outline-none focus-visible:text-[#8FB5BD] focus-vi text=
+A id= data-testid= data-cy= aria= href=https://www.dice.com/jobs class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Search for Jobs
+A id= data-testid= data-cy= aria= href=https://www.dice.com/jobs/browse-jobs class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Jobs Directory
+A id= data-testid= data-cy= aria= href=https://www.dice.com/companies class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Search for Companies
+A id= data-testid= data-cy= aria= href=https://www.dice.com/company-profile/browse class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Company Directory
+A id= data-testid= data-cy= aria= href=https://www.dice.com/career-advice class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Career Advice
+A id= data-testid= data-cy= aria= href=https://www.dice.com/career-events class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Career Events
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/post-jobs class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Post Jobs
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/find-candidates class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Find Candidates
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/employer-brand class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Build Employer Brand
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/talent-solutions class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Explore Talent Solutions
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/integrations class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=View Integrations
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/recruitment class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Recruiting Advice
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/employer-resources class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Hiring Resources
+A id= data-testid= data-cy= aria= href=https://dhigroupinc.com class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=About Us
+A id= data-testid= data-cy= aria= href=https://www.dice.com/media class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Media
+A id= data-testid= data-cy= aria= href=https://dhigroupinc.com/careers/default.aspx class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Work at Dice
+A id= data-testid= data-cy= aria= href=https://www.dice.com/hiring/demo class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Request a Demo
+A id= data-testid= data-cy= aria= href=https://www.dice.com/support class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Knowledge Center
+A id= data-testid= data-cy= aria= href=https://www.dice.com/privacy-center class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Privacy & Trust Center
+A id= data-testid= data-cy= aria= href=https://www.dice.com/about/contact-us class=underline-offset-4 hover:underline focus:outline-none focus-visible:underline active:text-[#a5a199] active:underline text=Contact Support
+A id= data-testid= data-cy= aria=Download on the Apple App Store href=https://apps.apple.com/app/id794201100 class=block rounded focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visi text=
+A id= data-testid= data-cy= aria=Get it on Google Play href=https://play.google.com/store/apps/details?id=com.dice.app.jobs&referrer=trackingcode%3DDI_OS_UN_MA_UP&utm_campaign%3DDice%2520Universal%2520Header%2520and%2520Footer&utm_source%3DDice&utm_medium%3DOnsite&utm_content%3DUniversal&utm_term%3DUnpaid class=block rounded focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visi text=
+A id= data-testid= data-cy= aria= href=https://www.dice.com class=underline focus:outline-none focus-visible:text-[#a5a199] active:text-[#a5a199] text=Dice
+A id= data-testid= data-cy= aria= href=https://dhigroupinc.com class=underline focus:outline-none focus-visible:text-[#a5a199] active:text-[#a5a199] text=DHI
+A id= data-testid= data-cy= aria= href=https://www.dice.com/about/terms-and-conditions class=underline focus:outline-none focus-visible:text-[#a5a199] active:text-[#a5a199] text=Terms & Conditions
+A id= data-testid= data-cy= aria= href=https://www.dice.com/about/privacy-policy class=underline focus:outline-none focus-visible:text-[#a5a199] active:text-[#a5a199] text=Privacy Policy
+A id= data-testid= data-cy= aria= href=https://www.dice.com/about/ccpa#ccpa-form-anchor class=underline focus:outline-none focus-visible:text-[#a5a199] active:text-[#a5a199] text=Do Not Sell or Share My Personal Information
+DHI-MESSAGING-APP id= data-testid=messaging-app data-cy= aria= href= class=dice text=Messaging Application Messaging total unread messages Open Chat
+DIV id= data-testid= data-cy= aria=Message History Menu href= class=d-flex flex-column message-container ng-tns-c56-0 message-widget no-settings hide-history text=Messaging total unread messages Open Chat
+BUTTON id= data-testid= data-cy= aria= href= class=reset-background ng-star-inserted text=Open Chat
+BUTTON id= data-testid= data-cy= aria= href= class=reset-background ng-star-inserted text=Back
+BUTTON id= data-testid= data-cy= aria= href= class=reset-background ng-star-inserted text=Open Chat
+SCRIPT id= data-testid=sift data-cy= aria= href= class= text=
+DIV id=usabilla_live_button_container_442627121 data-testid= data-cy= aria=Feedback href= class=usabilla_live_button_container text=div.usabilla_live_button_container#usabilla_live_button_container_442627121[role="button"] {width:40px;height:130px;position:fixed;z-index:999;right:0;top:50%;m

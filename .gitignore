@@ -11,7 +11,7 @@ venv/
 
 # Ignore log files and unwanted output files
 *.log
-*.csv
+# *.csv
 *.sqlite3
 *.db
 *.xlsx
@@ -73,7 +73,7 @@ build/
 dist/
 bin/
 obj/
-output/
+# output/
 storage/
-debug/
-app/dice/_experimental_/debug/
+# debug/
+# app/dice/_experimental_/debug/

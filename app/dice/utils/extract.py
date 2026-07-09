@@ -80,13 +80,32 @@ def extract_job_ids(page: Page, job_ids: List[str], only_easy_apply: bool = Fals
                 applied = False
                 easy_apply = False
                 try:
-                    card_container = job_link.query_selector('xpath=ancestor::div[contains(@data-job-guid, "")]') or job_link
-                    # Detect badges/buttons inside the card
-                    badge_text = (card_container.inner_text() or '').lower()
-                    if 'applied' in badge_text:
-                        applied = True
-                    if 'easy apply' in badge_text or 'easy apply' in (job_link.inner_text() or '').lower():
-                        easy_apply = True
+                    # Only check dedicated badge elements to avoid false positives from company
+                    # names or descriptions that happen to contain the word "applied"
+                    # (e.g. "Applied Materials", "Applied Systems").
+                    card_container = job_link.query_selector('xpath=ancestor::div[@data-testid="job-card"]') or job_link
+                    applied_badge = card_container.query_selector(
+                        '[data-testid="applied-badge"], .applied-badge, [class*="applied"][class*="badge"]'
+                    )
+                    if applied_badge is not None:
+                        badge_label = (applied_badge.inner_text() or '').strip().lower()
+                        if badge_label in ('applied', 'application submitted'):
+                            applied = True
+                    # Also check the apply button text inside the card for "Applied" state
+                    apply_btn = card_container.query_selector('[data-testid="apply-button"]')
+                    if apply_btn is not None:
+                        btn_text = (apply_btn.inner_text() or '').strip().lower()
+                        if btn_text in ('applied', 'application submitted'):
+                            applied = True
+                    # Easy Apply check: look at the apply button text only
+                    if apply_btn is not None:
+                        btn_text = (apply_btn.inner_text() or '').strip().lower()
+                        if 'easy apply' in btn_text:
+                            easy_apply = True
+                    if not easy_apply:
+                        link_text = (job_link.inner_text() or '').lower()
+                        if 'easy apply' in link_text:
+                            easy_apply = True
                 except Exception:
                     pass
 

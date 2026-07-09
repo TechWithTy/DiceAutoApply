@@ -196,6 +196,13 @@ def main(
     if session_file:
         session_file.parent.mkdir(parents=True, exist_ok=True)
     total_jobs_processed = 0
+    # Grand-total accumulators across all job titles and recommended jobs
+    grand_applied = 0
+    grand_failed = 0
+    grand_skipped = 0
+    grand_already_applied = 0
+    grand_no_btn = 0
+    grand_success = 0
     applied_job_ids = load_applied_job_ids()
     processed_job_ids: Set[str] = set()
     if applied_job_ids:
@@ -265,7 +272,12 @@ def main(
                             (
                                 app, fail, fail_jobs, skip, alr, no_btn, succ
                             ) = write_job_titles_to_file(page, filtered_rec_job_ids, page.url, known_applied_job_ids=applied_job_ids)
-                            
+                            grand_applied += app
+                            grand_failed += fail
+                            grand_skipped += skip
+                            grand_already_applied += alr
+                            grand_no_btn += no_btn
+                            grand_success += succ
                             print(f"Recommended Jobs successfully applied: {app}")
                             total_jobs_processed += len(filtered_rec_job_ids)
                     else:
@@ -372,21 +384,36 @@ def main(
                 no_apply_button_count,
                 success_count,
             ) = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
-            print("\n========== APPLICATION SUMMARY ==========")
-            print(f"Jobs successfully applied: {applied}")
-            print(f"Jobs failed: {failed}")
-            print(f"Jobs skipped: {skipped}")
-            print(
-                "Breakdown - already_applied: "
-                f"{already_applied_count}, no_apply_button: {no_apply_button_count}, success: {success_count}"
-            )
+            # Accumulate into grand totals
+            grand_applied += applied
+            grand_failed += failed
+            grand_skipped += skipped
+            grand_already_applied += already_applied_count
+            grand_no_btn += no_apply_button_count
+            grand_success += success_count
             total_jobs_processed += len(job_ids)
-            print(f"[TOTAL] Jobs processed so far: {total_jobs_processed}")
+            print(f"\n---------- [{search_keyword}] Summary ----------")
+            print(f"  Applied:       {applied}")
+            print(f"  Skipped:       {skipped} (already_applied={already_applied_count}, no_button={no_apply_button_count})")
+            print(f"  Failed:        {failed}")
+            print(f"  Processed so far (run total): {total_jobs_processed}")
             if failed_jobs:
-                print("Failed jobs:")
+                print("  Failed jobs:")
                 for job in failed_jobs:
-                    print("-", job)
-            print("========================================\n")
+                    print("    -", job)
+            print("-" * 50)
+        # ========== GRAND TOTAL SUMMARY ==========
+        print("\n" + "=" * 50)
+        print("          GRAND TOTAL SUMMARY FOR RUN")
+        print("=" * 50)
+        print(f"  Total jobs successfully applied: {grand_applied}")
+        print(f"  Total jobs skipped:              {grand_skipped}")
+        print(f"    - Already applied (history):   {grand_already_applied}")
+        print(f"    - No Easy Apply button:         {grand_no_btn}")
+        print(f"  Total jobs failed:               {grand_failed}")
+        print(f"  Total jobs processed this run:   {total_jobs_processed}")
+        print("=" * 50 + "\n")
+
         if reuse_session and session_file:
             try:
                 context.storage_state(path=str(session_file))

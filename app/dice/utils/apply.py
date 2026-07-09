@@ -200,21 +200,9 @@ def write_job_titles_to_file(
         status = "failed"
         error_message = ""
         if job_id in known_applied_job_ids:
-            status = "already_applied"
-            error_message = "Skipped from local application history."
             skipped += 1
             already_applied_count += 1
             print(f"[SKIP/TRACKED] Already applied according to local history: {job_id}")
-            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
-                writer.writerow({
-                    "job_id": job_id,
-                    "job_title": job_title,
-                    "job_url": job_id_url,
-                    "datetime": dt_str,
-                    "status": status,
-                    "error_message": error_message
-                })
             continue
         try:
             try:

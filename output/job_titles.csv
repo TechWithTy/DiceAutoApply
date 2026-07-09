@@ -1,0 +1,3 @@
+job_title,job_url,datetime,status,error_message
+Test Job Title,https://www.dice.com/job-detail/jobid1?q=Test&location=Remote,2025-05-15 11:41:19,failed,
+Test Job Title,https://www.dice.com/job-detail/jobid2?q=Test&location=Remote,2025-05-15 11:41:22,failed,
