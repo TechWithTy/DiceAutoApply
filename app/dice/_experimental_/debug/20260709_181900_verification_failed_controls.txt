@@ -1,0 +1,200 @@
+Reason: Saved values did not match the expected profile payload
+Captured: 20260709_181900
+
+DIV depth=0 host=document testid= cy= name= id=usabilla_live_button_container_227156214 type= role=button aria=Feedback href= placeholder= text=div.usabilla_live_button_container#usabilla_live_button_container_227156214[role="button"] {width:40px;height:130px;position:fixed;z-index:999;right:0;top:50%;m
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role= aria=Dice Home href=https://www.dice.com/home/home-feed placeholder= text=
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role= aria= href=https://www.dice.com/jobs placeholder= text=Job Search
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role= aria= href=https://www.dice.com/companies placeholder= text=Companies
+BUTTON depth=1 host=dice-smart-header testid= cy= name= id= type=button role= aria= href= placeholder= text=Career Resources
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/career-advice placeholder= text=Tech Career Advice
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/ai-careers-and-resource-center placeholder= text=AI Careers Center
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role= aria=Messages href=https://www.dice.com/message-center placeholder= text=
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role= aria=Connect href=https://www.dice.com/dashboard/connections/ placeholder= text=
+BUTTON depth=1 host=dice-smart-header testid= cy= name= id= type=button role= aria=Tyler Davis href= placeholder= text=TD
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/dashboard/profiles placeholder= text=Profile
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/recommended-jobs placeholder= text=Recommended Jobs
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/my-jobs placeholder= text=My Jobs
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/dashboard/alerts placeholder= text=Alerts
+A depth=1 host=dice-smart-header testid= cy= name= id= type= role=menuitem aria= href=https://www.dice.com/settings placeholder= text=Settings
+BUTTON depth=1 host=dice-smart-header testid= cy= name= id= type=button role=menuitem aria= href= placeholder= text=Log Out
+BUTTON depth=1 host=dice-smart-header testid= cy= name= id= type=button role= aria=Toggle menu href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=file role= aria= href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role= aria=Change Profile Photo href= placeholder= text=TD
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Add Desired Job Title
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Location,
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Resume,
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Skills (at least 5),
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Work Authorization,
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Employment Type.
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id=dhi-form-field_Hr4GV0WRTc type=checkbox role=switch aria=OFF href= placeholder= text=on
+DHI-CANDIDATES-ICON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id=visibilityHelpTextIcon type= role=button aria=visibility help text icon href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Location
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Resume
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Skills (at least 5)
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Work Authorization
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Employment Type
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Profile Photo href= placeholder= text=+Profile Photo10%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=First Name href= placeholder= text=\u2713First Name10%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Last Name href= placeholder= text=\u2713Last Name10%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Location href= placeholder= text=+Location10%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Resume href= placeholder= text=+Resume25%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Desired Job Title href= placeholder= text=+Desired Job Title10%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Skills (at least 5) href= placeholder= text=+Skills (at least 5)5%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Years Experience href= placeholder= text=+Years Experience10%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Work Authorization href= placeholder= text=+Work Authorization5%
+LI depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type= role=button aria=Employment Type href= placeholder= text=+Employment Type5%
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id=resume-upload type=file role= aria=Upload resume href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=How many years of experience do you have?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Do you want to add a phone number?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Where are you currently located?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=What is your work authorization status?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Do you have any security clearances?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=job_title id=dhi-candidates-autocomplete_xU7b8qgEry4oIiS1oJmSI_input type= role=combobox aria= href= placeholder=Preferred Job Title text=Full Stack AI Engineer
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=compensation_annual id= type=number role= aria=Annual Salary href= placeholder=Annual Salary text=
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=hourly_rate id= type=number role= aria=Hourly Rate href= placeholder=Hourly Rate text=
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_FULL_TIME type=checkbox role= aria=FULL_TIME href= placeholder= text=FULL_TIME
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_PART_TIME type=checkbox role= aria=PART_TIME href= placeholder= text=PART_TIME
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_CONTRACT_CORP_TO_CORP type=checkbox role= aria=CONTRACT_CORP_TO_CORP href= placeholder= text=CONTRACT_CORP_TO_CORP
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_CONTRACT_INDEPENDENT type=checkbox role= aria=CONTRACT_INDEPENDENT href= placeholder= text=CONTRACT_INDEPENDENT
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_CONTRACT_W2 type=checkbox role= aria=CONTRACT_W2 href= placeholder= text=CONTRACT_W2
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_CONTRACT_TO_HIRE_CORP_TO_CORP type=checkbox role= aria=CONTRACT_TO_HIRE_CORP_TO_CORP href= placeholder= text=CONTRACT_TO_HIRE_CORP_TO_CORP
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_CONTRACT_TO_HIRE_INDEPENDANT type=checkbox role= aria=CONTRACT_TO_HIRE_INDEPENDANT href= placeholder= text=CONTRACT_TO_HIRE_INDEPENDANT
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_CONTRACT_TO_HIRE_W2 type=checkbox role= aria=CONTRACT_TO_HIRE_W2 href= placeholder= text=CONTRACT_TO_HIRE_W2
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=employment_type id=dhi-form-field_INTERNSHIP type=checkbox role= aria=INTERNSHIP href= placeholder= text=INTERNSHIP
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=remote_preferences id=dhi-form-field_REMOTE type=checkbox role= aria=REMOTE href= placeholder= text=REMOTE
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=remote_preferences id=dhi-form-field_ONSITE type=checkbox role= aria=ONSITE href= placeholder= text=ONSITE
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=remote_preferences id=dhi-form-field_HYBRID type=checkbox role= aria=HYBRID href= placeholder= text=HYBRID
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=remote_preferences id=dhi-form-field_NO_PREFERENCE type=checkbox role= aria=NO_PREFERENCE href= placeholder= text=NO_PREFERENCE
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=ideal_job_willing_to_relocate id=dhi-form-field_f312ge8o-L type=radio role= aria=true href= placeholder= text=true
+INPUT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=ideal_job_willing_to_relocate id=dhi-form-field_D1Ozh1vLiH type=radio role= aria=false href= placeholder= text=false
+SELECT depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name=willing_to_travel id= type= role= aria= href= placeholder= text=None Up to 25% Up to 50% Up to 75% Up to 100%
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=What do you want for your next job title?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=What is your preferred type of employment?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Are you looking for remote, hybrid or in-office work?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=Are you willing to travel?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=What salary do you want in your next role?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=What size of company would you like to work for?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=What age of company are you most interested in?
+BUTTON depth=1 host=dhi-candidates-wired-candidate-profile testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+A depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type= role= aria= href=https://www.dice.com/support/candidate/candidate-profile/profile---private-email.html placeholder= text=Learn more
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=goVisibleOption id=existing-user-go-visible-radio type=radio role= aria= href= placeholder= text=goVisible
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=goVisibleOption id=existing-user-maybe-later-radio type=radio role= aria= href= placeholder= text=doNotGoVisible
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=partyType id=firstPartyRadio type=radio role= aria= href= placeholder= text=FIRST_PARTY
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=partyType id=thirdPartyRadio type=radio role= aria= href= placeholder= text=THIRD_PARTY
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id=party-type-icon type= role= aria=tooltip-icon href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+A depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type= role= aria= href=https://www.dice.com/support/candidate/candidate-profile/profile---private-email.html placeholder= text=Learn more
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=file role= aria=Upload Resume href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=first_name id= type= role= aria=First Name href= placeholder=First Name text=Tyler
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=last_name id= type= role= aria=Last Name href= placeholder=Last Name text=Davis
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=years_experience id= type=number role=textbox aria=Years Experience href= placeholder= text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=phone_number id= type=tel role=textbox aria= href= placeholder=(201) 555-0123 text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=sms_opt_in id=txt-msg-opt-in type=checkbox role= aria= href= placeholder= text=on
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=job_title id=dhi-candidates-autocomplete_w8TcFnZYYxQ9XhE1qDkRk_input type= role=combobox aria=Ideal Job href= placeholder= text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_FULL_TIME type=checkbox role= aria=FULL_TIME href= placeholder= text=FULL_TIME
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_PART_TIME type=checkbox role= aria=PART_TIME href= placeholder= text=PART_TIME
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_CONTRACT_CORP_TO_CORP type=checkbox role= aria=CONTRACT_CORP_TO_CORP href= placeholder= text=CONTRACT_CORP_TO_CORP
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_CONTRACT_INDEPENDENT type=checkbox role= aria=CONTRACT_INDEPENDENT href= placeholder= text=CONTRACT_INDEPENDENT
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_CONTRACT_W2 type=checkbox role= aria=CONTRACT_W2 href= placeholder= text=CONTRACT_W2
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_CONTRACT_TO_HIRE_CORP_TO_CORP type=checkbox role= aria=CONTRACT_TO_HIRE_CORP_TO_CORP href= placeholder= text=CONTRACT_TO_HIRE_CORP_TO_CORP
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_CONTRACT_TO_HIRE_INDEPENDANT type=checkbox role= aria=CONTRACT_TO_HIRE_INDEPENDANT href= placeholder= text=CONTRACT_TO_HIRE_INDEPENDANT
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_CONTRACT_TO_HIRE_W2 type=checkbox role= aria=CONTRACT_TO_HIRE_W2 href= placeholder= text=CONTRACT_TO_HIRE_W2
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=employment_type id=dhi-form-field_INTERNSHIP type=checkbox role= aria=INTERNSHIP href= placeholder= text=INTERNSHIP
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=remote_preferences id=dhi-form-field_REMOTE type=checkbox role= aria=REMOTE href= placeholder= text=REMOTE
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=remote_preferences id=dhi-form-field_ONSITE type=checkbox role= aria=ONSITE href= placeholder= text=ONSITE
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=remote_preferences id=dhi-form-field_HYBRID type=checkbox role= aria=HYBRID href= placeholder= text=HYBRID
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=remote_preferences id=dhi-form-field_NO_PREFERENCE type=checkbox role= aria=NO_PREFERENCE href= placeholder= text=NO_PREFERENCE
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=postalCode id=dhi-candidates-autocomplete_kp4_6xK3x94RMCMXWEOXe_input type= role=combobox aria=Zip/Postal Code href= placeholder= text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=city_state id=dhi-candidates-autocomplete_61b8mJOjYjudHHInWRVDf_input type= role=combobox aria=City, ST/Province href= placeholder= text=
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=location.country id=dhi-candidates-autocomplete_mMZp7TE6MGdRTA_jgNq9f_input type= role=combobox aria=Country href= placeholder= text=
+SELECT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=work_authorization id= type= role= aria=Work Authorization href= placeholder= text=US CitizenCanadian CitizenHave H1 VisaNeed H1 VisaGreen Card HolderTN Permit HolderEmployment Auth. DocumentPrefer not to answer
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=security_clearance id=dhi-form-field_G0QzJlWUFS type=radio role= aria=true href= placeholder= text=true
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=security_clearance id=dhi-form-field_g_TTjSkizh type=radio role= aria=false href= placeholder= text=false
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role=link aria= href= placeholder= text=Add Skills
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+SEDS-BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type= role=button aria= href= placeholder= text=Not Now
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type=button role= aria= href= placeholder= text=
+A depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name= id= type= role= aria= href=https://www.dice.com/support/candidate/candidate-profile/profile---private-email.html placeholder= text=Learn more
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=goVisibleOption id=go-visible-radio type=radio role= aria= href= placeholder= text=goVisible
+INPUT depth=2 host=dhi-candidates-wired-onboarding-flow-state-controller testid= cy= name=goVisibleOption id=maybe-later-radio type=radio role= aria= href= placeholder= text=doNotGoVisible
+BUTTON depth=3 host=seds-button testid= cy= name= id= type= role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type= role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=submit role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=submit role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=3 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=submit role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=submit role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=button role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type= role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type=submit role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type= role= aria= href= placeholder= text=
+BUTTON depth=2 host=seds-button testid= cy= name= id= type= role= aria= href= placeholder= text=
+A depth=1 host=dice-horizontal-profile-nav testid= cy= name= id= type= role= aria= href=/dashboard/profiles placeholder= text=Profile
+A depth=1 host=dice-horizontal-profile-nav testid= cy= name= id= type= role= aria= href=/dashboard/alerts placeholder= text=Alerts
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=Dice Home href=https://www.dice.com placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=LinkedIn href=https://www.linkedin.com/company/dice placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=YouTube href=https://www.youtube.com/Dice placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=Instagram href=https://www.instagram.com/dicedotcom placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=TikTok href=https://www.tiktok.com/@dicetechjobs placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/jobs placeholder= text=Search for Jobs
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/jobs/browse-jobs placeholder= text=Jobs Directory
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/companies placeholder= text=Search for Companies
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/company-profile/browse placeholder= text=Company Directory
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/career-advice placeholder= text=Career Advice
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/post-jobs placeholder= text=Post Jobs
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/find-candidates placeholder= text=Find Candidates
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/employer-brand placeholder= text=Build Employer Brand
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/talent-solutions placeholder= text=Explore Talent Solutions
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/integrations placeholder= text=View Integrations
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/recruitment placeholder= text=Recruiting Advice
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/employer-resources placeholder= text=Hiring Resources
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://dhigroupinc.com placeholder= text=About Us
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/media placeholder= text=Media
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://dhigroupinc.com/careers/default.aspx placeholder= text=Work at Dice
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/hiring/demo placeholder= text=Request a Demo
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/support placeholder= text=Knowledge Center
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/privacy-center placeholder= text=Privacy & Trust Center
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/about/contact-us placeholder= text=Contact Support
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=Download on the Apple App Store href=https://apps.apple.com/app/id794201100 placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria=Get it on Google Play href=https://play.google.com/store/apps/details?id=com.dice.app.jobs&referrer=trackingcode%3DDI_OS_UN_MA_UP&utm_campaign%3DDice%2520Universal%2520Header%2520and%2520Footer&utm_source%3DDice&utm_medium%3DOnsite&utm_content%3DUniversal&utm_term%3DUnpaid placeholder= text=
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com placeholder= text=Dice
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://dhigroupinc.com placeholder= text=DHI
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/about/terms-and-conditions placeholder= text=Terms & Conditions
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/about/privacy-policy placeholder= text=Privacy Policy
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/about/eula placeholder= text=End User License Agreement
+A depth=1 host=dice-candidate-footer testid= cy= name= id= type= role= aria= href=https://www.dice.com/about/ccpa#ccpa-form-anchor placeholder= text=Do Not Sell or Share My Personal Information

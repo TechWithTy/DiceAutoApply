@@ -1,0 +1,3 @@
+HTML saved to app\dice\_experimental_\debug\20260709_180420_profile_run_failed_profile.html
+Screenshot saved to app\dice\_experimental_\debug\20260709_180420_profile_run_failed_profile.png
+Control inventory failed: 'depth'

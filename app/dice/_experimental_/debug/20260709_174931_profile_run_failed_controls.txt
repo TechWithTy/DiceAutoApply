@@ -1,0 +1,4 @@
+Failed to capture HTML: Page.content: Unable to retrieve content because the page is navigating and changing the content.
+Reason: Page.goto: net::ERR_NETWORK_ACCESS_DENIED at https://www.dice.com/dashboard/login
+Call log:
+navigating to "https://www.dice.com/dashboard/login", waiting until "domcontentloaded"

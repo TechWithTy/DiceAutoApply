@@ -27,6 +27,7 @@ dependencies = [
 # Console entry point to run the app
 apply-dice = "app.dice.AutomateDiceMin:main"
 apply-dice-headless = "app.dice._experimental_.headless_test:main"
+apply-dice-profile = "app.dice.profile.workflow:main"
 
 [tool.uv]
 # uv will create and manage a project-local virtualenv automatically

@@ -1,0 +1,4 @@
+Reason: Initial profile page capture
+Captured: 20260709_174958
+
+DIV name= id=usabilla_live_button_container_213672960 type= role=button aria=Feedback href= placeholder= text=div.usabilla_live_button_container#usabilla_live_button_container_213672960[role="button"] {width:40px;height:130px;position:fixed;z-index:999;right:0;top:50%;m
