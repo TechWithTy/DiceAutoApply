@@ -113,6 +113,21 @@ def _expand_section(page: Page, selectors: ProfileSelectorRegistry, section: str
             continue
 
 
+def _click_any(page: Page, selectors: Sequence[str], timeout_ms: int = 3000) -> bool:
+    return _click_first_visible(page, selectors, timeout_ms=timeout_ms)
+
+
+def _dom_click_first_visible(page: Page, selectors: Sequence[str], timeout_ms: int = 3000) -> bool:
+    locator = _first_visible(page, selectors, timeout_ms=timeout_ms)
+    if locator is None:
+        return False
+    try:
+        locator.evaluate("(el) => el.click()")
+        return True
+    except Exception:
+        return False
+
+
 def _fill_first_matching(page: Page, candidates: Sequence[str], value: str, timeout_ms: int = 5000) -> bool:
     value = (value or "").strip()
     if not value:
@@ -203,6 +218,31 @@ def _add_skills(page: Page, payload: DiceProfilePayload, selectors: ProfileSelec
                 time.sleep(0.2)
             except Exception:
                 continue
+
+
+def _split_location(location: str) -> tuple[str, str]:
+    parts = [part.strip() for part in (location or "").split(",") if part.strip()]
+    if not parts:
+        return "", ""
+    if len(parts) == 1:
+        return parts[0], ""
+    return parts[0], parts[-1]
+
+
+def _upload_resume_and_accept_parse(page: Page, selectors: ProfileSelectorRegistry, resume_path: str) -> None:
+    if not resume_path:
+        return
+    _expand_section(page, selectors, "resume")
+    if not _set_file_input(page, selectors.resume_upload_candidates, resume_path):
+        return
+    time.sleep(1)
+    _click_any(page, ['button:has-text("Yes")', 'seds-button:has-text("Yes")'], timeout_ms=4000)
+    time.sleep(1)
+    _click_any(page, ['button:has-text("Close")', 'seds-button:has-text("Close")'], timeout_ms=4000)
+
+
+def _open_inline_editor(page: Page, button_selectors: Sequence[str]) -> bool:
+    return _dom_click_first_visible(page, button_selectors, timeout_ms=4000)
 
 
 def _save_profile(page: Page, selectors: ProfileSelectorRegistry) -> bool:
@@ -334,26 +374,62 @@ class DiceProfileWorkflow:
     def fill_identity_section(self) -> None:
         self._log("Filling identity section")
         _expand_section(self.page, self.selectors, "identity")
+        _open_inline_editor(self.page, [
+            'button[data-related-input="job_title"]',
+            'button:has-text("What do you want for your next job title?")',
+            'button:has-text("Add Desired Job Title")',
+        ])
         _fill_first_matching(self.page, self.selectors.input_candidates["job_title"], self.payload.headline)
+        _open_inline_editor(self.page, [
+            'button[data-related-input="years_experience"]',
+            'button:has-text("How many years of experience do you have?")',
+        ])
+        _fill_first_matching(self.page, self.selectors.input_candidates["years_experience"], str(self.payload.years_experience))
 
     def fill_contact_section(self) -> None:
         self._log("Filling contact section")
         _expand_section(self.page, self.selectors, "contact")
-        _fill_first_matching(self.page, self.selectors.input_candidates["location"], self.payload.location)
+        _open_inline_editor(self.page, [
+            'button[data-related-input="location.municipality"]',
+            'button:has-text("Where are you currently located?")',
+            'button:has-text("Location")',
+        ])
+        city, country = _split_location(self.payload.location)
+        if city:
+            _fill_first_matching(self.page, self.selectors.input_candidates["location"], city)
+        if country:
+            _fill_first_matching(self.page, self.selectors.input_candidates["location"], country)
 
     def fill_summary_section(self) -> None:
         self._log("Filling summary section")
-        return
+        _expand_section(self.page, self.selectors, "summary")
+        _open_inline_editor(self.page, [
+            'button:has-text("Edit About Me")',
+            'button[data-related-input="about_me"]',
+            'button:has-text("About")',
+        ])
+        _fill_first_matching(self.page, self.selectors.input_candidates["summary"], self.payload.summary)
 
     def fill_resume_section(self) -> None:
         self._log("Filling resume section")
-        _expand_section(self.page, self.selectors, "resume")
-        if self.payload.resume_path:
-            _set_file_input(self.page, self.selectors.resume_upload_candidates, self.payload.resume_path)
+        _upload_resume_and_accept_parse(self.page, self.selectors, self.payload.resume_path)
 
     def fill_skills_section(self) -> None:
         self._log("Filling skills section")
+        _open_inline_editor(self.page, [
+            'button:has-text("Edit Skills")',
+            'button:has-text("Add Skills")',
+            'button:has-text("Skills")',
+        ])
         _add_skills(self.page, self.payload, self.selectors)
+
+    def fill_work_experience_section(self) -> None:
+        self._log("Filling work experience section")
+        _expand_section(self.page, self.selectors, "experience")
+        _open_inline_editor(self.page, [
+            'button:has-text("Add work experience")',
+            'button:has-text("Add experience")',
+        ])
 
     def verify_profile(self) -> bool:
         checks = [
@@ -370,6 +446,7 @@ class DiceProfileWorkflow:
         self.fill_summary_section()
         self.fill_resume_section()
         self.fill_skills_section()
+        self.fill_work_experience_section()
 
         self._log("Attempting save")
         if not _save_profile(self.page, self.selectors):

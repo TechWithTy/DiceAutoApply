@@ -51,13 +51,18 @@ class ProfileSelectorRegistry:
         "identity": [
             'button:has-text("Profile")',
             'button:has-text("Add Desired Job Title")',
+            'button:has-text("What do you want for your next job title?")',
+            'button:has-text("How many years of experience do you have?")',
         ],
         "contact": [
             'button:has-text("Location")',
+            'button:has-text("Where are you currently located?")',
+            'button:has-text("Do you want to add a phone number?")',
         ],
         "summary": [
             'button:has-text("About")',
             'button:has-text("Summary")',
+            'button:has-text("Edit About Me")',
         ],
         "resume": [
             'button:has-text("Resume")',
@@ -67,6 +72,10 @@ class ProfileSelectorRegistry:
             'button:has-text("Skills")',
             'button:has-text("Add skill")',
             'button:has-text("Add Skills")',
+            'button:has-text("Edit Skills")',
+        ],
+        "experience": [
+            'button:has-text("Add work experience")',
         ],
     })
     input_candidates: Dict[str, List[str]] = field(default_factory=lambda: {

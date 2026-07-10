@@ -1,4 +1,4 @@
-DIV testid= cy= name= id=usabilla_live_button_container_963808333 type= role=button aria=Feedback href= placeholder= text=div.usabilla_live_button_container#usabilla_live_button_container_963808333[role="button"] {height:130px;position:fixed;z-index:999;right:0;top:50%;margin-top:-
+DIV testid= cy= name= id=usabilla_live_button_container_104931813 type= role=button aria=Feedback href= placeholder= text=div.usabilla_live_button_container#usabilla_live_button_container_104931813[role="button"] {width:40px;height:130px;position:fixed;z-index:999;right:0;top:50%;m
 A testid= cy= name= id= type= role= aria=Dice Home href=https://www.dice.com/home/home-feed placeholder= text=
 A testid= cy= name= id= type= role= aria= href=https://www.dice.com/jobs placeholder= text=Job Search
 A testid= cy= name= id= type= role= aria= href=https://www.dice.com/companies placeholder= text=Companies
@@ -24,7 +24,7 @@ BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=Res
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=Skills (at least 5),
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=Work Authorization,
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=Employment Type.
-INPUT testid= cy= name= id=dhi-form-field_3Xgh6tSYy0 type=checkbox role=switch aria=OFF href= placeholder= text=on
+INPUT testid= cy= name= id=dhi-form-field_YkEkrQbHZ- type=checkbox role=switch aria=OFF href= placeholder= text=on
 DHI-CANDIDATES-ICON testid= cy= name= id=visibilityHelpTextIcon type= role=button aria=visibility help text icon href= placeholder= text=
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=
@@ -78,7 +78,7 @@ INPUT testid= cy= name=last_name id= type= role= aria=Last Name href= placeholde
 INPUT testid= cy= name=years_experience id= type=number role=textbox aria=Years Experience href= placeholder= text=
 INPUT testid= cy= name=phone_number id= type=tel role=textbox aria= href= placeholder=(201) 555-0123 text=
 INPUT testid= cy= name=sms_opt_in id=txt-msg-opt-in type=checkbox role= aria= href= placeholder= text=on
-INPUT testid= cy= name=job_title id=dhi-candidates-autocomplete_sTgsDD06t-5AsosmDkO5Q_input type= role=combobox aria=Ideal Job href= placeholder= text=
+INPUT testid= cy= name=job_title id=dhi-candidates-autocomplete_khfgMc_URHmEgiMGxk7Mf_input type= role=combobox aria=Ideal Job href= placeholder= text=
 INPUT testid= cy= name=employment_type id=dhi-form-field_FULL_TIME type=checkbox role= aria=FULL_TIME href= placeholder= text=FULL_TIME
 INPUT testid= cy= name=employment_type id=dhi-form-field_PART_TIME type=checkbox role= aria=PART_TIME href= placeholder= text=PART_TIME
 INPUT testid= cy= name=employment_type id=dhi-form-field_CONTRACT_CORP_TO_CORP type=checkbox role= aria=CONTRACT_CORP_TO_CORP href= placeholder= text=CONTRACT_CORP_TO_CORP
@@ -92,12 +92,12 @@ INPUT testid= cy= name=remote_preferences id=dhi-form-field_REMOTE type=checkbox
 INPUT testid= cy= name=remote_preferences id=dhi-form-field_ONSITE type=checkbox role= aria=ONSITE href= placeholder= text=ONSITE
 INPUT testid= cy= name=remote_preferences id=dhi-form-field_HYBRID type=checkbox role= aria=HYBRID href= placeholder= text=HYBRID
 INPUT testid= cy= name=remote_preferences id=dhi-form-field_NO_PREFERENCE type=checkbox role= aria=NO_PREFERENCE href= placeholder= text=NO_PREFERENCE
-INPUT testid= cy= name=postalCode id=dhi-candidates-autocomplete_fAFZyMWox15Vb2u5lRaiB_input type= role=combobox aria=Zip/Postal Code href= placeholder= text=
-INPUT testid= cy= name=city_state id=dhi-candidates-autocomplete_6EZXci-Wtq95fWEmdKZK2_input type= role=combobox aria=City, ST/Province href= placeholder= text=
-INPUT testid= cy= name=location.country id=dhi-candidates-autocomplete_TrlyzLb-m3MHDAIWM6kX7_input type= role=combobox aria=Country href= placeholder= text=
+INPUT testid= cy= name=postalCode id=dhi-candidates-autocomplete_9ZLt97RbFpV1MMljp9ll0_input type= role=combobox aria=Zip/Postal Code href= placeholder= text=
+INPUT testid= cy= name=city_state id=dhi-candidates-autocomplete_BU-6QcQ5WvYTA0qNNfZNb_input type= role=combobox aria=City, ST/Province href= placeholder= text=
+INPUT testid= cy= name=location.country id=dhi-candidates-autocomplete_eI-VK_8vUB0pHR7LAmBbA_input type= role=combobox aria=Country href= placeholder= text=
 SELECT testid= cy= name=work_authorization id= type= role= aria=Work Authorization href= placeholder= text=US CitizenCanadian CitizenHave H1 VisaNeed H1 VisaGreen Card HolderTN Permit HolderEmployment Auth. DocumentPrefer not to answer
-INPUT testid= cy= name=security_clearance id=dhi-form-field_VvDqe-ALQv type=radio role= aria=true href= placeholder= text=true
-INPUT testid= cy= name=security_clearance id=dhi-form-field_xKj7ZI74Jq type=radio role= aria=false href= placeholder= text=false
+INPUT testid= cy= name=security_clearance id=dhi-form-field_dnTVAIzJdd type=radio role= aria=true href= placeholder= text=true
+INPUT testid= cy= name=security_clearance id=dhi-form-field_deq7gO-u5a type=radio role= aria=false href= placeholder= text=false
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=
 BUTTON testid= cy= name= id= type=button role=link aria= href= placeholder= text=Add Skills
 BUTTON testid= cy= name= id= type=button role= aria= href= placeholder= text=
