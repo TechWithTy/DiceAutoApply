@@ -43,7 +43,22 @@ def capture_profile_debug_bundle(page: Any, label: str, reason: str, base_dir: s
             () => {
               const results = [];
               const seen = new Set();
-              const selector = 'input, textarea, button, a, [role="button"], select, [contenteditable="true"]';
+              const selector = [
+                'input',
+                'textarea',
+                'button',
+                'a',
+                'label',
+                '[role="button"]',
+                '[role="checkbox"]',
+                '[role="radio"]',
+                'select',
+                'seds-button',
+                'dhi-candidates-display-chip',
+                'dhi-candidates-selectable-chip',
+                'dhi-candidates-chip',
+                '[contenteditable="true"]',
+              ].join(',');
 
               const walk = (root, depth = 0, host = 'document') => {
                 const nodes = Array.from(root.querySelectorAll(selector));
@@ -99,7 +114,22 @@ def collect_profile_controls(page: Any) -> list[dict[str, str]]:
         () => {
           const results = [];
           const seen = new Set();
-          const selector = 'input, textarea, button, a, [role="button"], select, [contenteditable="true"]';
+          const selector = [
+            'input',
+            'textarea',
+            'button',
+            'a',
+            'label',
+            '[role="button"]',
+            '[role="checkbox"]',
+            '[role="radio"]',
+            'select',
+            'seds-button',
+            'dhi-candidates-display-chip',
+            'dhi-candidates-selectable-chip',
+            'dhi-candidates-chip',
+            '[contenteditable="true"]',
+          ].join(',');
 
           const walk = (root, depth = 0, host = '') => {
             const nodes = Array.from(root.querySelectorAll(selector));

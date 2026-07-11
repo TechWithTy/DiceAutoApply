@@ -75,7 +75,31 @@ class ProfileSelectorRegistry:
             'button:has-text("Edit Skills")',
         ],
         "experience": [
+            'seds-button:has-text("Add work experience")',
+            'seds-button:has-text("Add experience")',
             'button:has-text("Add work experience")',
+        ],
+        "ideal_job": [
+            'seds-button:has-text("Edit Ideal Job")',
+            'button:has-text("Edit Ideal Job")',
+            'button:has-text("What do you want for your next job title?")',
+        ],
+        "ideal_company": [
+            'seds-button:has-text("Edit Ideal Company")',
+            'button:has-text("Edit Ideal Company")',
+            'button[data-related-input="ideal_company_size"]',
+            'button[data-related-input="ideal_company_age"]',
+        ],
+        "education": [
+            'seds-button:has-text("Add Education")',
+            'seds-button:has-text("Add education")',
+            'button:has-text("Add Education")',
+            'button:has-text("Add education")',
+        ],
+        "social": [
+            'seds-button:has-text("Edit Social Profiles")',
+            'button:has-text("Edit Social Profiles")',
+            'button:has-text("Social Profiles")',
         ],
     })
     input_candidates: Dict[str, List[str]] = field(default_factory=lambda: {
@@ -95,9 +119,10 @@ class ProfileSelectorRegistry:
             'input[aria-label="Years Experience"]',
         ],
         "job_title": [
+            'input[placeholder="Preferred Job Title"]',
+            'input[aria-label="Ideal Job"]',
             'input[name="job_title"]',
             'input[id*="job_title" i]',
-            'input[aria-label="Ideal Job"]',
         ],
         "summary": [
             'textarea[name*="summary" i]',
@@ -150,6 +175,43 @@ class ProfileSelectorRegistry:
             'input[id*="skill" i]',
             '[contenteditable="true"][aria-label*="skill" i]',
         ],
+        "salary": [
+            'input[name="compensation_annual"]',
+            'input[name*="salary" i]',
+            'input[name*="compensation" i]',
+            'input[aria-label*="salary" i]',
+            'input[placeholder*="salary" i]',
+        ],
+        "school": [
+            'input[name="institution"]',
+            'input[name*="institution" i]',
+            'input[name*="school" i]',
+            'input[name*="university" i]',
+            'input[aria-label*="school" i]',
+            'input[aria-label*="institution" i]',
+            'input[placeholder*="school" i]',
+        ],
+        "degree": [
+            'select[name="type"]',
+            'input[name*="degree" i]',
+            'input[aria-label*="degree" i]',
+            'input[placeholder*="degree" i]',
+            'select[name*="degree" i]',
+            'select[aria-label*="degree" i]',
+        ],
+        "field_of_study": [
+            'input[name*="field" i]',
+            'input[name*="major" i]',
+            'input[name*="study" i]',
+            'input[aria-label*="field" i]',
+            'input[aria-label*="major" i]',
+            'input[placeholder*="field" i]',
+        ],
+        "education_location": [
+            'input[name="location"]',
+            'input[aria-label*="location" i]',
+            'input[placeholder*="location" i]',
+        ],
     })
     resume_upload_candidates: List[str] = field(default_factory=lambda: [
         'input#resume-upload',
@@ -164,4 +226,10 @@ class ProfileSelectorRegistry:
         '[aria-live="polite"]',
         'div:has-text("saved")',
         'div:has-text("updated")',
+    ])
+    visibility_toggle_candidates: List[str] = field(default_factory=lambda: [
+        'input[role="switch"][aria-label="ON"]',
+        'input[role="switch"][aria-label="OFF"]',
+        'input[type="checkbox"][role="switch"]',
+        'dhi-candidates-toggle input[type="checkbox"]',
     ])
