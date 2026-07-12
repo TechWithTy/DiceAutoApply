@@ -94,11 +94,16 @@ def _first_visible(page: Page, selectors: Sequence[str], timeout_ms: int = 5000)
 
 
 def _click_first_visible(page: Page, selectors: Sequence[str], timeout_ms: int = 5000) -> bool:
-    locator = _first_visible(page, selectors, timeout_ms=timeout_ms)
-    if locator is None:
-        return False
-    locator.click()
-    return True
+    for selector in selectors:
+        try:
+            locator = page.locator(selector).first
+            if locator.count() == 0 or not locator.is_visible():
+                continue
+            locator.click(timeout=timeout_ms)
+            return True
+        except Exception:
+            continue
+    return False
 
 
 def _expand_section(page: Page, selectors: ProfileSelectorRegistry, section: str) -> None:

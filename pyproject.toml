@@ -33,6 +33,11 @@ apply-dice-profile = "app.dice.profile.workflow:main"
 # uv will create and manage a project-local virtualenv automatically
 # You can also pin a python version via `uv python pin` if desired
 
+[tool.pytest.ini_options]
+markers = [
+  "e2e: live browser tests that require Dice credentials and network access",
+]
+
 [tool.hatch.metadata]
 # Allow direct references (e.g., git+ URLs) in project.dependencies
 allow-direct-references = true

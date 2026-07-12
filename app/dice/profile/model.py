@@ -166,10 +166,10 @@ def build_profile_payload(profile=user_profile) -> DiceProfilePayload:
     if parts:
         first_name = parts[0]
         last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
-    years_experience = 0
+    years_experience = 6
     if getattr(profile, "job_titles", []):
         first_job = profile.job_titles[0]
-        years_experience = int(getattr(first_job, "experience", 0) or 0)
+        years_experience = int(getattr(first_job, "experience", years_experience) or years_experience)
     work_experiences = [
         WorkExperiencePayload(
             title="AI Training Expert - Advanced Coder",

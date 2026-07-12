@@ -96,6 +96,10 @@ def _ensure_results_csv(csv_file: str) -> None:
         writer.writerows(migrated_rows)
 
 
+def _dry_run_enabled() -> bool:
+    return os.getenv("DICE_DRY_RUN", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def load_applied_job_ids(csv_file: str = "output/job_application_results.csv") -> Set[str]:
     """Load Dice job IDs that should not be applied to again."""
     path = Path(csv_file)
@@ -274,6 +278,11 @@ def write_job_titles_to_file(
                         error_message = "Easy Apply button not found on job detail page."
                         print(f"[NO APPLY BUTTON] {job_title} ({job_id_url})")
                         _dump_no_apply_debug(new_page, job_title, job_id_url)
+                    elif apply_result == "dry_run":
+                        status = "dry_run"
+                        skipped += 1
+                        error_message = "Dry run: Easy Apply control found, application was not submitted."
+                        print(f"[DRY RUN] {job_title} ({job_id_url})")
                     else:
                         status = "failed"
                         failed += 1
@@ -367,6 +376,51 @@ def evaluate_and_apply(page: Page, val: int) -> str:
         if is_submitted:
             print("[ALREADY APPLIED] Application Submitted found in <apply-button-wc> shadow DOM. Skipping job as already applied.")
             return "already_applied"
+
+    if _dry_run_enabled():
+        try:
+            direct_apply_btn = page.query_selector('button[data-testid="apply-button"], [data-testid="apply-button"]')
+            if direct_apply_btn is not None and direct_apply_btn.is_visible():
+                button_text = (direct_apply_btn.inner_text() or "").strip().lower()
+                if "applied" in button_text or "application submitted" in button_text:
+                    return "already_applied"
+                if "apply" in button_text:
+                    print("[DRY RUN] Easy Apply control found; skipping click/submit.")
+                    return "dry_run"
+        except Exception:
+            pass
+        try:
+            found_shadow_or_dom_apply = page.evaluate('''
+                (function() {
+                    const wc = document.querySelector('div#applyButton apply-button-wc');
+                    if (wc && wc.shadowRoot) {
+                        const btns = wc.shadowRoot.querySelectorAll('button');
+                        for (const btn of btns) {
+                            const txt = btn.innerText.trim().toLowerCase();
+                            if (txt === "easy apply" || txt === "apply now" || txt === "apply") {
+                                return 1;
+                            }
+                        }
+                    }
+                    const candidates = Array.from(
+                        document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]')
+                    );
+                    for (const el of candidates) {
+                        const txt = ((el.innerText || el.textContent || el.value || '') + '').trim().toLowerCase();
+                        if (txt.includes('easy apply') || txt.includes('apply now') || txt === 'apply') {
+                            return 1;
+                        }
+                    }
+                    return 0;
+                })();
+            ''')
+            if found_shadow_or_dom_apply == 1:
+                print("[DRY RUN] Easy Apply control found; skipping click/submit.")
+                return "dry_run"
+        except Exception:
+            pass
+        print("[DRY RUN] Easy Apply control not found.")
+        return "no_easy_apply"
     # ! Removed all page refreshes when waiting for Easy Apply button (per user request)
     # * Extended wait time and improved logs
     # * Selector is now robust to match <div id="applyButton"><apply-button-wc ...></apply-button-wc></div>
