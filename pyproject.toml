@@ -36,6 +36,7 @@ apply-dice-profile = "app.dice.profile.workflow:main"
 [tool.pytest.ini_options]
 markers = [
   "e2e: live browser tests that require Dice credentials and network access",
+  "indeed_e2e: live browser tests that require an Indeed saved login token and network access",
 ]
 
 [tool.hatch.metadata]

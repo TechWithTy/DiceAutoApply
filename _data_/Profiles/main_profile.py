@@ -67,7 +67,7 @@ job_titles = [
          JobTitle(
         title="Full Stack AI Engineer",
         experience=6,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
             "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
@@ -78,7 +78,7 @@ job_titles = [
     JobTitle(
         title="AI Integration Engineer",
         experience=6,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
             "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
@@ -89,7 +89,7 @@ job_titles = [
     JobTitle(
         title="Senior Full Stack Developer",
         experience=7,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "JavaScript", "React", "Next.js", "Node.js", "Golang", "GraphQL",
             "Docker", "Kubernetes", "CI/CD", "TypeScript", "Git"
@@ -100,7 +100,7 @@ job_titles = [
     JobTitle(
         title="Full Stack Engineer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "JavaScript", "React", "Node.js", "Python", "Golang", "Docker",
             "CI/CD", "Git", "GraphQL", "HTML5", "CSS3"
@@ -111,7 +111,7 @@ job_titles = [
     JobTitle(
         title="Frontend Engineer",
         experience=4,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "JavaScript", "React", "Next.js", "HTML5", "CSS3", "Tailwind CSS",
             "GraphQL", "REST APIs", "AI Integration"
@@ -122,7 +122,7 @@ job_titles = [
     JobTitle(
         title="TypeScript Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "TypeScript", "JavaScript", "React", "Next.js", "Node.js", "Python", "Golang", "Docker", "CI/CD", "GraphQL", "HTML5", "CSS3"
         ],
@@ -132,7 +132,7 @@ job_titles = [
     JobTitle(
         title="React Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "React", "JavaScript", "Next.js", "HTML5", "CSS3", "TypeScript",
             "GraphQL", "REST APIs", "Tailwind CSS"
@@ -143,7 +143,7 @@ job_titles = [
     JobTitle(
         title="Next.js Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "Next.js", "React", "JavaScript", "TypeScript", "HTML5", "CSS3",
             "GraphQL", "REST APIs", "Tailwind CSS"
@@ -154,7 +154,7 @@ job_titles = [
     JobTitle(
         title="Full Stack Software Engineer",
         experience=6,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "JavaScript", "React", "Node.js", "Golang", "GraphQL", "Docker",
             "CI/CD", "HTML5", "CSS3", "TypeScript", "Git"
@@ -165,7 +165,7 @@ job_titles = [
     JobTitle(
         title="Web Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "JavaScript", "Next.js", "React", "TypeScript", "GraphQL",
             "HTML5", "CSS3", "Tailwind CSS", "REST APIs", "Node.js"
@@ -176,7 +176,7 @@ job_titles = [
     JobTitle(
         title="Founding Engineer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\8-6-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
         skills=[
             "JavaScript", "Next.js", "React", "TypeScript", "GraphQL",
             "HTML5", "CSS3", "Tailwind CSS", "REST APIs", "Node.js"
