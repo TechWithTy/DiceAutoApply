@@ -7,3 +7,7 @@
 [submodule "app/linkedin"]
 	path = app/linkedin
 	url = https://github.com/TechWithTy/LI-Easy-Apply-Bot.git
+[submodule "indeed_bot"]
+	path = indeed_bot
+	url = https://github.com/TechWithTy/indeed_bot.git
+	branch = fix-indeed-discovery-dry-run
