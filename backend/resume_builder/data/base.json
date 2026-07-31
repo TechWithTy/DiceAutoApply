@@ -1,0 +1,69 @@
+{
+    "name": "Tyrique (Ty) Daniel",
+    "headline": "Front End Developer | Next.js | TypeScript | A11y | SEO | Micro-Frontends",
+    "contact": [
+        "Remote",
+        "628-303-8011",
+        "tyrique1.daniel@gmail.com"
+    ],
+    "links_line": "Portfolio: ty-dev-port.vercel.app • GitHub: github.com/techwithty",
+    "summary": "Front-End engineer with 8+ years building high-performance, accessible, SEO-friendly web apps using Next.js/React/TypeScript. Experienced with Storybook design systems, micro-frontend architecture, and CI/CD quality gates.",
+    "skills": [
+        {
+            "label": "Frontend",
+            "items": [
+                "Next.js",
+                "React",
+                "TypeScript",
+                "HTML5",
+                "CSS3"
+            ]
+        },
+        {
+            "label": "A11y/SEO",
+            "items": [
+                "WCAG",
+                "semantic markup",
+                "Core Web Vitals",
+                "Lighthouse"
+            ]
+        },
+        {
+            "label": "UI System",
+            "items": [
+                "Storybook",
+                "component libraries",
+                "design systems"
+            ]
+        },
+        {
+            "label": "Testing/DevOps",
+            "items": [
+                "Playwright",
+                "Jest",
+                "CI/CD",
+                "Docker"
+            ]
+        }
+    ],
+    "experience": [
+        {
+            "org": "Deal Scale",
+            "title": "CTO / Frontend Architect",
+            "dates": "2025–Present",
+            "location": "Remote",
+            "bullets": [
+                "Built Next.js SSR surfaces optimized for SEO and page speed; improved Core Web Vitals via rendering + asset optimizations.",
+                "Created reusable component patterns and Storybook-driven UI library to increase consistency and reduce rework.",
+                "Delivered modular features with independent deployment boundaries (micro-frontend style) to enable parallel team velocity."
+            ]
+        }
+    ],
+    "education": [
+        {
+            "school": "Western Governors University",
+            "degree": "B.S. Software Engineering",
+            "dates": "2020–2023"
+        }
+    ]
+}

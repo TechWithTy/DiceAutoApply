@@ -1,0 +1,25 @@
+{
+    "name": "Tyrique (Ty) Daniel",
+    "headline": "Front End Developer | Next.js | TypeScript | A11y | SEO | Micro-Frontends",
+    "contact": [
+        "Remote",
+        "628-303-8011",
+        "tyrique1.daniel@gmail.com"
+    ],
+    "links_line": "Portfolio: ty-dev-port.vercel.app • GitHub: github.com/techwithty",
+    "date": "February 23, 2026",
+    "recipient": {
+        "name": "Hiring Manager",
+        "company": "Tech Innovations Inc.",
+        "address": "123 Tech Boulevard\nSan Francisco, CA 94107"
+    },
+    "greeting": "Dear Hiring Manager,",
+    "paragraphs": [
+        "I am writing to express my strong interest in the Front End Developer position at Tech Innovations Inc. With over 8 years of experience building high-performance, accessible, and SEO-friendly web applications using Next.js, React, and TypeScript, I am confident in my ability to contribute immediately to your engineering team.",
+        "In my recent role as CTO / Frontend Architect at Deal Scale, I spearheaded the development of SSR surfaces optimized for page speed and Core Web Vitals. I established a Storybook-driven UI library that increased cross-team consistency and significantly reduced redundant work. I also successfully delivered modular features implementing a micro-frontend style architecture, which enabled parallel team velocity and streamlined our CI/CD pipelines.",
+        "I am particularly drawn to Tech Innovations Inc. because of your commitment to creating accessible, scaleable user interfaces. I believe my deep expertise in WCAG compliance, semantic markup, and comprehensive testing methodologies aligns perfectly with the standards required for this role.",
+        "Thank you for considering my application. I have attached my resume and I would welcome the opportunity to discuss how my background, skills, and strategic approach to frontend architecture can support the continued growth of Tech Innovations Inc."
+    ],
+    "sign_off": "Sincerely,",
+    "signature": "Tyrique (Ty) Daniel"
+}

@@ -1,0 +1,91 @@
+{
+  "id": "dice_ai_full_stack",
+  "resume_paths": [
+    "_data_/Resumes/Dice/8-5-24-Ai-Full-Stack.pdf",
+    "_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf"
+  ],
+  "headline": "Full Stack AI Engineer | Data Scientist | Systems Engineer",
+  "summary": "AI-focused engineer with experience spanning machine learning systems, full stack application delivery, CI/CD automation, and production-quality model evaluation.",
+  "skills": [
+    {
+      "label": "AI / ML",
+      "items": [
+        "TensorFlow",
+        "PyTorch",
+        "scikit-learn",
+        "Pandas",
+        "NumPy",
+        "RAG"
+      ]
+    },
+    {
+      "label": "Software",
+      "items": [
+        "Python",
+        "SQL",
+        "React",
+        "TypeScript",
+        "CI/CD",
+        "Docker",
+        "Kubernetes"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "org": "Deep Mind",
+      "title": "ML-Research Engineer / Trainer | Data Scientist",
+      "dates": "03/2023 - 08/2024",
+      "location": "Remote",
+      "bullets": [
+        "Led design, training, and optimization of machine learning models using TensorFlow and PyTorch, improving model accuracy by 25% and reducing training time by 15%.",
+        "Implemented feature engineering techniques including vectorization and dimensionality reduction to improve model performance by 20%.",
+        "Streamlined AI testing with Retrieval-Augmented Generation (RAG) systems, reducing testing time by 40% and improving robustness.",
+        "Built scalable ML infrastructure with Docker and Kubernetes for efficient deployment across distributed systems."
+      ]
+    },
+    {
+      "org": "Google",
+      "title": "AI Automation Engineer",
+      "dates": "02/2022 - 01/2023",
+      "location": "Remote",
+      "bullets": [
+        "Developed and managed CI/CD pipelines, reducing time to production by 25%.",
+        "Used BDD with Gherkin to create executable specifications that improved software quality and reliability.",
+        "Implemented React and Redux in a component-based architecture, improving maintainability and reducing bugs by 20%.",
+        "Applied TDD and BDD with Jest and Cypress to improve reliability and scalability by 30%."
+      ]
+    },
+    {
+      "org": "Outlier",
+      "title": "AI Training Expert - Advanced Coder",
+      "dates": "07/2024 - Present",
+      "location": "Remote",
+      "bullets": [
+        "Developed AI training programs that improved model accuracy by 30% across healthcare, finance, and autonomous systems use cases.",
+        "Collaborated across teams to deliver machine learning solutions that reduced processing time for critical analysis tasks by 20%.",
+        "Integrated new AI methodologies into existing systems, increasing automation efficiency by 15% and reducing manual intervention by 25%.",
+        "Maintained experimental AI research frameworks that improved reproducibility, scalability, and overall research output."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "Western Governors University",
+      "degree": "Bachelors Software Development / Associate Computer Science",
+      "dates": "2020-2023 BA"
+    },
+    {
+      "school": "Florida A&M University",
+      "degree": "",
+      "dates": "2014 - 2016 AA"
+    }
+  ],
+  "certifications": [
+    "IBM AI Engineering Professional Certificate",
+    "Microsoft Certified: Azure AI Engineer Associate",
+    "CASP",
+    "CISSP",
+    "Google Professional Data Engineer Certification"
+  ]
+}

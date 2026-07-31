@@ -1,0 +1,71 @@
+{
+  "id": "indeed_blue_collar",
+  "resume_paths": [
+    "_data_/Resumes/Indeed/indeed_blue_collar_resume.txt",
+    "_data_\\Resumes\\Indeed\\indeed_blue_collar_resume.txt"
+  ],
+  "headline": "Warehouse Associate | General Laborer | Material Handler",
+  "summary": "Reliable operations worker with experience supporting warehouse, shipping, receiving, loading, unloading, inventory movement, facilities support, and route delivery tasks in fast-paced environments.",
+  "skills": [
+    {
+      "label": "Operations",
+      "items": [
+        "Warehouse operations",
+        "Shipping and receiving",
+        "Loading and unloading",
+        "Inventory control",
+        "Order picking and packing"
+      ]
+    },
+    {
+      "label": "Equipment / Safety",
+      "items": [
+        "Pallet jack operation",
+        "Forklift safety awareness",
+        "Hand and power tools",
+        "Preventive maintenance support",
+        "OSHA-style safety practices"
+      ]
+    },
+    {
+      "label": "Work Habits",
+      "items": [
+        "Reliable attendance",
+        "Team communication",
+        "Customer service",
+        "Route delivery support"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "org": "Operations Experience Summary",
+      "title": "Warehouse / General Labor / Delivery Support",
+      "dates": "Recent",
+      "location": "Denver, CO",
+      "bullets": [
+        "Supported fast-paced operations by moving materials, staging inventory, organizing work areas, and completing assigned tasks safely and on schedule.",
+        "Loaded, unloaded, sorted, packed, and prepared materials for shipment or delivery.",
+        "Followed supervisor instructions, safety procedures, and quality standards in warehouse and field environments.",
+        "Maintained clean work areas and reported equipment, inventory, or safety issues when identified."
+      ]
+    },
+    {
+      "org": "Team / Site Support",
+      "title": "Production / Facilities / Maintenance Helper",
+      "dates": "Recent",
+      "location": "Denver, CO",
+      "bullets": [
+        "Worked independently and with teams to complete physically demanding tasks in changing work conditions.",
+        "Supported preventive maintenance and general facilities tasks using hand and power tools under site-specific procedures.",
+        "Helped teams stay on schedule by adapting quickly to shifting daily priorities and operational needs."
+      ]
+    }
+  ],
+  "education": [],
+  "certifications": [
+    "Driver's License",
+    "Forklift certification preferred",
+    "OSHA safety training preferred"
+  ]
+}

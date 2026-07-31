@@ -11,6 +11,7 @@ def render_settings() -> None:
     - Manage Dice credentials (stored in session only)
     - Manage default search parameters (keywords/location/radius)
     - Manage target job title defaults
+    - Resume Builder generation lives on its own page
     """
     st.header("Settings")
 
@@ -44,3 +45,4 @@ def render_settings() -> None:
             st.success("Defaults updated for this session.")
 
     st.caption("Note: Settings are stored in memory for this session only.")
+    st.caption("Use the Resume Builder page to generate optimized resumes from your profile and existing resume files.")

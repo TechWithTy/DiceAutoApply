@@ -10,6 +10,8 @@ LOGS_KEY = "logs"
 SUMMARY_KEY = "summary"
 AUTH_TOKEN_KEY = "auth_token"
 ENTITLEMENTS_KEY = "entitlements"
+RESUME_BUILDER_RESULT_KEY = "resume_builder_result"
+RESUME_BUILDER_MESSAGE_KEY = "resume_builder_message"
 
 
 @dataclass
@@ -58,6 +60,10 @@ def ensure_session_defaults() -> None:
         st.session_state[AUTH_TOKEN_KEY] = None
     if ENTITLEMENTS_KEY not in st.session_state:
         st.session_state[ENTITLEMENTS_KEY] = {"credits": 0}
+    if RESUME_BUILDER_RESULT_KEY not in st.session_state:
+        st.session_state[RESUME_BUILDER_RESULT_KEY] = None
+    if RESUME_BUILDER_MESSAGE_KEY not in st.session_state:
+        st.session_state[RESUME_BUILDER_MESSAGE_KEY] = None
 
 
 def get_credentials() -> Credentials:
@@ -120,8 +126,24 @@ def get_credits() -> int:
 
 def logout_user() -> None:
     """Clear all authentication-related state and transient data."""
-    for k in [AUTH_TOKEN_KEY, ENTITLEMENTS_KEY, AUTH_KEY, LOGS_KEY, SUMMARY_KEY]:
+    for k in [AUTH_TOKEN_KEY, ENTITLEMENTS_KEY, AUTH_KEY, LOGS_KEY, SUMMARY_KEY, RESUME_BUILDER_RESULT_KEY, RESUME_BUILDER_MESSAGE_KEY]:
         if k in st.session_state:
             del st.session_state[k]
     # Re-seed defaults so app doesn't error on next render
     ensure_session_defaults()
+
+
+def get_resume_builder_result() -> Dict[str, Any] | None:
+    return st.session_state.get(RESUME_BUILDER_RESULT_KEY)
+
+
+def set_resume_builder_result(result: Dict[str, Any] | None) -> None:
+    st.session_state[RESUME_BUILDER_RESULT_KEY] = result
+
+
+def get_resume_builder_message() -> str | None:
+    return st.session_state.get(RESUME_BUILDER_MESSAGE_KEY)
+
+
+def set_resume_builder_message(message: str | None) -> None:
+    st.session_state[RESUME_BUILDER_MESSAGE_KEY] = message

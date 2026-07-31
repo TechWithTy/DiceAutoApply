@@ -14,6 +14,7 @@ from streamlit_app.ui_auth import render_login
 from streamlit_app.ui_params import render_search_and_filters, render_profile_and_target
 from streamlit_app.ui_results import render_live_logs, render_summary
 from streamlit_app.runner import stream_headless_run
+from streamlit_app.ui_resume_builder import render_resume_builder
 from streamlit_app.ui_saas import (
     ensure_token_from_query,
     render_login_prompt,
@@ -114,7 +115,7 @@ def main() -> None:
 
     # --- Sidebar navigation & logout ---
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", options=["Dashboard", "Settings"], index=0)
+    page = st.sidebar.radio("Go to", options=["Dashboard", "Resume Builder", "Settings"], index=0)
     if st.sidebar.button("Logout"):
         logout_user()
         try:
@@ -130,6 +131,9 @@ def main() -> None:
     # Render selected page
     if page == "Settings":
         render_settings()
+        return
+    if page == "Resume Builder":
+        render_resume_builder()
         return
     else:
         # Dashboard contents
