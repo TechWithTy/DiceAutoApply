@@ -31,7 +31,10 @@ class JobFilter:
     employer_types: List[str] = field(default_factory=list)  # Multiple can be selected
     easy_apply: bool = False  # Only one can be true
 
-    def set_work_setting(self, setting: str):
+    def set_work_setting(self, setting: Optional[str]):
+        if setting is None:
+            self.work_setting = None
+            return
         if setting not in [self.WorkSetting.ONSITE, self.WorkSetting.REMOTE, self.WorkSetting.HYBRID]:
             raise ValueError(f"Invalid work setting: {setting}")
         self.work_setting = setting
@@ -61,10 +64,12 @@ class JobFilter:
             raise ValueError("easy_apply can only be set to True.")
         self.easy_apply = easy
 
-# Example usage
+# Default Dice filter configuration used by the app/profile modules.
 dice_job_filter = JobFilter()
 dice_job_filter.set_posted_date(JobFilter.PostedDate.LAST_3_DAYS)  # Added posted date of today
-dice_job_filter.set_work_setting(JobFilter.WorkSetting.REMOTE)
+# Leave workplace filtering unset by default so location-based searches can
+# return on-site, hybrid, and remote jobs unless a specific mode is requested.
+dice_job_filter.set_work_setting(None)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.CONTRACT)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.THIRD_PARTY)
@@ -72,6 +77,3 @@ dice_job_filter.set_willing_to_sponsor(False)
 dice_job_filter.add_employer_type(JobFilter.EmployerType.DIRECT_HIRE)
 dice_job_filter.add_employer_type(JobFilter.EmployerType.RECRUITER)
 dice_job_filter.set_easy_apply(True)
-print('Dice Filter',dice_job_filter)  # Check intermediate output
-
-print(dice_job_filter)
