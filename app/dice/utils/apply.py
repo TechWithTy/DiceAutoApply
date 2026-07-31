@@ -9,6 +9,8 @@ from pathlib import Path
 from datetime import datetime
 from urllib.parse import urlparse
 
+from _data_.Profiles.main_profile import user_profile
+
 next_in_application_button = 'button.seds-button-primary.btn-next'
 
 import csv
@@ -98,6 +100,29 @@ def _ensure_results_csv(csv_file: str) -> None:
 
 def _dry_run_enabled() -> bool:
     return os.getenv("DICE_DRY_RUN", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _allowed_location_tokens(profile=user_profile) -> tuple[set[str], bool]:
+    raw_locations = getattr(profile, "cities", None) or [getattr(profile, "city", "")]
+    normalized = [
+        str(value).strip().lower()
+        for value in raw_locations
+        if str(value).strip()
+    ]
+    allow_remote = "remote" in normalized
+    allowed_cities = {value for value in normalized if value != "remote"}
+    return allowed_cities, allow_remote
+
+
+def _job_matches_allowed_locations(job_title: str, profile=user_profile) -> bool:
+    title = (job_title or "").strip().lower()
+    allowed_cities, allow_remote = _allowed_location_tokens(profile)
+
+    if allow_remote and "remote" in title:
+        return True
+    if any(city in title for city in allowed_cities):
+        return True
+    return False
 
 
 def load_applied_job_ids(csv_file: str = "output/job_application_results.csv") -> Set[str]:
@@ -215,6 +240,23 @@ def write_job_titles_to_file(
                     new_page.goto(job_id_url)
                     new_page.wait_for_load_state("load")
                     job_title = new_page.evaluate("document.title")
+                    if not _job_matches_allowed_locations(job_title):
+                        status = "location_filtered"
+                        error_message = "Job location is outside allowed profile cities."
+                        skipped += 1
+                        print(f"[SKIP/LOCATION] {job_title} ({job_id_url})")
+                        with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                            writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
+                            writer.writerow({
+                                "job_id": job_id,
+                                "job_title": job_title,
+                                "job_url": job_id_url,
+                                "datetime": dt_str,
+                                "status": status,
+                                "error_message": error_message
+                            })
+                        new_page.close()
+                        continue
                     # Check for 'already applied' state
                     try:
                         # If <apply-button-wc> does NOT exist, or 'Application submitted' text is present, treat as already applied

@@ -44,20 +44,55 @@ def jobfilter_to_url_args(job_filter):
         radius=getattr(job_filter, 'radius', None),
     )
 
+def userprofile_locations(profile=user_profile) -> list[str]:
+    cities = getattr(profile, "cities", None)
+    if isinstance(cities, list) and cities:
+        country = getattr(profile, "country", "").strip()
+        normalized_locations: list[str] = []
+        for city in cities:
+            if not isinstance(city, str):
+                continue
+            normalized = city.strip()
+            if not normalized:
+                continue
+            if normalized.casefold() == "remote":
+                normalized_locations.append("Remote")
+            else:
+                normalized_locations.append(", ".join(part for part in [normalized, country] if part))
+        return normalized_locations
+
+    location = ", ".join(
+        part for part in [
+            getattr(profile, "city", "").strip(),
+            getattr(profile, "country", "").strip(),
+        ]
+        if part
+    )
+    return [location] if location else []
+
+
 def userprofile_to_search_url(job_title: str) -> str:
     """
     Build a Dice search URL from the current user_profile and a job title.
     """
+    return userprofile_to_search_urls(job_title)[0]
+
+
+def userprofile_to_search_urls(job_title: str) -> list[str]:
+    """
+    Build Dice search URLs from the current user_profile and a job title,
+    one URL per configured city.
+    """
     job_filter = user_profile.dice_job_filter
-    # Location string
-    location = f"{user_profile.city}, {user_profile.country}"
-    # Optionally, add geo fields if available
-    url = build_dice_search_url(
-        q=job_title,
-        location=location,
-        **jobfilter_to_url_args(job_filter)
-    )
-    return url
+    locations = userprofile_locations(user_profile)
+    return [
+        build_dice_search_url(
+            q=job_title,
+            location=location,
+            **jobfilter_to_url_args(job_filter)
+        )
+        for location in locations
+    ]
 
 # Example usage:
 # print(userprofile_to_search_url("Full Stack Engineer"))

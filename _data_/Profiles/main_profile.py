@@ -53,10 +53,19 @@ class UserProfile:
     job_titles: List[JobTitle]  # List of JobTitle instances
     dice_job_filter: JobFilter  # User's job filter preferences
     main_interview_questions: InterviewAnswerDataset  # General interview questions
-    city: str
+    cities: List[str]
     country: str
     timezone: str
     apply_every: ApplyEvery
+
+    @property
+    def city(self) -> str:
+        return self.cities[0] if self.cities else ""
+
+    @city.setter
+    def city(self, value: str) -> None:
+        normalized = (value or "").strip()
+        self.cities = [normalized] if normalized else []
 
 
 # Instantiate the user_profile at the module level for importing
@@ -205,7 +214,7 @@ user_profile = UserProfile(
     job_titles=job_titles,
     dice_job_filter=dice_job_filter,
     main_interview_questions=interview_data,
-    city="Denver",
+    cities=["Remote", "Denver", "Boulder", "Aurora"],
     country="USA",
     timezone="MST",  # Mountain Standard Time
     apply_every=ApplyEvery.EIGHT_HOURS  # Apply every 8 hours
@@ -221,7 +230,8 @@ def display_profile(profile: UserProfile):
     print(f"Phone Number: {profile.phone_number}")
     print(f"LinkedIn: {profile.linkedin_profile}")
     print(f"About Me: {profile.about_me}")
-    print(f"City: {profile.city}")
+    print(f"Primary City: {profile.city}")
+    print(f"Cities: {', '.join(profile.cities)}")
     print(f"Country: {profile.country}")
     print(f"Timezone: {profile.timezone}")
     print(f"Apply Every: {profile.apply_every.value}")

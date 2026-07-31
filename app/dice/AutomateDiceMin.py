@@ -18,7 +18,7 @@ from app.dice.utils.utils import close_extra_tabs, logout_and_close
 from typing import List, Optional, Set
 import time
 from datetime import datetime
-from app.dice.utils.profile_to_url import userprofile_to_search_url
+from app.dice.utils.profile_to_url import userprofile_locations, userprofile_to_search_urls
 
 # Load environment variables from .env file (robust search)
 # 1) Prefer loading relative to the project root derived from this file's location
@@ -289,119 +289,120 @@ def main(
             print("======================================\n")
 
         job_titles_to_process = [] if only_recommended else user_profile.job_titles
+        locations = userprofile_locations(user_profile)
         for job_title in job_titles_to_process:
-            if max_jobs is not None and total_jobs_processed >= max_jobs:
-                print(f"[LIMIT] Reached max jobs for run ({max_jobs}). Stopping.")
-                break
-            # Session can expire during long runs; re-auth before each title.
-            if not _session_is_valid(page):
-                print("[SESSION] Detected logged-out state before title search. Re-authenticating.")
-                login(page, secret_email, secret_password)
-                if reuse_session and session_file:
-                    try:
-                        context.storage_state(path=str(session_file))
-                        print(f"[SESSION] Saved refreshed storage state: {session_file}")
-                    except Exception as e:
-                        print(f"[SESSION] Failed to save refreshed storage state: {e}")
             search_keyword = job_title.title
-            print('Processing job title:', search_keyword)
-            search_url = userprofile_to_search_url(search_keyword)
-            print(f"Navigating to search URL: {search_url}")
-            if not first_run:
-                close_extra_tabs(context)
-                page = context.new_page()  # Always create a new page after closing tabs
-            else:
-                first_run = False
-                # Use the original page created before the loop
-            # More robust navigation with retry and longer timeouts
-            try:
-                page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
-            except Exception as e:
-                print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...")
+            search_urls = userprofile_to_search_urls(search_keyword)
+            for location, search_url in zip(locations, search_urls):
+                if max_jobs is not None and total_jobs_processed >= max_jobs:
+                    print(f"[LIMIT] Reached max jobs for run ({max_jobs}). Stopping.")
+                    break
+                # Session can expire during long runs; re-auth before each title/location search.
+                if not _session_is_valid(page):
+                    print("[SESSION] Detected logged-out state before title search. Re-authenticating.")
+                    login(page, secret_email, secret_password)
+                    if reuse_session and session_file:
+                        try:
+                            context.storage_state(path=str(session_file))
+                            print(f"[SESSION] Saved refreshed storage state: {session_file}")
+                        except Exception as e:
+                            print(f"[SESSION] Failed to save refreshed storage state: {e}")
+                print(f"Processing job title: {search_keyword} | Location: {location}")
+                print(f"Navigating to search URL: {search_url}")
+                if not first_run:
+                    close_extra_tabs(context)
+                    page = context.new_page()  # Always create a new page after closing tabs
+                else:
+                    first_run = False
+                    # Use the original page created before the loop
+                # More robust navigation with retry and longer timeouts
                 try:
-                    page.close()
+                    page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
+                except Exception as e:
+                    print(f"[NAVIGATE] First attempt failed ({e}). Retrying once...")
+                    try:
+                        page.close()
+                    except Exception:
+                        pass
+                    page = context.new_page()
+                    try:
+                        page.goto(search_url, wait_until="domcontentloaded", timeout=90000)
+                    except Exception as e2:
+                        print(f"[NAVIGATE] Second attempt failed: {e2}")
+                        # Skip this job title/location and continue to keep the run alive
+                        continue
+                try:
+                    page.wait_for_load_state("networkidle", timeout=30000)
                 except Exception:
                     pass
-                page = context.new_page()
-                try:
-                    page.goto(search_url, wait_until="domcontentloaded", timeout=90000)
-                except Exception as e2:
-                    print(f"[NAVIGATE] Second attempt failed: {e2}")
-                    # Skip this job title and continue to the next to keep the run alive
+                time.sleep(2)
+                if debug_dir:
+                    _save_debug_html(page, debug_dir, f"{search_keyword}_{location}")
+                job_ids: List[str] = []
+                url = page.url
+                extract_job_ids(page, job_ids)
+
+                filtered_job_ids: List[str] = []
+                for job_id in job_ids:
+                    if job_id in processed_job_ids:
+                        print(f"[SKIP/RUN DUPLICATE] Already processed in this run: {job_id}")
+                        continue
+                    if job_id in applied_job_ids:
+                        print(f"[SKIP/TRACKED] Already applied from local history: {job_id}")
+                        continue
+                    filtered_job_ids.append(job_id)
+                if len(filtered_job_ids) != len(job_ids):
+                    print(
+                        f"[TRACKING] Queued {len(filtered_job_ids)} new IDs "
+                        f"after removing {len(job_ids) - len(filtered_job_ids)} tracked/duplicate IDs."
+                    )
+                job_ids = filtered_job_ids
+
+                if max_jobs_per_title is not None:
+                    job_ids = job_ids[:max_jobs_per_title]
+                    print(f"[LIMIT] Per-title cap applied ({max_jobs_per_title}). Jobs queued: {len(job_ids)}")
+                if max_jobs is not None:
+                    remaining = max_jobs - total_jobs_processed
+                    if remaining <= 0:
+                        print(f"[LIMIT] Reached max jobs for run ({max_jobs}).")
+                        break
+                    if len(job_ids) > remaining:
+                        job_ids = job_ids[:remaining]
+                        print(f"[LIMIT] Run cap remaining {remaining}. Trimming current queue to {len(job_ids)}.")
+
+                if not job_ids:
+                    print("[SKIP] No jobs queued for this title/location after filters/limits.")
                     continue
-            # Wait a bit more for network to settle before scraping
-            try:
-                page.wait_for_load_state("networkidle", timeout=30000)
-            except Exception:
-                # Not fatal; proceed with a short sleep buffer
-                pass
-            time.sleep(2)
-            if debug_dir:
-                _save_debug_html(page, debug_dir, search_keyword)
-            job_ids: List[str] = []
-            url = page.url
-            extract_job_ids(page, job_ids)
+                processed_job_ids.update(job_ids)
 
-            filtered_job_ids: List[str] = []
-            for job_id in job_ids:
-                if job_id in processed_job_ids:
-                    print(f"[SKIP/RUN DUPLICATE] Already processed in this run: {job_id}")
-                    continue
-                if job_id in applied_job_ids:
-                    print(f"[SKIP/TRACKED] Already applied from local history: {job_id}")
-                    continue
-                filtered_job_ids.append(job_id)
-            if len(filtered_job_ids) != len(job_ids):
-                print(
-                    f"[TRACKING] Queued {len(filtered_job_ids)} new IDs "
-                    f"after removing {len(job_ids) - len(filtered_job_ids)} tracked/duplicate IDs."
-                )
-            job_ids = filtered_job_ids
-
-            if max_jobs_per_title is not None:
-                job_ids = job_ids[:max_jobs_per_title]
-                print(f"[LIMIT] Per-title cap applied ({max_jobs_per_title}). Jobs queued: {len(job_ids)}")
-            if max_jobs is not None:
-                remaining = max_jobs - total_jobs_processed
-                if remaining <= 0:
-                    print(f"[LIMIT] Reached max jobs for run ({max_jobs}).")
-                    break
-                if len(job_ids) > remaining:
-                    job_ids = job_ids[:remaining]
-                    print(f"[LIMIT] Run cap remaining {remaining}. Trimming current queue to {len(job_ids)}.")
-
-            if not job_ids:
-                print("[SKIP] No jobs queued for this title after filters/limits.")
-                continue
-            processed_job_ids.update(job_ids)
-
-            (
-                applied,
-                failed,
-                failed_jobs,
-                skipped,
-                already_applied_count,
-                no_apply_button_count,
-                success_count,
-            ) = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
-            # Accumulate into grand totals
-            grand_applied += applied
-            grand_failed += failed
-            grand_skipped += skipped
-            grand_already_applied += already_applied_count
-            grand_no_btn += no_apply_button_count
-            grand_success += success_count
-            total_jobs_processed += len(job_ids)
-            print(f"\n---------- [{search_keyword}] Summary ----------")
-            print(f"  Applied:       {applied}")
-            print(f"  Skipped:       {skipped} (already_applied={already_applied_count}, no_button={no_apply_button_count})")
-            print(f"  Failed:        {failed}")
-            print(f"  Processed so far (run total): {total_jobs_processed}")
-            if failed_jobs:
-                print("  Failed jobs:")
-                for job in failed_jobs:
-                    print("    -", job)
-            print("-" * 50)
+                (
+                    applied,
+                    failed,
+                    failed_jobs,
+                    skipped,
+                    already_applied_count,
+                    no_apply_button_count,
+                    success_count,
+                ) = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
+                grand_applied += applied
+                grand_failed += failed
+                grand_skipped += skipped
+                grand_already_applied += already_applied_count
+                grand_no_btn += no_apply_button_count
+                grand_success += success_count
+                total_jobs_processed += len(job_ids)
+                print(f"\n---------- [{search_keyword} | {location}] Summary ----------")
+                print(f"  Applied:       {applied}")
+                print(f"  Skipped:       {skipped} (already_applied={already_applied_count}, no_button={no_apply_button_count})")
+                print(f"  Failed:        {failed}")
+                print(f"  Processed so far (run total): {total_jobs_processed}")
+                if failed_jobs:
+                    print("  Failed jobs:")
+                    for job in failed_jobs:
+                        print("    -", job)
+                print("-" * 50)
+            if max_jobs is not None and total_jobs_processed >= max_jobs:
+                break
         # ========== GRAND TOTAL SUMMARY ==========
         print("\n" + "=" * 50)
         print("          GRAND TOTAL SUMMARY FOR RUN")

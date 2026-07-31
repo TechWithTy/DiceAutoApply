@@ -1,9 +1,14 @@
 """
 Test for profile_to_url.py: ensures userprofile_to_search_url builds a valid Dice job search URL from profile filters.
 """
+from types import SimpleNamespace
+
 from _data_.Filters.diceFilterSettings import JobFilter
+from app.dice.utils import profile_to_url as profile_to_url_module
 from app.dice.utils.profile_to_url import jobfilter_to_url_args
+from app.dice.utils.profile_to_url import userprofile_locations
 from app.dice.utils.profile_to_url import userprofile_to_search_url
+from app.dice.utils.profile_to_url import userprofile_to_search_urls
 
 def test_userprofile_to_search_url():
     job_title = "Full Stack Engineer"
@@ -22,6 +27,33 @@ def test_jobfilter_to_url_args_omits_workplace_types_when_unset():
     args = jobfilter_to_url_args(job_filter)
 
     assert args["workplace_types"] == []
+
+
+def test_userprofile_locations_uses_multiple_cities():
+    profile = SimpleNamespace(cities=["Remote", "Denver", "Austin"], country="USA")
+
+    locations = userprofile_locations(profile)
+
+    assert locations == ["Remote", "Denver, USA", "Austin, USA"]
+
+
+def test_userprofile_to_search_urls_builds_one_url_per_city(monkeypatch):
+    job_filter = JobFilter()
+    job_filter.set_posted_date(JobFilter.PostedDate.LAST_3_DAYS)
+    profile = SimpleNamespace(
+        cities=["Remote", "Denver", "Austin"],
+        country="USA",
+        dice_job_filter=job_filter,
+    )
+    monkeypatch.setattr(profile_to_url_module, "user_profile", profile)
+
+    urls = userprofile_to_search_urls("Full Stack Engineer")
+
+    assert len(urls) == 3
+    assert "location=Remote" in urls[0]
+    assert "location=Denver%2C+USA" in urls[1]
+    assert "location=Austin%2C+USA" in urls[2]
+    assert all("filters.workplaceTypes=Remote" not in url for url in urls)
 
 if __name__ == "__main__":
     test_userprofile_to_search_url()
