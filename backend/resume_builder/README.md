@@ -29,3 +29,11 @@ python generator.py data/front_end_dev_google.json output/front_end_dev_google_r
 # Generate Cover Letter
 python generator.py data/front_end_dev_google_cl.json output/front_end_dev_google_cover_letter.pdf --template cover_letter
 ```
+
+## Technical Resume Prompt
+
+`prompts/technical_resume_optimization.poml` is the reusable Prompt Orchestration
+Markup Language source for optimized technical resumes. Provide the structured
+candidate profile and target role (plus an optional job description) to generate
+template-compatible JSON. It requires evidence-backed STAR/CAR achievement bullets,
+ATS-safe terminology, and complete reverse-chronological work history.

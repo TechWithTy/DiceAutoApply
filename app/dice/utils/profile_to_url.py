@@ -58,7 +58,13 @@ def userprofile_locations(profile=user_profile) -> list[str]:
             if normalized.casefold() == "remote":
                 normalized_locations.append("Remote")
             else:
-                normalized_locations.append(", ".join(part for part in [normalized, country] if part))
+                normalized_parts = [part.strip() for part in normalized.split(",") if part.strip()]
+                if country and (
+                    not normalized_parts
+                    or normalized_parts[-1].casefold() != country.casefold()
+                ):
+                    normalized_parts.append(country)
+                normalized_locations.append(", ".join(normalized_parts))
         return normalized_locations
 
     location = ", ".join(

@@ -24,20 +24,33 @@ class JobFilter:
         LAST_3_DAYS = "Last 3 Days"
         LAST_7_DAYS = "Last 7 Days"
 
-    work_setting: Optional[str] = None  # Only one can be selected
+    work_setting: List[str] = field(default_factory=list)
     posted_date: Optional[str] = None  # Only one can be selected
     employment_types: List[str] = field(default_factory=list)  # Multiple can be selected
     willing_to_sponsor: bool = False  # Only one can be true
     employer_types: List[str] = field(default_factory=list)  # Multiple can be selected
     easy_apply: bool = False  # Only one can be true
 
-    def set_work_setting(self, setting: Optional[str]):
-        if setting is None:
-            self.work_setting = None
-            return
+    def _validate_work_setting(self, setting: str) -> str:
         if setting not in [self.WorkSetting.ONSITE, self.WorkSetting.REMOTE, self.WorkSetting.HYBRID]:
             raise ValueError(f"Invalid work setting: {setting}")
-        self.work_setting = setting
+        return setting
+
+    def set_work_setting(self, setting: Optional[str | List[str]]):
+        if setting is None:
+            self.work_setting = []
+            return
+        if isinstance(setting, list):
+            self.work_setting = []
+            for item in setting:
+                self.add_work_setting(item)
+            return
+        self.work_setting = [self._validate_work_setting(setting)]
+
+    def add_work_setting(self, setting: str):
+        normalized = self._validate_work_setting(setting)
+        if normalized not in self.work_setting:
+            self.work_setting.append(normalized)
 
     def set_posted_date(self, date: str):
         if date not in [self.PostedDate.ANY_DATE, self.PostedDate.TODAY, self.PostedDate.LAST_3_DAYS, self.PostedDate.LAST_7_DAYS]:
@@ -67,9 +80,13 @@ class JobFilter:
 # Default Dice filter configuration used by the app/profile modules.
 dice_job_filter = JobFilter()
 dice_job_filter.set_posted_date(JobFilter.PostedDate.LAST_3_DAYS)  # Added posted date of today
-# Leave workplace filtering unset by default so location-based searches can
-# return on-site, hybrid, and remote jobs unless a specific mode is requested.
-dice_job_filter.set_work_setting(None)
+dice_job_filter.set_work_setting(
+    [
+        JobFilter.WorkSetting.REMOTE,
+        JobFilter.WorkSetting.HYBRID,
+        JobFilter.WorkSetting.ONSITE,
+    ]
+)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.FULL_TIME)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.CONTRACT)
 dice_job_filter.add_employment_type(JobFilter.EmploymentType.THIRD_PARTY)

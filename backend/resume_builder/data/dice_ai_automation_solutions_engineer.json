@@ -1,0 +1,97 @@
+{
+  "name": "Tyrique Daniel",
+  "headline": "SENIOR AI SOLUTIONS ENGINEER | AUTOMATION & INTEGRATIONS",
+  "contact": ["Denver, CO", "628-303-8011", "tyrique1.daniel@gmail.com"],
+  "links_line": "Portfolio: ty-dev-port.vercel.app | GitHub: github.com/techwithty",
+  "summary": "Senior AI Solutions Engineer with 8+ years of experience designing and delivering production software, AI-enabled workflows, API integrations, and cloud infrastructure. Strong background in TypeScript, Python, React/Next.js, Node.js, PostgreSQL, AWS, Google Cloud, and workflow orchestration. Experienced in translating business requirements into scalable technical solutions, integrating CRM and third-party platforms, automating operational workflows, and guiding products from discovery through deployment. Combines hands-on engineering depth with strong cross-functional communication across customers, product teams, and engineering organizations.",
+  "skills": [
+    {"label": "Languages", "items": ["TypeScript", "JavaScript", "Python", "Go"]},
+    {"label": "Applications", "items": ["React", "Next.js", "Node.js", "Django"]},
+    {"label": "Integrations", "items": ["REST APIs", "GraphQL", "Webhooks", "CRM Integrations"]},
+    {"label": "AI & Data", "items": ["LLMs", "AI Agents", "PySpark", "PostgreSQL"]},
+    {"label": "Cloud & Delivery", "items": ["AWS", "Google Cloud", "Docker", "Kubernetes"]}
+  ],
+  "experience": [
+    {
+      "org": "Deal Scale",
+      "title": "Lead Software Engineer",
+      "dates": "Jul 2025 - Present",
+      "location": "Denver, CO - Remote",
+      "bullets": [
+        "Architected an AI sales automation platform that integrated LLMs, CRM systems, APIs, webhooks, and workflow services to automate lead enrichment, qualification, follow-up, and multi-channel outreach.",
+        "Designed event-driven infrastructure with Apache Pulsar, Kubernetes, Docker, and Redis/Valkey, supporting 40% growth in platform workloads without performance degradation.",
+        "Built reusable CRM integration patterns that synchronized customer data, campaign activity, and workflow state across external automation platforms.",
+        "Developed AI agent orchestration that combined business rules, structured data, APIs, and language models to execute customer-facing sales workflows.",
+        "Engineered data-ingestion and enrichment pipelines processing 140M+ property records, improving the data foundation for lead scoring, personalization, and automated decisions."
+      ]
+    },
+    {
+      "org": "CoVoice",
+      "title": "Founding Engineer",
+      "dates": "Dec 2024 - Jun 2025",
+      "location": "Denver, CO - Hybrid",
+      "bullets": [
+        "Translated product requirements into a cross-platform communication architecture using React Native, Django, Java, Go, PostgreSQL, and cloud services.",
+        "Optimized Django APIs and PostgreSQL data-access patterns for real-time workloads, reducing API response times by 50%.",
+        "Integrated AI speech and language-processing workflows with AWS, Apache Ray, and Kubernetes, reducing inference latency by 40%.",
+        "Built CI/CD and deployment workflows with GitHub Actions, Docker, Kubernetes, and Terraform, reducing manual iOS and Android deployment errors by 60%.",
+        "Led technical coordination across a distributed engineering team, converting product goals into implementation plans, deployment workflows, and production releases."
+      ]
+    },
+    {
+      "org": "Google DeepMind",
+      "title": "Full Stack AI Engineer",
+      "dates": "Mar 2023 - Dec 2024",
+      "location": "Mountain View, CA - Remote",
+      "bullets": [
+        "Developed full-stack AI applications with React, Next.js, Python, Django, Flask, and PostgreSQL, connecting production AI services to user-facing workflows.",
+        "Designed distributed AI infrastructure using Google Cloud, Kubernetes, Apache Ray, Redis, and Docker, reducing AI response time by 40% under high-demand workloads.",
+        "Built PySpark and Pandas pipelines that reduced real-time and batch data-processing time by 50%.",
+        "Partnered across product, engineering, and infrastructure teams to integrate AI capabilities into scalable production systems."
+      ]
+    },
+    {
+      "org": "Google",
+      "title": "Senior Full Stack Engineer",
+      "dates": "Feb 2022 - Mar 2023",
+      "location": "Remote",
+      "bullets": [
+        "Built scalable TypeScript, JavaScript, React, and Go applications, translating product and UX requirements into maintainable production software.",
+        "Designed backend services and APIs that supported large-scale application workflows.",
+        "Built CI/CD and testing workflows that reduced deployment time by 40% while improving release consistency."
+      ]
+    },
+    {
+      "org": "StayBeyondGreen",
+      "title": "Lead Full Stack Developer",
+      "dates": "Dec 2020 - Feb 2022",
+      "location": "Remote",
+      "bullets": [
+        "Built responsive product experiences and backend integrations with React, Node.js, Express, Apollo, and GraphQL, reducing page load times by 30%.",
+        "Redesigned application data flow and backend services, improving application performance by 25%."
+      ]
+    },
+    {
+      "org": "Modis (Akkodis)",
+      "title": "Front End Developer",
+      "dates": "Aug 2018 - Jul 2020",
+      "location": "Remote",
+      "bullets": [
+        "Developed and maintained React, JavaScript, CSS, Bootstrap, and SCSS web applications, improving site performance and user experience.",
+        "Introduced lazy loading, memoization, and efficient state management, increasing site traffic by 20% while improving accessibility and cross-browser reliability."
+      ]
+    },
+    {
+      "org": "Powermoves and Pumps",
+      "title": "Web Developer",
+      "dates": "Nov 2016 - Dec 2018",
+      "location": "Contract",
+      "bullets": [
+        "Developed and maintained client web applications using HTML5, CSS, and JavaScript, aligning functionality with business requirements and improving user engagement by 20%.",
+        "Optimized front-end code for responsive, cross-platform delivery, reducing page load times by 30% and improving accessibility across devices."
+      ]
+    }
+  ],
+  "education": [{"school": "Western Governors University", "degree": "Bachelor of Science, Software Engineering", "dates": "2020 - 2023"}],
+  "certifications": ["Google Professional Cloud Architect", "Meta Front-End Developer Professional Certificate", "Hugging Face Transformers Certification"]
+}
