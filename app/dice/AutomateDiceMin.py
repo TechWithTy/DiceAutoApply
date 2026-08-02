@@ -72,6 +72,49 @@ def _save_debug_html(page, debug_dir: Path, job_title: str) -> Optional[Path]:
         return None
 
 
+def _sync_visible_search_fields(page, search_keyword: str, location: str) -> None:
+    """Keep only the keyword field aligned without disturbing URL-selected city."""
+    field_pairs = [
+        (
+            search_keyword,
+            [
+                'input[name="q"]',
+                'input[placeholder*="job title" i]',
+                'input[placeholder*="search jobs" i]',
+                '#typeaheadInput',
+            ],
+            "keyword",
+        ),
+    ]
+
+    # Dice's location control is an autocomplete. Refilling it after navigation
+    # can clear the committed URL location when the exact display string differs
+    # from Dice's suggestion text. The URL generated for this queue already holds
+    # the intended city, so leave that field untouched.
+    if location:
+        print(f"[SEARCH UI] Preserving URL-selected location: {location}")
+
+    for target_value, selectors, label in field_pairs:
+        if not target_value:
+            continue
+        for selector in selectors:
+            try:
+                locator = page.locator(selector).first
+                locator.wait_for(state="visible", timeout=1500)
+                current_value = (locator.input_value() or "").strip()
+                if current_value == target_value:
+                    break
+                locator.click()
+                locator.fill("")
+                locator.fill(target_value)
+                locator.dispatch_event("input")
+                locator.dispatch_event("change")
+                print(f"[SEARCH UI] Synced visible {label} field to: {target_value}")
+                break
+            except Exception:
+                continue
+
+
 def _session_is_valid(page) -> bool:
     """Check if current browser context is already authenticated on Dice."""
     try:
@@ -85,10 +128,19 @@ def _session_is_valid(page) -> bool:
             return False
         # Dice can still render jobs while anonymous; detect login/register prompts.
         try:
-            login_links = page.locator('a[href*="/dashboard/login"], a[href*="/register"], a[href*="/employers/login"]').count()
-            login_register_text = page.locator("button:has-text('Login/Register'), a:has-text('Login'), a:has-text('Register')").count()
-            if login_links > 0 or login_register_text > 0:
-                return False
+            login_prompt_selectors = [
+                'a[href*="/dashboard/login"]',
+                'a[href*="/register"]',
+                'a[href*="/employers/login"]',
+                "button:has-text('Login/Register')",
+                "a:has-text('Login')",
+                "a:has-text('Register')",
+            ]
+            for selector in login_prompt_selectors:
+                locator = page.locator(selector)
+                for index in range(min(locator.count(), 3)):
+                    if locator.nth(index).is_visible():
+                        return False
         except Exception:
             pass
         return True
@@ -267,11 +319,18 @@ def main(
                                 print(f"[LIMIT] Trimming recommended jobs queue to {len(filtered_rec_job_ids)}.")
                         
                         if filtered_rec_job_ids and (max_jobs is None or total_jobs_processed < max_jobs):
+                            remaining = None if max_jobs is None else max_jobs - total_jobs_processed
                             print(f"Applying to {len(filtered_rec_job_ids)} Recommended Easy Apply Jobs...")
                             processed_job_ids.update(filtered_rec_job_ids)
                             (
-                                app, fail, fail_jobs, skip, alr, no_btn, succ
-                            ) = write_job_titles_to_file(page, filtered_rec_job_ids, page.url, known_applied_job_ids=applied_job_ids)
+                                app, fail, fail_jobs, skip, alr, no_btn, succ, processed_count
+                            ) = write_job_titles_to_file(
+                                page,
+                                filtered_rec_job_ids,
+                                page.url,
+                                known_applied_job_ids=applied_job_ids,
+                                max_jobs_to_process=remaining,
+                            )
                             grand_applied += app
                             grand_failed += fail
                             grand_skipped += skip
@@ -279,7 +338,7 @@ def main(
                             grand_no_btn += no_btn
                             grand_success += succ
                             print(f"Recommended Jobs successfully applied: {app}")
-                            total_jobs_processed += len(filtered_rec_job_ids)
+                            total_jobs_processed += processed_count
                     else:
                         print("No new Easy Apply recommended jobs found to apply for.")
                 else:
@@ -292,8 +351,16 @@ def main(
         locations = userprofile_locations(user_profile)
         for job_title in job_titles_to_process:
             search_keyword = job_title.title
-            search_urls = userprofile_to_search_urls(search_keyword)
-            for location, search_url in zip(locations, search_urls):
+            for location in locations:
+                workplace_settings = (
+                    getattr(job_title, "remote_work_settings", None)
+                    if location.casefold() == "remote"
+                    else getattr(job_title, "work_settings", None)
+                )
+                search_url = userprofile_to_search_urls(
+                    search_keyword,
+                    workplace_settings=workplace_settings,
+                )[locations.index(location)]
                 if max_jobs is not None and total_jobs_processed >= max_jobs:
                     print(f"[LIMIT] Reached max jobs for run ({max_jobs}). Stopping.")
                     break
@@ -336,6 +403,7 @@ def main(
                 except Exception:
                     pass
                 time.sleep(2)
+                _sync_visible_search_fields(page, search_keyword, location)
                 if debug_dir:
                     _save_debug_html(page, debug_dir, f"{search_keyword}_{location}")
                 job_ids: List[str] = []
@@ -358,22 +426,23 @@ def main(
                     )
                 job_ids = filtered_job_ids
 
-                if max_jobs_per_title is not None:
-                    job_ids = job_ids[:max_jobs_per_title]
-                    print(f"[LIMIT] Per-title cap applied ({max_jobs_per_title}). Jobs queued: {len(job_ids)}")
                 if max_jobs is not None:
                     remaining = max_jobs - total_jobs_processed
                     if remaining <= 0:
                         print(f"[LIMIT] Reached max jobs for run ({max_jobs}).")
                         break
-                    if len(job_ids) > remaining:
-                        job_ids = job_ids[:remaining]
-                        print(f"[LIMIT] Run cap remaining {remaining}. Trimming current queue to {len(job_ids)}.")
 
                 if not job_ids:
                     print("[SKIP] No jobs queued for this title/location after filters/limits.")
                     continue
                 processed_job_ids.update(job_ids)
+
+                queue_limit = max_jobs_per_title
+                if max_jobs is not None:
+                    remaining = max_jobs - total_jobs_processed
+                    queue_limit = remaining if queue_limit is None else min(queue_limit, remaining)
+                if queue_limit is not None:
+                    print(f"[LIMIT] Eligible-job cap for this queue: {queue_limit}")
 
                 (
                     applied,
@@ -383,14 +452,22 @@ def main(
                     already_applied_count,
                     no_apply_button_count,
                     success_count,
-                ) = write_job_titles_to_file(page, job_ids, url, known_applied_job_ids=applied_job_ids)
+                    processed_count,
+                ) = write_job_titles_to_file(
+                    page,
+                    job_ids,
+                    url,
+                    known_applied_job_ids=applied_job_ids,
+                    target_job=job_title,
+                    max_jobs_to_process=queue_limit,
+                )
                 grand_applied += applied
                 grand_failed += failed
                 grand_skipped += skipped
                 grand_already_applied += already_applied_count
                 grand_no_btn += no_apply_button_count
                 grand_success += success_count
-                total_jobs_processed += len(job_ids)
+                total_jobs_processed += processed_count
                 print(f"\n---------- [{search_keyword} | {location}] Summary ----------")
                 print(f"  Applied:       {applied}")
                 print(f"  Skipped:       {skipped} (already_applied={already_applied_count}, no_button={no_apply_button_count})")

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 import os
 
 # Import the JobFilter class
@@ -32,6 +32,16 @@ class JobTitle:
     interview_questions: InterviewAnswerDataset  # Move this before skills
     skills: List[str] = field(default_factory=list)
     max_apply_jobs: int = 100  # Default value for max_apply_jobs
+    uploaded_resume_name: Optional[str] = None  # Existing Dice resume label/file name to re-select
+    generated_resume_profile_id: Optional[str] = None  # Generated profile id from backend/resume_builder/data/generated_profiles
+    work_settings: Optional[List[str]] = None  # Local search settings; None uses the profile-wide filter.
+    remote_work_settings: Optional[List[str]] = field(
+        default_factory=lambda: [
+            JobFilter.WorkSetting.REMOTE,
+            JobFilter.WorkSetting.HYBRID,
+            JobFilter.WorkSetting.ONSITE,
+        ]
+    )  # Override per title when a Remote search should use a narrower setting.
 
 
 class ApplyEvery(Enum):
@@ -70,13 +80,19 @@ class UserProfile:
 
 # Instantiate the user_profile at the module level for importing
 interview_data = InterviewAnswerDataset()
+MAIN_DICE_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel Updated Data Resume.pdf"
+AI_SOLUTIONS_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - AI Automation Solutions Engineer.pdf"
+TECHNICAL_LEAD_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - Technical Lead Founding Engineer.pdf"
+FORWARD_DEPLOYED_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - Forward Deployed Engineer.pdf"
+BACKEND_PLATFORM_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - Senior Backend Platform Engineer.pdf"
+
 job_titles = [
    
 
          JobTitle(
         title="Full Stack AI Engineer",
         experience=6,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
             "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
@@ -87,7 +103,7 @@ job_titles = [
     JobTitle(
         title="AI Integration Engineer",
         experience=6,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
         skills=[
             "Python", "JavaScript", "React", "Node.js", "Golang", "Docker",
             "Kubernetes", "GraphQL", "CI/CD", "Machine Learning Integration"
@@ -98,7 +114,7 @@ job_titles = [
     JobTitle(
         title="Senior Full Stack Developer",
         experience=7,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "JavaScript", "React", "Next.js", "Node.js", "Golang", "GraphQL",
             "Docker", "Kubernetes", "CI/CD", "TypeScript", "Git"
@@ -109,7 +125,7 @@ job_titles = [
     JobTitle(
         title="Full Stack Engineer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "JavaScript", "React", "Node.js", "Python", "Golang", "Docker",
             "CI/CD", "Git", "GraphQL", "HTML5", "CSS3"
@@ -120,7 +136,7 @@ job_titles = [
     JobTitle(
         title="Frontend Engineer",
         experience=4,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "JavaScript", "React", "Next.js", "HTML5", "CSS3", "Tailwind CSS",
             "GraphQL", "REST APIs", "AI Integration"
@@ -131,7 +147,7 @@ job_titles = [
     JobTitle(
         title="TypeScript Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "TypeScript", "JavaScript", "React", "Next.js", "Node.js", "Python", "Golang", "Docker", "CI/CD", "GraphQL", "HTML5", "CSS3"
         ],
@@ -141,7 +157,7 @@ job_titles = [
     JobTitle(
         title="React Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "React", "JavaScript", "Next.js", "HTML5", "CSS3", "TypeScript",
             "GraphQL", "REST APIs", "Tailwind CSS"
@@ -152,7 +168,7 @@ job_titles = [
     JobTitle(
         title="Next.js Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "Next.js", "React", "JavaScript", "TypeScript", "HTML5", "CSS3",
             "GraphQL", "REST APIs", "Tailwind CSS"
@@ -163,7 +179,7 @@ job_titles = [
     JobTitle(
         title="Full Stack Software Engineer",
         experience=6,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "JavaScript", "React", "Node.js", "Golang", "GraphQL", "Docker",
             "CI/CD", "HTML5", "CSS3", "TypeScript", "Git"
@@ -174,7 +190,7 @@ job_titles = [
     JobTitle(
         title="Web Developer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=MAIN_DICE_RESUME,
         skills=[
             "JavaScript", "Next.js", "React", "TypeScript", "GraphQL",
             "HTML5", "CSS3", "Tailwind CSS", "REST APIs", "Node.js"
@@ -185,13 +201,197 @@ job_titles = [
     JobTitle(
         title="Founding Engineer",
         experience=5,
-        relevant_resume_path=r"_data_\\Resumes\\Dice\\8-5-24-Ai-Full-Stack.pdf",
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
         skills=[
-            "JavaScript", "Next.js", "React", "TypeScript", "GraphQL",
-            "HTML5", "CSS3", "Tailwind CSS", "REST APIs", "Node.js"
+            "System Design", "TypeScript", "React", "Node.js", "Python",
+            "PostgreSQL", "Kubernetes", "Terraform", "Technical Strategy"
         ],
         interview_questions=interview_data,
         max_apply_jobs=80
+    ),
+    JobTitle(
+        title="AI Solutions Engineer",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["TypeScript", "Python", "REST APIs", "CRM Integrations", "LLMs", "AWS", "Google Cloud", "Kubernetes"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="AI Automation Engineer",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["Python", "TypeScript", "AI Agents", "LLMs", "Webhooks", "REST APIs", "CRM Integrations", "Docker"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Solutions Architect",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["System Design", "API Design", "AWS", "Google Cloud", "Kubernetes", "CRM Integrations", "PostgreSQL"],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Technical Solutions Engineer",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["Python", "TypeScript", "REST APIs", "GraphQL", "Webhooks", "Customer Integrations", "AWS"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Implementation Engineer",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["API Integrations", "REST APIs", "Webhooks", "CRM Integrations", "Python", "PostgreSQL", "Docker"],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Forward Deployed Engineer",
+        experience=8,
+        relevant_resume_path=FORWARD_DEPLOYED_RESUME,
+        skills=["Python", "TypeScript", "LLMs", "AI Agents", "API Integrations", "AWS", "Kubernetes"],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Senior Backend Engineer",
+        experience=8,
+        relevant_resume_path=BACKEND_PLATFORM_RESUME,
+        skills=["Python", "Node.js", "Go", "PostgreSQL", "REST APIs", "Microservices", "Event-Driven Systems", "Kubernetes"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Senior Platform Engineer",
+        experience=8,
+        relevant_resume_path=BACKEND_PLATFORM_RESUME,
+        skills=["Python", "Go", "Apache Pulsar", "Redis", "Kubernetes", "Docker", "AWS", "Google Cloud", "Observability"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Integration Engineer",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["REST APIs", "GraphQL", "Webhooks", "CRM Integrations", "Node.js", "Python", "PostgreSQL"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Customer Engineer",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["Technical Discovery", "API Integrations", "CRM Integrations", "TypeScript", "Python", "AWS", "Google Cloud"],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="AI Consultant",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["LLMs", "AI Agents", "Workflow Automation", "API Integrations", "Python", "TypeScript", "Cloud Architecture"],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="Automation Architect",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["Workflow Orchestration", "Event-Driven Systems", "Apache Pulsar", "AI Agents", "CRM Integrations", "Kubernetes"],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="Technical Consultant",
+        experience=8,
+        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        skills=["Technical Discovery", "Solutions Architecture", "API Integrations", "REST APIs", "Python", "TypeScript", "AWS"],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="Lead Software Engineer",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["System Design", "TypeScript", "Python", "Event-Driven Systems", "Kubernetes", "PostgreSQL", "Technical Leadership"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Technical Lead",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["Architecture Reviews", "Technical Strategy", "React", "Node.js", "Python", "Kubernetes", "Team Leadership"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Engineering Lead",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["Technical Leadership", "System Design", "CI/CD", "Cloud Infrastructure", "Cross-Functional Delivery", "Mentorship"],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Lead Full Stack Engineer",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["TypeScript", "React", "Next.js", "Node.js", "Python", "PostgreSQL", "AWS", "Kubernetes"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Principal Engineer",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["System Design", "Microservices", "Event-Driven Systems", "Cloud Architecture", "Technical Strategy", "Architecture Reviews"],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="Startup CTO",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["Product Architecture", "Technical Strategy", "Team Leadership", "Cloud Platform", "CI/CD", "Full Stack Development"],
+        interview_questions=interview_data,
+        max_apply_jobs=50
+    ),
+    JobTitle(
+        title="Head of Engineering",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["Engineering Leadership", "Technical Strategy", "System Design", "Delivery Management", "Cloud Infrastructure", "Mentorship"],
+        interview_questions=interview_data,
+        max_apply_jobs=50
+    ),
+    JobTitle(
+        title="Senior Staff Engineer",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["System Design", "Distributed Systems", "Technical Strategy", "Event-Driven Systems", "Kubernetes", "PostgreSQL"],
+        interview_questions=interview_data,
+        max_apply_jobs=60
+    ),
+    JobTitle(
+        title="Platform Lead",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["Platform Architecture", "Kubernetes", "Docker", "Terraform", "CI/CD", "Observability", "AWS"],
+        interview_questions=interview_data,
+        max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Product Engineering Lead",
+        experience=8,
+        relevant_resume_path=TECHNICAL_LEAD_RESUME,
+        skills=["Product Architecture", "React", "Node.js", "Python", "Technical Strategy", "Cross-Functional Delivery", "CI/CD"],
+        interview_questions=interview_data,
+        max_apply_jobs=70
     )
 
 ]
@@ -214,7 +414,7 @@ user_profile = UserProfile(
     job_titles=job_titles,
     dice_job_filter=dice_job_filter,
     main_interview_questions=interview_data,
-    cities=["Remote", "Denver", "Boulder", "Aurora"],
+    cities=["Remote", "Denver, CO", "Boulder, CO", "Aurora, CO"],
     country="USA",
     timezone="MST",  # Mountain Standard Time
     apply_every=ApplyEvery.EIGHT_HOURS  # Apply every 8 hours

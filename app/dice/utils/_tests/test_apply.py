@@ -1,5 +1,6 @@
 import csv
 from collections import deque
+from types import SimpleNamespace
 
 import app.dice.utils.apply as apply_module
 
@@ -48,6 +49,16 @@ class _RootPage:
         return self._detail_pages.popleft()
 
 
+class _ResumeCardPage:
+    def __init__(self, filename):
+        self.filename = filename
+        self.script = ""
+
+    def evaluate(self, script):
+        self.script = script
+        return self.filename
+
+
 def _read_rows(path):
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
@@ -79,7 +90,7 @@ def test_write_job_titles_records_apply_outcomes(tmp_path, monkeypatch):
         csv_file=str(csv_file),
     )
 
-    assert result == (1, 1, ["Failed Engineer - Remote"], 2, 1, 1, 1)
+    assert result == (1, 1, ["Failed Engineer - Remote"], 2, 1, 1, 1, 4)
     rows = _read_rows(csv_file)
     assert [row["job_id"] for row in rows] == ["job-success", "job-already", "job-no-button", "job-failed"]
     assert [row["status"] for row in rows] == ["success", "already_applied", "no_apply_button", "failed"]
@@ -106,7 +117,7 @@ def test_write_job_titles_skips_known_applied_jobs(tmp_path, monkeypatch):
         known_applied_job_ids={"job-known"},
     )
 
-    assert result == (0, 0, [], 1, 1, 0, 0)
+    assert result == (0, 0, [], 1, 1, 0, 0, 0)
     assert calls == []
     assert _read_rows(csv_file) == []
 
@@ -151,7 +162,114 @@ def test_write_job_titles_skips_out_of_area_jobs_but_allows_remote(tmp_path, mon
         csv_file=str(csv_file),
     )
 
-    assert result == (1, 0, [], 1, 0, 0, 1)
+    assert result == (1, 0, [], 1, 0, 0, 1, 1)
     rows = _read_rows(csv_file)
     assert [row["status"] for row in rows] == ["location_filtered", "success"]
     assert calls == ["Dispatch Engineer - Remote in New York, NY, US | Dice.com"]
+
+
+def test_write_job_titles_cap_ignores_location_filtered_jobs(tmp_path, monkeypatch):
+    pages = [
+        _DetailPage("Senior Full Stack Developer - FourthSquare - New York, NY, US | Dice.com"),
+        _DetailPage("Dispatch Engineer - Remote in New York, NY, US | Dice.com"),
+        _DetailPage("Frontend Engineer - Denver, CO, US | Dice.com"),
+    ]
+    root_page = _RootPage(pages)
+    csv_file = tmp_path / "results.csv"
+    calls = []
+
+    monkeypatch.setattr(
+        apply_module,
+        "evaluate_and_apply",
+        lambda page, *_args, **_kwargs: calls.append(page.title) or "success",
+    )
+    monkeypatch.setattr(
+        apply_module,
+        "user_profile",
+        type("Profile", (), {"cities": ["Remote", "Denver"], "city": "Remote"})(),
+    )
+
+    result = apply_module.write_job_titles_to_file(
+        root_page,
+        ["job-ny", "job-remote", "job-denver"],
+        "https://www.dice.com/jobs?q=python&location=Remote",
+        csv_file=str(csv_file),
+        max_jobs_to_process=2,
+    )
+
+    assert result == (2, 0, [], 1, 0, 0, 2, 2)
+    rows = _read_rows(csv_file)
+    assert [row["status"] for row in rows] == ["location_filtered", "success", "success"]
+    assert calls == [
+        "Dispatch Engineer - Remote in New York, NY, US | Dice.com",
+        "Frontend Engineer - Denver, CO, US | Dice.com",
+    ]
+
+
+def test_resolve_resume_choice_prefers_direct_resume_path(tmp_path):
+    resume_path = tmp_path / "frontend-resume.pdf"
+    resume_path.write_text("pdf", encoding="utf-8")
+
+    choice = apply_module._resolve_resume_choice(
+        SimpleNamespace(
+            title="Frontend Engineer",
+            relevant_resume_path=str(resume_path),
+            uploaded_resume_name="Frontend Resume.pdf",
+            generated_resume_profile_id=None,
+        )
+    )
+
+    assert choice["path"] == str(resume_path.resolve())
+    assert choice["label"] == "Frontend Resume.pdf"
+
+
+def test_resolve_resume_choice_can_fall_back_to_generated_resume(monkeypatch, tmp_path):
+    generated_resume = tmp_path / "generated-resume.pdf"
+    generated_resume.write_text("pdf", encoding="utf-8")
+
+    monkeypatch.setattr(apply_module, "_load_generated_resume_path", lambda **_kwargs: generated_resume)
+
+    choice = apply_module._resolve_resume_choice(
+        SimpleNamespace(
+            title="AI Integration Engineer",
+            relevant_resume_path="",
+            uploaded_resume_name="",
+            generated_resume_profile_id="generated_ai-integration-engineer",
+        )
+    )
+
+    assert choice["path"] == str(generated_resume)
+    assert choice["label"] == "generated-resume.pdf"
+
+
+def test_uploaded_resume_cache_deduplicates_paths(monkeypatch, tmp_path):
+    cache_file = tmp_path / "dice_uploaded_resumes.json"
+    resume_path = (tmp_path / "targeted-resume.pdf").resolve()
+
+    monkeypatch.setattr(apply_module, "RESUME_UPLOAD_CACHE_FILE", cache_file)
+
+    apply_module._remember_uploaded_resume_path(resume_path)
+    apply_module._remember_uploaded_resume_path(resume_path)
+
+    assert apply_module._load_uploaded_resume_paths() == {str(resume_path)}
+
+
+def test_ensure_resume_ready_reuses_matching_selected_resume(monkeypatch):
+    monkeypatch.setattr(apply_module, "_selected_resume_filename", lambda _page: "Target Resume.pdf")
+    monkeypatch.setattr(
+        apply_module,
+        "_replace_selected_resume",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("should not replace")),
+    )
+
+    assert apply_module._ensure_resume_ready(
+        object(),
+        {"label": "Target Resume.pdf", "path": "C:/resumes/target.pdf"},
+    )
+
+
+def test_selected_resume_filename_accepts_profile_uploaded_card():
+    page = _ResumeCardPage("Tyrique Daniel Updated Data Resume.pdf")
+
+    assert apply_module._selected_resume_filename(page) == "Tyrique Daniel Updated Data Resume.pdf"
+    assert "Uploaded to profile" in page.script

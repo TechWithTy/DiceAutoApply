@@ -1,0 +1,96 @@
+{
+  "name": "Tyrique Daniel",
+  "headline": "SENIOR BACKEND & PLATFORM ENGINEER",
+  "contact": ["Denver, CO", "628-303-8011", "tyrique1.daniel@gmail.com"],
+  "links_line": "Portfolio: ty-dev-port.vercel.app | GitHub: github.com/techwithty",
+  "summary": "Senior Backend and Platform Engineer with 8+ years of experience building APIs, distributed systems, event-driven services, cloud infrastructure, and data-processing platforms. Strong background in Python, Node.js, Go, PostgreSQL, Redis, Apache Pulsar, Kubernetes, AWS, and Google Cloud. Experienced in designing scalable backend architectures, asynchronous processing systems, observability platforms, CI/CD pipelines, and large-scale data workflows for AI-enabled products.",
+  "skills": [
+    {"label": "Languages", "items": ["Python", "Node.js", "Go", "TypeScript"]},
+    {"label": "Backend", "items": ["Django", "FastAPI", "REST APIs", "PostgreSQL"]},
+    {"label": "Data", "items": ["PySpark", "Pandas", "Redis/Valkey", "Data Pipelines"]},
+    {"label": "Distributed Systems", "items": ["Apache Pulsar", "Microservices", "Event-Driven Systems", "Apache Ray"]},
+    {"label": "Cloud & DevOps", "items": ["AWS", "Google Cloud", "Kubernetes", "Docker"]}
+  ],
+  "experience": [
+    {
+      "org": "Deal Scale",
+      "title": "Lead Software Engineer",
+      "dates": "Jul 2025 - Present",
+      "location": "Denver, CO - Remote",
+      "bullets": [
+        "Designed an event-driven backend architecture using Apache Pulsar, Kubernetes, Docker, PostgreSQL, and Redis/Valkey for scalable asynchronous AI and workflow workloads.",
+        "Built observability across distributed services with OpenTelemetry, Prometheus, Grafana, Loki, and Tempo, improving bottleneck detection and production diagnostics.",
+        "Developed backend services and workflow orchestration integrating APIs, CRM platforms, LLMs, and structured business rules.",
+        "Engineered PySpark and Pandas pipelines processing 140M+ records for enrichment, scoring, and personalization.",
+        "Supported 40% growth in platform workloads without performance degradation through scalable service and infrastructure design."
+      ]
+    },
+    {
+      "org": "CoVoice",
+      "title": "Founding Engineer",
+      "dates": "Dec 2024 - Jun 2025",
+      "location": "Denver, CO - Hybrid",
+      "bullets": [
+        "Owned backend architecture for a cross-platform communication product using Django, Java, Go, PostgreSQL, AWS, and React Native.",
+        "Optimized Django APIs and PostgreSQL data-access patterns for real-time workloads, reducing API response times by 50%.",
+        "Built CI/CD pipelines with GitHub Actions, Docker, Kubernetes, and Terraform, reducing manual iOS and Android deployment errors by 60%.",
+        "Integrated AI speech workflows with AWS, Apache Ray, and Kubernetes, reducing inference latency by 40%."
+      ]
+    },
+    {
+      "org": "Google DeepMind",
+      "title": "Full Stack AI Engineer",
+      "dates": "Mar 2023 - Dec 2024",
+      "location": "Mountain View, CA - Remote",
+      "bullets": [
+        "Built production Python, Django, Flask, and PostgreSQL services supporting AI applications and user-facing workflows.",
+        "Designed distributed AI infrastructure with Google Cloud, Kubernetes, Docker, Apache Ray, and Redis, reducing AI response time by 40%.",
+        "Developed PySpark and Pandas pipelines for multimillion-row real-time and batch datasets, reducing processing time by 50%.",
+        "Partnered with product, engineering, and infrastructure teams to operate reliable production AI systems."
+      ]
+    },
+    {
+      "org": "Google",
+      "title": "Senior Full Stack Engineer",
+      "dates": "Feb 2022 - Mar 2023",
+      "location": "Remote",
+      "bullets": [
+        "Designed backend services and APIs supporting large-scale application workflows using Go, TypeScript, JavaScript, and React.",
+        "Contributed to system design, technical planning, and cross-functional engineering decisions.",
+        "Built CI/CD and testing workflows that reduced deployment time by 40% and improved release consistency."
+      ]
+    },
+    {
+      "org": "StayBeyondGreen",
+      "title": "Lead Full Stack Developer",
+      "dates": "Dec 2020 - Feb 2022",
+      "location": "Remote",
+      "bullets": [
+        "Built Node.js, Express, Apollo, and GraphQL services alongside React applications, reducing page load times by 30%.",
+        "Designed backend services and API architecture, improving application performance by 25%."
+      ]
+    },
+    {
+      "org": "Modis (Akkodis)",
+      "title": "Front End Developer",
+      "dates": "Aug 2018 - Jul 2020",
+      "location": "Remote",
+      "bullets": [
+        "Developed and maintained React, JavaScript, CSS, Bootstrap, and SCSS web applications, improving site performance and user experience.",
+        "Introduced lazy loading, memoization, and efficient state management, increasing site traffic by 20% while improving accessibility and reliability."
+      ]
+    },
+    {
+      "org": "Powermoves and Pumps",
+      "title": "Web Developer",
+      "dates": "Nov 2016 - Dec 2018",
+      "location": "Contract",
+      "bullets": [
+        "Developed client web applications with HTML5, CSS, and JavaScript, improving engagement by 20% through business-aligned functionality.",
+        "Improved responsive front-end performance, reducing page load times by 30% and improving accessibility across devices."
+      ]
+    }
+  ],
+  "education": [{"school": "Western Governors University", "degree": "Bachelor of Science, Software Engineering", "dates": "2020 - 2023"}],
+  "certifications": ["Google Professional Cloud Architect", "Meta Front-End Developer Professional Certificate", "Hugging Face Transformers Certification"]
+}

@@ -3,11 +3,12 @@ Handles job application actions for Dice automation.
 """
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import time
-from typing import List, Optional, Set
+from typing import Any, List, Optional, Set
 import os
+import json
 from pathlib import Path
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from _data_.Profiles.main_profile import user_profile
 
@@ -17,6 +18,7 @@ import csv
 
 CSV_FIELDNAMES = ["job_id", "job_title", "job_url", "datetime", "status", "error_message"]
 APPLIED_STATUSES = {"success", "already_applied"}
+RESUME_UPLOAD_CACHE_FILE = Path("storage/dice_uploaded_resumes.json")
 
 
 def _slugify(value: str) -> str:
@@ -102,6 +104,25 @@ def _dry_run_enabled() -> bool:
     return os.getenv("DICE_DRY_RUN", "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _resume_validation_enabled() -> bool:
+    """Open the application and verify resume handling without submitting it."""
+    return os.getenv("DICE_RESUME_VALIDATION", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _resume_validation_hold_seconds() -> int:
+    try:
+        return max(0, min(int(os.getenv("DICE_RESUME_VALIDATION_HOLD_SECONDS", "0")), 300))
+    except ValueError:
+        return 0
+
+
+def _hold_resume_validation_page() -> None:
+    seconds = _resume_validation_hold_seconds()
+    if seconds:
+        print(f"[RESUME VALIDATION] Holding application form open for {seconds} seconds.")
+        time.sleep(seconds)
+
+
 def _allowed_location_tokens(profile=user_profile) -> tuple[set[str], bool]:
     raw_locations = getattr(profile, "cities", None) or [getattr(profile, "city", "")]
     normalized = [
@@ -123,6 +144,395 @@ def _job_matches_allowed_locations(job_title: str, profile=user_profile) -> bool
     if any(city in title for city in allowed_cities):
         return True
     return False
+
+
+def _resolve_repo_path(raw_path: str) -> Path | None:
+    if not raw_path:
+        return None
+    path = Path(raw_path)
+    candidates = [path]
+    if not path.is_absolute():
+        repo_root = Path(__file__).resolve().parents[3]
+        candidates.extend([repo_root / path, Path.cwd() / path])
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate.resolve()
+    return None
+
+
+def _load_generated_resume_path(
+    *,
+    generated_resume_profile_id: Optional[str] = None,
+    target_job_title: Optional[str] = None,
+) -> Path | None:
+    generated_dir = Path(__file__).resolve().parents[3] / "backend" / "resume_builder" / "data" / "generated_profiles"
+    if not generated_dir.exists():
+        return None
+
+    profile_files = sorted(generated_dir.glob("*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    for profile_file in profile_files:
+        try:
+            data = json.loads(profile_file.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if generated_resume_profile_id and data.get("id") != generated_resume_profile_id:
+            continue
+        if (
+            not generated_resume_profile_id
+            and target_job_title
+            and (data.get("metadata", {}).get("target_job_title") or "").strip() != target_job_title.strip()
+        ):
+            continue
+        for candidate in data.get("resume_paths", []):
+            resolved = _resolve_repo_path(candidate)
+            if resolved:
+                return resolved
+    return None
+
+
+def _resolve_resume_choice(target_job: Any) -> dict[str, str]:
+    if target_job is None:
+        return {"path": "", "label": ""}
+
+    title = getattr(target_job, "title", "") or ""
+    uploaded_resume_name = (getattr(target_job, "uploaded_resume_name", "") or "").strip()
+
+    direct_resume = _resolve_repo_path(getattr(target_job, "relevant_resume_path", "") or "")
+    if direct_resume:
+        return {
+            "path": str(direct_resume),
+            "label": uploaded_resume_name or direct_resume.name,
+        }
+
+    generated_resume = _load_generated_resume_path(
+        generated_resume_profile_id=(getattr(target_job, "generated_resume_profile_id", "") or "").strip() or None,
+        target_job_title=title,
+    )
+    if generated_resume:
+        return {
+            "path": str(generated_resume),
+            "label": uploaded_resume_name or generated_resume.name,
+        }
+
+    return {"path": "", "label": uploaded_resume_name}
+
+
+def _application_mentions_resume_requirement(page: Page) -> bool:
+    try:
+        page_text = (page.locator("body").text_content() or "").lower()
+    except Exception:
+        return False
+    return (
+        "resume is required" in page_text
+        or "upload resume" in page_text
+        or "add resume" in page_text
+        or "choose resume" in page_text
+        or "select resume" in page_text
+    )
+
+
+def _selected_resume_filename(page: Page) -> str:
+    """Read Dice's selected Resume card without confusing it with Cover letter."""
+    try:
+        return (page.evaluate(
+            """
+            () => {
+                const cards = Array.from(document.querySelectorAll('div'));
+                for (const card of cards) {
+                    const text = (card.innerText || '').trim();
+                    if (!text.startsWith('Resume')) continue;
+                    if (!text.includes('Uploaded to application') && !text.includes('Uploaded to profile')) continue;
+                    if (text.toLowerCase().includes('cover letter')) continue;
+                    const lines = text.split('\\n').map((line) => line.trim()).filter(Boolean);
+                    return lines.find((line) => /\\.pdf$/i.test(line)) || '';
+                }
+                return '';
+            }
+            """
+        ) or "").strip()
+    except Exception:
+        return ""
+
+
+def _replace_selected_resume(page: Page, resume_choice: dict[str, str]) -> bool:
+    """Replace only the file selected in Dice's Resume card."""
+    target_label = resume_choice.get("label", "")
+    target_path = resume_choice.get("path", "")
+    resolved = _resolve_repo_path(target_path)
+    if not resolved:
+        print(f"[RESUME] Resume file not found: {target_path}")
+        return False
+
+    card_options = page.locator(
+        'div:has(> div span:has-text("Resume")) button[aria-label="File options"]'
+    ).first
+    try:
+        card_options.wait_for(state="visible", timeout=2000)
+        card_options.click()
+    except Exception:
+        print("[RESUME] Could not open the selected Resume card's file options.")
+        return False
+
+    action_selectors = [
+        '[role="menuitem"]:has-text("Replace")',
+        'button:has-text("Replace")',
+        '[role="menuitem"]:has-text("Change")',
+        'button:has-text("Change")',
+        '[role="menuitem"]:has-text("Upload new resume")',
+        'button:has-text("Upload new resume")',
+        '[role="menuitem"]:has-text("Upload")',
+        'button:has-text("Upload")',
+    ]
+    for selector in action_selectors:
+        try:
+            action = page.locator(selector).first
+            action.wait_for(state="visible", timeout=1200)
+            if "cover" in _resume_context_text(action):
+                continue
+            try:
+                # Dice opens its replacement input in a portal, outside the Resume
+                # card. Bind the picker to this already-scoped menu action instead
+                # of looking for a generic file input that could be cover-letter UI.
+                with page.expect_file_chooser(timeout=2000) as chooser_info:
+                    action.click()
+                chooser_info.value.set_files(str(resolved))
+                _remember_uploaded_resume_path(resolved)
+                print(f"[RESUME] Replaced selected resume with: {target_label}")
+                time.sleep(1)
+                return True
+            except PlaywrightTimeoutError:
+                # Some Dice variants open a resume-specific dialog instead of the
+                # file chooser directly; its controls are handled below.
+                print(f"[RESUME] {target_label} replacement dialog opened.")
+                return _upload_resume_file(page, target_path)
+        except Exception:
+            continue
+    print("[RESUME] Resume file options did not expose a safe replace action.")
+    return False
+
+
+def _resume_context_text(locator) -> str:
+    """Return nearby control context so resume logic never targets cover letters."""
+    try:
+        return (locator.evaluate(
+            """
+            (el) => {
+                const values = [];
+                let current = el;
+                for (let level = 0; current && level < 4; level += 1, current = current.parentElement) {
+                    values.push(
+                        current.id || "",
+                        current.getAttribute("name") || "",
+                        current.getAttribute("aria-label") || "",
+                        current.getAttribute("data-testid") || "",
+                        current.innerText || ""
+                    );
+                }
+                return values.join(" ").toLowerCase();
+            }
+            """
+        ) or "").lower()
+    except Exception:
+        return ""
+
+
+def _is_resume_control(locator) -> bool:
+    context = _resume_context_text(locator)
+    return "resume" in context and "cover" not in context
+
+
+def _load_uploaded_resume_paths() -> Set[str]:
+    try:
+        data = json.loads(RESUME_UPLOAD_CACHE_FILE.read_text(encoding="utf-8"))
+        return {str(value) for value in data.get("paths", [])}
+    except Exception:
+        return set()
+
+
+def _remember_uploaded_resume_path(resume_path: Path) -> None:
+    uploaded = _load_uploaded_resume_paths()
+    uploaded.add(str(resume_path))
+    try:
+        RESUME_UPLOAD_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        RESUME_UPLOAD_CACHE_FILE.write_text(
+            json.dumps({"paths": sorted(uploaded)}, indent=2),
+            encoding="utf-8",
+        )
+    except Exception as error:
+        print(f"[RESUME] Could not persist upload cache: {error}")
+
+
+def _click_resume_option_by_text(page: Page, resume_label: str) -> bool:
+    if not resume_label:
+        return False
+    candidates = [
+        f'[data-testid*="resume"]:has-text("{resume_label}")',
+        f'[aria-label*="resume" i]:has-text("{resume_label}")',
+        f'label[for*="resume" i]:has-text("{resume_label}")',
+        f'button:has-text("{resume_label}")',
+        f'label:has-text("{resume_label}")',
+        f'[role="option"]:has-text("{resume_label}")',
+    ]
+    for selector in candidates:
+        try:
+            locator = page.locator(selector).first
+            locator.wait_for(state="visible", timeout=1200)
+            if not _is_resume_control(locator):
+                continue
+            locator.click()
+            print(f"[RESUME] Selected existing resume option: {resume_label}")
+            return True
+        except Exception:
+            continue
+    return False
+
+
+def _upload_resume_file(page: Page, resume_path: str) -> bool:
+    if not resume_path:
+        return False
+    resolved = _resolve_repo_path(resume_path)
+    if not resolved:
+        print(f"[RESUME] Resume file not found: {resume_path}")
+        return False
+
+    if str(resolved) in _load_uploaded_resume_paths():
+        print(f"[RESUME] {resolved.name} was uploaded previously; refusing to create a duplicate.")
+        return False
+
+    upload_buttons = [
+        'button:has-text("Upload resume")',
+        'button:has-text("Add resume")',
+    ]
+    for selector in upload_buttons:
+        try:
+            locator = page.locator(selector).first
+            if locator.is_visible() and _is_resume_control(locator):
+                locator.click()
+                time.sleep(0.5)
+                break
+        except Exception:
+            continue
+
+    file_inputs = [
+        'input#resume-upload',
+        'input[name*="resume" i]:not([name*="cover" i])',
+        'input[id*="resume" i]:not([id*="cover" i])',
+        'input[aria-label*="resume" i]:not([aria-label*="cover" i])',
+    ]
+    for selector in file_inputs:
+        try:
+            locator = page.locator(selector).first
+            locator.wait_for(state="attached", timeout=2000)
+            if not _is_resume_control(locator):
+                continue
+            locator.set_input_files(str(resolved))
+            _remember_uploaded_resume_path(resolved)
+            print(f"[RESUME] Uploaded resume file: {resolved.name}")
+            time.sleep(1)
+            for confirm_selector in ['button:has-text("Yes")', 'button:has-text("Close")']:
+                try:
+                    confirm = page.locator(confirm_selector).first
+                    if confirm.is_visible() and _is_resume_control(confirm):
+                        confirm.click()
+                        time.sleep(0.5)
+                except Exception:
+                    continue
+            return True
+        except Exception:
+            continue
+    return False
+
+
+def _ensure_resume_ready(page: Page, resume_choice: dict[str, str]) -> bool:
+    resume_label = resume_choice.get("label", "")
+    resume_path = resume_choice.get("path", "")
+
+    selected_filename = _selected_resume_filename(page)
+    if selected_filename:
+        if resume_label and selected_filename.casefold() == resume_label.casefold():
+            print(f"[RESUME] Reusing selected resume: {selected_filename}")
+            return True
+        if resume_path:
+            print(f"[RESUME] Selected resume differs: {selected_filename} -> {resume_label}")
+            return _replace_selected_resume(page, resume_choice)
+
+    if not _application_mentions_resume_requirement(page):
+        # Resume selectors can still be present without explicit requirement text.
+        if not resume_label and not resume_path:
+            return False
+
+    if resume_label and _click_resume_option_by_text(page, resume_label):
+        return True
+    if resume_path and _upload_resume_file(page, resume_path):
+        return True
+    return False
+
+
+def _advance_to_resume_step(page: Page) -> None:
+    """Open Dice's incomplete-application form before handling its Resume card."""
+    try:
+        continue_button = page.locator(
+            'button:has-text("Continue Application"), a:has-text("Continue Application")'
+        ).first
+        continue_button.wait_for(state="visible", timeout=1500)
+        continue_button.click()
+        print("[APPLY FLOW] Continued incomplete application to resume step.")
+        try:
+            page.wait_for_load_state("domcontentloaded", timeout=5000)
+        except Exception:
+            pass
+        time.sleep(1)
+    except Exception:
+        # Most Dice application flows already open directly on the resume step.
+        return
+
+
+def _continue_incomplete_application(page: Page) -> bool:
+    """Follow Dice's Continue Application wizard link without relying on a DOM click."""
+    try:
+        continue_link = page.locator(
+            'a[data-testid="apply-button"]:has-text("Continue Application")'
+        ).first
+        continue_link.wait_for(state="visible", timeout=1500)
+        href = (continue_link.get_attribute("href") or "").strip()
+        if not href:
+            return False
+        wizard_url = urljoin(page.url, href)
+        if "/job-applications/" not in wizard_url and "/application/" not in wizard_url:
+            return False
+        page.goto(wizard_url, wait_until="domcontentloaded", timeout=60000)
+        print(f"[APPLY FLOW] Opened incomplete application wizard: {wizard_url}")
+        return True
+    except Exception:
+        return False
+
+
+def _dump_resume_debug(page: Page) -> None:
+    debug_dir = Path(os.getenv("DICE_APPLY_DEBUG_DIR", "app/dice/_experimental_/debug"))
+    debug_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    html_path = debug_dir / f"{stamp}_resume_controls.html"
+    txt_path = debug_dir / f"{stamp}_resume_controls.txt"
+    try:
+        html_path.write_text(page.content(), encoding="utf-8")
+        controls = page.evaluate(
+            """
+            () => Array.from(document.querySelectorAll('input[type="file"], button, label, [role="option"]'))
+                .map((el) => ({
+                    tag: el.tagName,
+                    id: el.id || '',
+                    name: el.getAttribute('name') || '',
+                    aria: el.getAttribute('aria-label') || '',
+                    testid: el.getAttribute('data-testid') || '',
+                    text: (el.innerText || el.textContent || '').trim().slice(0, 160)
+                }))
+                .filter((item) => /resume|cover|upload|file/i.test(Object.values(item).join(' ')))
+            """
+        )
+        txt_path.write_text(json.dumps(controls, indent=2), encoding="utf-8")
+        print(f"[RESUME DEBUG] Saved controls: {html_path}, {txt_path}")
+    except Exception as error:
+        print(f"[RESUME DEBUG] Could not save controls: {error}")
 
 
 def load_applied_job_ids(csv_file: str = "output/job_application_results.csv") -> Set[str]:
@@ -201,6 +611,8 @@ def write_job_titles_to_file(
     url: str,
     csv_file: str = 'output/job_application_results.csv',
     known_applied_job_ids: Optional[Set[str]] = None,
+    target_job: Any = None,
+    max_jobs_to_process: Optional[int] = None,
 ):
     """
     Writes job application results to
@@ -211,16 +623,21 @@ def write_job_titles_to_file(
     applied = 0
     failed = 0
     skipped = 0  # already applied, etc.
+    processed = 0
     # Detailed counters for GRAND SUMMARY
     already_applied_count = 0
     no_apply_button_count = 0
     success_count = 0
     failed_jobs = []
+    resume_choice = _resolve_resume_choice(target_job)
     parts = url.split('?', 1)
     query_string = parts[1] if len(parts) > 1 else ""
     known_applied_job_ids = known_applied_job_ids if known_applied_job_ids is not None else set()
     _ensure_results_csv(csv_file)
     for job_id in job_ids:
+        if max_jobs_to_process is not None and processed >= max_jobs_to_process:
+            print(f"[LIMIT] Stopping after {processed} eligible jobs for this queue.")
+            break
         job_id_url = "https://www.dice.com/job-detail/" + job_id
         if query_string:
             job_id_url = job_id_url + "?" + query_string
@@ -298,7 +715,7 @@ def write_job_titles_to_file(
                     failed_jobs.append(job_title)
                     raise  # Will be caught by outer except to write CSV
                 try:
-                    apply_result = evaluate_and_apply(new_page, applied + 1)
+                    apply_result = evaluate_and_apply(new_page, applied + 1, resume_choice=resume_choice)
                     if apply_result == "success":
                         status = "success"
                         applied += 1
@@ -325,6 +742,17 @@ def write_job_titles_to_file(
                         skipped += 1
                         error_message = "Dry run: Easy Apply control found, application was not submitted."
                         print(f"[DRY RUN] {job_title} ({job_id_url})")
+                    elif apply_result == "resume_validated":
+                        status = "resume_validated"
+                        skipped += 1
+                        error_message = "Resume was selected or uploaded; application was intentionally not submitted."
+                        print(f"[RESUME VALIDATED] {job_title} ({job_id_url})")
+                    elif apply_result == "resume_validation_failed":
+                        status = "resume_validation_failed"
+                        failed += 1
+                        failed_jobs.append(job_title)
+                        error_message = "Application opened, but the configured resume could not be selected or uploaded."
+                        print(f"[RESUME VALIDATION FAILED] {job_title} ({job_id_url})")
                     else:
                         status = "failed"
                         failed += 1
@@ -353,6 +781,8 @@ def write_job_titles_to_file(
             print(f"[NETWORK/CRITICAL ERROR] {job_id_url} - {error_message}")
             failed += 1
             failed_jobs.append(job_title)
+        if status != "location_filtered":
+            processed += 1
         # Write result to CSV
         with open(csv_file, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=CSV_FIELDNAMES)
@@ -364,9 +794,9 @@ def write_job_titles_to_file(
                 "status": status,
                 "error_message": error_message
             })
-    return applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count
+    return applied, failed, failed_jobs, skipped, already_applied_count, no_apply_button_count, success_count, processed
 
-def evaluate_and_apply(page: Page, val: int) -> str:
+def evaluate_and_apply(page: Page, val: int, resume_choice: Optional[dict[str, str]] = None) -> str:
     selectors = {
         # * Updated Easy Apply button selector to target <apply-button-wc> inside #applyButton (pierce shadow DOM)
         # ! Use Playwright shadow selector, filter for text in code
@@ -467,18 +897,19 @@ def evaluate_and_apply(page: Page, val: int) -> str:
     # * Extended wait time and improved logs
     # * Selector is now robust to match <div id="applyButton"><apply-button-wc ...></apply-button-wc></div>
 
-    # Prefer current Dice target discovered from captured HTML.
-    try:
-        direct_apply_btn = page.query_selector('button[data-testid="apply-button"], [data-testid="apply-button"]')
-        if direct_apply_btn is not None and direct_apply_btn.is_visible():
-            button_text = (direct_apply_btn.inner_text() or "").strip()
-            print(f"[Easy Apply] Clicking direct apply target data-testid=apply-button (text='{button_text}')")
-            direct_apply_btn.click()
-            found = True
-        else:
+    # Continue Application is a persisted Dice wizard, not a regular Easy Apply
+    # button. Follow its explicit wizard link before trying generic controls.
+    found = _continue_incomplete_application(page)
+    if not found:
+        try:
+            direct_apply_btn = page.query_selector('button[data-testid="apply-button"], [data-testid="apply-button"]')
+            if direct_apply_btn is not None and direct_apply_btn.is_visible():
+                button_text = (direct_apply_btn.inner_text() or "").strip()
+                print(f"[Easy Apply] Clicking direct apply target data-testid=apply-button (text='{button_text}')")
+                direct_apply_btn.click()
+                found = True
+        except Exception:
             found = False
-    except Exception:
-        found = False
 
     # Keep this bounded so one slow card does not stall the whole run.
     EASY_APPLY_WAIT_SECONDS = int(os.getenv("DICE_EASY_APPLY_WAIT_SECONDS", "8"))
@@ -576,6 +1007,15 @@ def evaluate_and_apply(page: Page, val: int) -> str:
 
         if _is_apply_flow_url(current_url):
             print(f"Already on the correct URL: {current_url}")
+            _advance_to_resume_step(page)
+            resume_ready = _ensure_resume_ready(page, resume_choice or {})
+            if _resume_validation_enabled():
+                result = "resume_validated" if resume_ready else "resume_validation_failed"
+                if not resume_ready:
+                    _dump_resume_debug(page)
+                print(f"[RESUME VALIDATION] Resume ready={resume_ready}; exiting before application submission.")
+                _hold_resume_validation_page()
+                return result
             # Some Dice flows land directly on success without intermediate controls.
             try:
                 if page.is_visible(selectors["application_success_card"]):
@@ -587,8 +1027,10 @@ def evaluate_and_apply(page: Page, val: int) -> str:
             if next_button is not None:
                 next_button.click()
                 time.sleep(1)
+                _ensure_resume_ready(page, resume_choice or {})
             submit_button = _first_visible(submit_candidates, timeout_ms=3000)
             if submit_button is not None:
+                _ensure_resume_ready(page, resume_choice or {})
                 submit_button.click()
             else:
                 print("[APPLY FLOW] No submit/next controls found after apply click.")
@@ -627,12 +1069,23 @@ def evaluate_and_apply(page: Page, val: int) -> str:
         if attempt == max_attempts:
             print(f"[FAILURE] Failed to navigate to apply flow URL after {max_attempts} attempts. Last URL: {current_url}")
             return "failed"
+        _advance_to_resume_step(page)
+        resume_ready = _ensure_resume_ready(page, resume_choice or {})
+        if _resume_validation_enabled():
+            result = "resume_validated" if resume_ready else "resume_validation_failed"
+            if not resume_ready:
+                _dump_resume_debug(page)
+            print(f"[RESUME VALIDATION] Resume ready={resume_ready}; exiting before application submission.")
+            _hold_resume_validation_page()
+            return result
         next_button = _first_visible(next_candidates, timeout_ms=5000)
         if next_button is not None:
             next_button.click()
             time.sleep(1)
+            _ensure_resume_ready(page, resume_choice or {})
         submit_button = _first_visible(submit_candidates, timeout_ms=5000)
         if submit_button is not None:
+            _ensure_resume_ready(page, resume_choice or {})
             submit_button.click()
         else:
             print("[APPLY FLOW] Submit control not found after navigation.")

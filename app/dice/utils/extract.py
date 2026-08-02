@@ -7,6 +7,20 @@ import re
 from typing import List, Set
 
 
+def _collect_easy_apply_job_ids_from_html(html: str) -> Set[str]:
+    """Extract Easy Apply job IDs from Dice's embedded Next.js payload."""
+    easy_apply_job_ids: Set[str] = set()
+
+    for match in re.findall(
+        r'/job-applications/([a-f0-9\-]{16,})/(?:wizard|start-apply)',
+        html,
+        flags=re.IGNORECASE,
+    ):
+        easy_apply_job_ids.add(match.strip())
+
+    return easy_apply_job_ids
+
+
 def _add_ids_from_html_payload(page: Page, seen: Set[str], job_ids: List[str]) -> int:
     """Fallback extractor for Next.js payloads when card selectors do not render."""
     try:
@@ -47,6 +61,8 @@ def extract_job_ids(page: Page, job_ids: List[str], only_easy_apply: bool = Fals
     while True:
         page.wait_for_load_state("domcontentloaded")
         try:
+            page_html = page.content()
+            easy_apply_job_ids = _collect_easy_apply_job_ids_from_html(page_html)
             # Wait for either primary or alt cards
             try:
                 page.wait_for_selector(selectors["card_title_primary"], timeout=6000)
@@ -78,7 +94,7 @@ def extract_job_ids(page: Page, job_ids: List[str], only_easy_apply: bool = Fals
                     continue
                 # Check for cues on the card for already applied / easy apply
                 applied = False
-                easy_apply = False
+                easy_apply = job_id in easy_apply_job_ids
                 try:
                     # Only check dedicated badge elements to avoid false positives from company
                     # names or descriptions that happen to contain the word "applied"
@@ -97,8 +113,8 @@ def extract_job_ids(page: Page, job_ids: List[str], only_easy_apply: bool = Fals
                         btn_text = (apply_btn.inner_text() or '').strip().lower()
                         if btn_text in ('applied', 'application submitted'):
                             applied = True
-                    # Easy Apply check: look at the apply button text only
-                    if apply_btn is not None:
+                    # Easy Apply check: prefer payload-derived IDs, then rendered button text.
+                    if not easy_apply and apply_btn is not None:
                         btn_text = (apply_btn.inner_text() or '').strip().lower()
                         if 'easy apply' in btn_text:
                             easy_apply = True

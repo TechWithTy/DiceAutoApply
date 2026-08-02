@@ -1,0 +1,96 @@
+{
+  "name": "Tyrique Daniel",
+  "headline": "TECHNICAL LEAD | FOUNDING ENGINEER",
+  "contact": ["Denver, CO", "628-303-8011", "tyrique1.daniel@gmail.com"],
+  "links_line": "Portfolio: ty-dev-port.vercel.app | GitHub: github.com/techwithty",
+  "summary": "Technical Lead and Founding Engineer with 8+ years of experience architecting, building, and scaling production software across startup and enterprise environments. Experienced in full-stack development, AI systems, distributed architecture, cloud infrastructure, data pipelines, CI/CD, and engineering leadership. Proven ability to take products from early requirements through architecture, implementation, deployment, observability, and production operation. Strong hands-on background in TypeScript, React/Next.js, Node.js, Python, PostgreSQL, AWS, Google Cloud, Docker, and Kubernetes, with experience leading distributed teams and collaborating across product, design, infrastructure, and business stakeholders.",
+  "skills": [
+    {"label": "Architecture", "items": ["System Design", "Microservices", "Event-Driven Systems", "API Design"]},
+    {"label": "Product Engineering", "items": ["React", "Next.js", "TypeScript", "React Native"]},
+    {"label": "Backend & Data", "items": ["Node.js", "Python", "PostgreSQL", "Redis/Valkey"]},
+    {"label": "Cloud Platform", "items": ["AWS", "Google Cloud", "Kubernetes", "Terraform"]},
+    {"label": "Leadership", "items": ["Technical Strategy", "Team Leadership", "Architecture Reviews", "Cross-Functional Delivery"]}
+  ],
+  "experience": [
+    {
+      "org": "Deal Scale",
+      "title": "Lead Software Engineer",
+      "dates": "Jul 2025 - Present",
+      "location": "Denver, CO - Remote",
+      "bullets": [
+        "Led architecture and development for a production AI sales automation platform spanning web applications, AI services, workflow orchestration, data processing, and cloud infrastructure.",
+        "Designed an event-driven architecture with Apache Pulsar, Kubernetes, Docker, PostgreSQL, and Redis/Valkey that supported 40% platform-workload growth without performance degradation.",
+        "Established production observability with OpenTelemetry, Prometheus, Grafana, Loki, and Tempo, reducing time to identify bottlenecks across distributed services.",
+        "Designed AI agent and workflow systems integrating LLMs, APIs, CRM platforms, and business rules for automated sales operations.",
+        "Built data-ingestion pipelines processing 140M+ property records, enabling enrichment, scoring, and personalization at scale."
+      ]
+    },
+    {
+      "org": "CoVoice",
+      "title": "Founding Engineer",
+      "dates": "Dec 2024 - Jun 2025",
+      "location": "Denver, CO - Hybrid",
+      "bullets": [
+        "Owned full-stack architecture for a cross-platform communication product using React Native, Django, Java, Go, PostgreSQL, and AWS.",
+        "Optimized Django APIs and PostgreSQL data-access patterns for real-time workloads, reducing API response times by 50%.",
+        "Built CI/CD pipelines using GitHub Actions, Docker, Kubernetes, and Terraform, automating iOS and Android deployments and reducing manual deployment errors by 60%.",
+        "Led technical execution across a globally distributed development team, establishing development workflows, code-review practices, and delivery processes."
+      ]
+    },
+    {
+      "org": "Google DeepMind",
+      "title": "Full Stack AI Engineer",
+      "dates": "Mar 2023 - Dec 2024",
+      "location": "Mountain View, CA - Remote",
+      "bullets": [
+        "Designed and delivered production AI applications across frontend, backend, data, and infrastructure layers.",
+        "Built distributed AI infrastructure with Google Cloud, Kubernetes, Docker, Apache Ray, and Redis, reducing AI response time by 40%.",
+        "Designed PySpark and Pandas pipelines for multimillion-row datasets, reducing processing time by 50%.",
+        "Automated production infrastructure and deployment using GitHub Actions and Terraform, improving release consistency across environments."
+      ]
+    },
+    {
+      "org": "Google",
+      "title": "Senior Full Stack Engineer",
+      "dates": "Feb 2022 - Mar 2023",
+      "location": "Remote",
+      "bullets": [
+        "Designed large-scale full-stack applications using TypeScript, JavaScript, React, and Go.",
+        "Contributed to architecture reviews, technical planning, and cross-functional engineering decisions.",
+        "Built CI/CD and testing workflows that reduced deployment time by 40% and improved release consistency."
+      ]
+    },
+    {
+      "org": "StayBeyondGreen",
+      "title": "Lead Full Stack Developer",
+      "dates": "Dec 2020 - Feb 2022",
+      "location": "Remote",
+      "bullets": [
+        "Led development of full-stack applications using React, Tailwind CSS, Node.js, Express, Apollo, and GraphQL, reducing page load times by 30%.",
+        "Designed backend services and API architecture, improving application performance by 25%."
+      ]
+    },
+    {
+      "org": "Modis (Akkodis)",
+      "title": "Front End Developer",
+      "dates": "Aug 2018 - Jul 2020",
+      "location": "Remote",
+      "bullets": [
+        "Developed and maintained React, JavaScript, CSS, Bootstrap, and SCSS web applications, improving site performance and user experience.",
+        "Introduced lazy loading, memoization, and efficient state management, increasing site traffic by 20% while improving accessibility and cross-browser reliability."
+      ]
+    },
+    {
+      "org": "Powermoves and Pumps",
+      "title": "Web Developer",
+      "dates": "Nov 2016 - Dec 2018",
+      "location": "Contract",
+      "bullets": [
+        "Developed and maintained client web applications using HTML5, CSS, and JavaScript, translating requirements into improved functionality and a 20% increase in engagement.",
+        "Improved responsive and cross-platform delivery through front-end performance optimization, reducing page load times by 30% and improving accessibility."
+      ]
+    }
+  ],
+  "education": [{"school": "Western Governors University", "degree": "Bachelor of Science, Software Engineering", "dates": "2020 - 2023"}],
+  "certifications": ["Google Professional Cloud Architect", "Meta Front-End Developer Professional Certificate", "Hugging Face Transformers Certification"]
+}
