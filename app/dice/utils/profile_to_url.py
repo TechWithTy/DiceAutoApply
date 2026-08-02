@@ -13,7 +13,7 @@ def _enum_or_str(val):
         return val.lower().replace(" ", "_").replace("-", "_")
     return str(val).lower()
 
-def jobfilter_to_url_args(job_filter):
+def jobfilter_to_url_args(job_filter, workplace_settings=None):
     """
     Map JobFilter fields to build_dice_search_url keyword arguments.
     Handles enums and string values robustly.
@@ -23,7 +23,7 @@ def jobfilter_to_url_args(job_filter):
     # Employer types
     employer_types = [_enum_or_str(e) for e in getattr(job_filter, 'employer_types', [])]
     # Work setting (workplace types)
-    work_setting = getattr(job_filter, 'work_setting', None)
+    work_setting = workplace_settings if workplace_settings is not None else getattr(job_filter, 'work_setting', None)
     if isinstance(work_setting, list):
         workplace_types = [_enum_or_str(w) for w in work_setting]
     elif work_setting:
@@ -77,14 +77,14 @@ def userprofile_locations(profile=user_profile) -> list[str]:
     return [location] if location else []
 
 
-def userprofile_to_search_url(job_title: str) -> str:
+def userprofile_to_search_url(job_title: str, workplace_settings=None) -> str:
     """
     Build a Dice search URL from the current user_profile and a job title.
     """
-    return userprofile_to_search_urls(job_title)[0]
+    return userprofile_to_search_urls(job_title, workplace_settings=workplace_settings)[0]
 
 
-def userprofile_to_search_urls(job_title: str) -> list[str]:
+def userprofile_to_search_urls(job_title: str, workplace_settings=None) -> list[str]:
     """
     Build Dice search URLs from the current user_profile and a job title,
     one URL per configured city.
@@ -95,7 +95,7 @@ def userprofile_to_search_urls(job_title: str) -> list[str]:
         build_dice_search_url(
             q=job_title,
             location=location,
-            **jobfilter_to_url_args(job_filter)
+            **jobfilter_to_url_args(job_filter, workplace_settings=workplace_settings)
         )
         for location in locations
     ]

@@ -49,6 +49,16 @@ class _RootPage:
         return self._detail_pages.popleft()
 
 
+class _ResumeCardPage:
+    def __init__(self, filename):
+        self.filename = filename
+        self.script = ""
+
+    def evaluate(self, script):
+        self.script = script
+        return self.filename
+
+
 def _read_rows(path):
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
@@ -230,3 +240,36 @@ def test_resolve_resume_choice_can_fall_back_to_generated_resume(monkeypatch, tm
 
     assert choice["path"] == str(generated_resume)
     assert choice["label"] == "generated-resume.pdf"
+
+
+def test_uploaded_resume_cache_deduplicates_paths(monkeypatch, tmp_path):
+    cache_file = tmp_path / "dice_uploaded_resumes.json"
+    resume_path = (tmp_path / "targeted-resume.pdf").resolve()
+
+    monkeypatch.setattr(apply_module, "RESUME_UPLOAD_CACHE_FILE", cache_file)
+
+    apply_module._remember_uploaded_resume_path(resume_path)
+    apply_module._remember_uploaded_resume_path(resume_path)
+
+    assert apply_module._load_uploaded_resume_paths() == {str(resume_path)}
+
+
+def test_ensure_resume_ready_reuses_matching_selected_resume(monkeypatch):
+    monkeypatch.setattr(apply_module, "_selected_resume_filename", lambda _page: "Target Resume.pdf")
+    monkeypatch.setattr(
+        apply_module,
+        "_replace_selected_resume",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("should not replace")),
+    )
+
+    assert apply_module._ensure_resume_ready(
+        object(),
+        {"label": "Target Resume.pdf", "path": "C:/resumes/target.pdf"},
+    )
+
+
+def test_selected_resume_filename_accepts_profile_uploaded_card():
+    page = _ResumeCardPage("Tyrique Daniel Updated Data Resume.pdf")
+
+    assert apply_module._selected_resume_filename(page) == "Tyrique Daniel Updated Data Resume.pdf"
+    assert "Uploaded to profile" in page.script

@@ -34,6 +34,14 @@ class JobTitle:
     max_apply_jobs: int = 100  # Default value for max_apply_jobs
     uploaded_resume_name: Optional[str] = None  # Existing Dice resume label/file name to re-select
     generated_resume_profile_id: Optional[str] = None  # Generated profile id from backend/resume_builder/data/generated_profiles
+    work_settings: Optional[List[str]] = None  # Local search settings; None uses the profile-wide filter.
+    remote_work_settings: Optional[List[str]] = field(
+        default_factory=lambda: [
+            JobFilter.WorkSetting.REMOTE,
+            JobFilter.WorkSetting.HYBRID,
+            JobFilter.WorkSetting.ONSITE,
+        ]
+    )  # Override per title when a Remote search should use a narrower setting.
 
 
 class ApplyEvery(Enum):
@@ -75,6 +83,8 @@ interview_data = InterviewAnswerDataset()
 MAIN_DICE_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel Updated Data Resume.pdf"
 AI_SOLUTIONS_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - AI Automation Solutions Engineer.pdf"
 TECHNICAL_LEAD_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - Technical Lead Founding Engineer.pdf"
+FORWARD_DEPLOYED_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - Forward Deployed Engineer.pdf"
+BACKEND_PLATFORM_RESUME = r"_data_\Resumes\Dice\Tyrique Daniel - Senior Backend Platform Engineer.pdf"
 
 job_titles = [
    
@@ -242,10 +252,26 @@ job_titles = [
     JobTitle(
         title="Forward Deployed Engineer",
         experience=8,
-        relevant_resume_path=AI_SOLUTIONS_RESUME,
+        relevant_resume_path=FORWARD_DEPLOYED_RESUME,
         skills=["Python", "TypeScript", "LLMs", "AI Agents", "API Integrations", "AWS", "Kubernetes"],
         interview_questions=interview_data,
         max_apply_jobs=70
+    ),
+    JobTitle(
+        title="Senior Backend Engineer",
+        experience=8,
+        relevant_resume_path=BACKEND_PLATFORM_RESUME,
+        skills=["Python", "Node.js", "Go", "PostgreSQL", "REST APIs", "Microservices", "Event-Driven Systems", "Kubernetes"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
+    ),
+    JobTitle(
+        title="Senior Platform Engineer",
+        experience=8,
+        relevant_resume_path=BACKEND_PLATFORM_RESUME,
+        skills=["Python", "Go", "Apache Pulsar", "Redis", "Kubernetes", "Docker", "AWS", "Google Cloud", "Observability"],
+        interview_questions=interview_data,
+        max_apply_jobs=80
     ),
     JobTitle(
         title="Integration Engineer",

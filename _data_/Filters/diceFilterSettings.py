@@ -79,7 +79,8 @@ class JobFilter:
 
 # Default Dice filter configuration used by the app/profile modules.
 dice_job_filter = JobFilter()
-dice_job_filter.set_posted_date(JobFilter.PostedDate.LAST_3_DAYS)  # Added posted date of today
+# Dice's Last 7 Days option includes both 0-3 and 4-7 day postings.
+dice_job_filter.set_posted_date(JobFilter.PostedDate.LAST_7_DAYS)
 dice_job_filter.set_work_setting(
     [
         JobFilter.WorkSetting.REMOTE,

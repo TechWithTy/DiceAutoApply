@@ -73,7 +73,7 @@ def _save_debug_html(page, debug_dir: Path, job_title: str) -> Optional[Path]:
 
 
 def _sync_visible_search_fields(page, search_keyword: str, location: str) -> None:
-    """Keep Dice's visible search inputs aligned with the URL-driven search."""
+    """Keep only the keyword field aligned without disturbing URL-selected city."""
     field_pairs = [
         (
             search_keyword,
@@ -85,17 +85,14 @@ def _sync_visible_search_fields(page, search_keyword: str, location: str) -> Non
             ],
             "keyword",
         ),
-        (
-            location,
-            [
-                'input[name="location"]',
-                'input[name="city_state"]',
-                'input[aria-label*="location" i]',
-                'input[placeholder*="location" i]',
-            ],
-            "location",
-        ),
     ]
+
+    # Dice's location control is an autocomplete. Refilling it after navigation
+    # can clear the committed URL location when the exact display string differs
+    # from Dice's suggestion text. The URL generated for this queue already holds
+    # the intended city, so leave that field untouched.
+    if location:
+        print(f"[SEARCH UI] Preserving URL-selected location: {location}")
 
     for target_value, selectors, label in field_pairs:
         if not target_value:
@@ -131,10 +128,19 @@ def _session_is_valid(page) -> bool:
             return False
         # Dice can still render jobs while anonymous; detect login/register prompts.
         try:
-            login_links = page.locator('a[href*="/dashboard/login"], a[href*="/register"], a[href*="/employers/login"]').count()
-            login_register_text = page.locator("button:has-text('Login/Register'), a:has-text('Login'), a:has-text('Register')").count()
-            if login_links > 0 or login_register_text > 0:
-                return False
+            login_prompt_selectors = [
+                'a[href*="/dashboard/login"]',
+                'a[href*="/register"]',
+                'a[href*="/employers/login"]',
+                "button:has-text('Login/Register')",
+                "a:has-text('Login')",
+                "a:has-text('Register')",
+            ]
+            for selector in login_prompt_selectors:
+                locator = page.locator(selector)
+                for index in range(min(locator.count(), 3)):
+                    if locator.nth(index).is_visible():
+                        return False
         except Exception:
             pass
         return True
@@ -345,8 +351,16 @@ def main(
         locations = userprofile_locations(user_profile)
         for job_title in job_titles_to_process:
             search_keyword = job_title.title
-            search_urls = userprofile_to_search_urls(search_keyword)
-            for location, search_url in zip(locations, search_urls):
+            for location in locations:
+                workplace_settings = (
+                    getattr(job_title, "remote_work_settings", None)
+                    if location.casefold() == "remote"
+                    else getattr(job_title, "work_settings", None)
+                )
+                search_url = userprofile_to_search_urls(
+                    search_keyword,
+                    workplace_settings=workplace_settings,
+                )[locations.index(location)]
                 if max_jobs is not None and total_jobs_processed >= max_jobs:
                     print(f"[LIMIT] Reached max jobs for run ({max_jobs}). Stopping.")
                     break
